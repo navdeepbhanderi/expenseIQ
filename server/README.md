@@ -129,6 +129,16 @@ utilisation and the amortisation position are pure functions of the account's
 terms and today's date. Persisting them would mean every one going stale at
 midnight with no write to trigger a refresh.
 
+**Dependency pins live in `overrides`.** `js-yaml` is pinned to `^5.2.3` under
+`@nestjs/swagger` — the advisory affects 5.0.0–5.2.1, and npm's suggested fix
+was to *downgrade* swagger. A scoped override patches within the same major
+without touching anything else. Re-check with `npm audit --omit=dev`.
+
+**Prisma config is `prisma.config.ts`, not `package.json#prisma`.** The old
+block is removed in Prisma 7. The config file loads before anything populates
+`process.env`, so it imports `dotenv/config` explicitly — without that,
+`DATABASE_URL` is undefined and every migrate command fails confusingly.
+
 **CSV export neutralises formulas.** A cell starting with `=`, `+`, `-` or `@`
 executes when opened in Excel or Sheets. Merchant names and notes are user
 input — and from Phase 4 will come from parsed emails — so an exported ledger

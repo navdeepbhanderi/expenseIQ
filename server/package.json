@@ -28,9 +28,6 @@
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\" \"prisma/**/*.ts\"",
     "verify": "npm run typecheck && npm run lint && npm test"
   },
-  "prisma": {
-    "seed": "ts-node -r tsconfig-paths/register prisma/seed.ts"
-  },
   "dependencies": {
     "@nestjs/common": "^11.1.28",
     "@nestjs/config": "^4.0.4",
@@ -106,5 +103,10 @@
     ],
     "coverageDirectory": "./coverage",
     "testEnvironment": "node"
+  },
+  "overrides": {
+    "@nestjs/swagger": {
+      "js-yaml": "^5.2.3"
+    }
   }
 }

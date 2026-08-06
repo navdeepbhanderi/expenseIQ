@@ -38,6 +38,14 @@ This document details **every feature**, its purpose, user flow, edge cases, and
 1. Click link in email → `/auth/verify-email?token=xxx`
 2. Backend validates token, marks `emailVerified: true`, redirects to login with success message
 
+> **Resolved — link, not OTP.** The design system's component kit (`6b`) shows a
+> 4-digit OTP field with a "resend in 24s" timer, which contradicts this
+> section. The link wins and is what's built: a 24-hour signed token, one
+> usable link at a time (requesting a resend invalidates the previous one), and
+> an expired link returns `details: { canResend: true }` so the UI can offer
+> the resend inline. **The `6b` OTP control is therefore dead and should be
+> dropped or repurposed in the design** — nothing in the API serves it.
+
 ### 1.1.3 Google Sign-In
 **Purpose:** Frictionless signup, matches your stated requirement.
 
@@ -113,6 +121,21 @@ This document details **every feature**, its purpose, user flow, edge cases, and
 - **Recent transactions** — list, last 10
 - **Upcoming dues** — cards showing next 3 upcoming credit card/loan due dates with amount and days-remaining
 - **Credit utilization** — per card, balance/limit as a progress bar (flag in red if >30% utilization — real financial literacy signal)
+- **Net worth** — design `2a` shows "Net worth ₹— 34.2L". Not in the original
+  widget list; added here because the screen renders it.
+
+**Net worth sign convention (resolved).** Assets minus liabilities, where:
+
+| Account type | Contributes |
+|---|---|
+| `BANK`, `CASH` | `+ balance` |
+| `CREDIT_CARD` | `− outstanding` (the balance owed, not the limit) |
+| `LOAN` | `− outstanding principal` (from the amortisation schedule, not the original principal) |
+
+A large home loan therefore makes net worth negative early in its term, which
+is why design `2a` shows a negative figure — that's correct and expected, not a
+bug. The loan contribution uses the *current* outstanding balance, so net worth
+improves with every EMI paid.
 
 ### 1.4.4 Filters
 Date range, category, account — combinable, applied to transaction list view.

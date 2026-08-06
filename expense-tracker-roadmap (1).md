@@ -70,7 +70,7 @@
 
 ### Sub-phase 2.1: Basic NLU Pipeline
 - [ ] Text input box: "spent 300 rs on groceries today"
-- [ ] Claude/OpenAI API integration — prompt engineered to extract structured JSON (amount, category, merchant, date)
+- [ ] Gemini API integration — a `responseSchema` constrains the model to structured JSON (amount, category, merchant, date), so validation is a second line of defence rather than the primary one
 - [ ] Map extracted category to existing categories (fuzzy match or LLM-assisted)
 - [ ] Insert into a **review queue** table, not directly into transactions
 
@@ -222,7 +222,7 @@ Not required for the 2-month core build — but document these in your README as
 | Backend | NestJS | Enforced architecture, good for interview talking points |
 | Database | PostgreSQL | Relational data (accounts, transactions) fits well |
 | ORM | Prisma | Type-safe, good DX |
-| LLM | Claude API | Structured extraction, multilingual |
+| LLM | Google Gemini Pro | Native `responseSchema` for constrained JSON, strong Indic-language support, natively multimodal so receipts need no separate vision model, and one vendor with the Gmail/Calendar/Tasks integrations |
 | Queue/Jobs | BullMQ + Redis | For email parsing, reminders (Phase 3+) |
 | Auth | JWT + Google OAuth | Standard, well-documented |
 | Cloud | GCP (Cloud Run, Cloud SQL) | Ecosystem fit with Gmail/Calendar APIs |

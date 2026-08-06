@@ -515,7 +515,7 @@ This directly maps to the DB `@@unique([source, sourceRefId])` constraint — en
 async extractExpense(rawInput: string, profileId: string): Promise<ExtractionResult> {
   // 1. Check merchant cache for known normalization first (cost optimization)
   // 2. Build prompt with schema instructions (see prompts/expense-extraction.prompt.ts)
-  // 3. Call Claude API with structured output instructions
+  // 3. Call Gemini with a responseSchema (constrained JSON, not prompt-coaxed)
   // 4. Validate response against JSON schema (validators/extraction-schema.validator.ts)
   // 5. If invalid → retry once with error feedback in prompt
   // 6. If still invalid → mark as low-confidence, flag for manual review
@@ -523,9 +523,35 @@ async extractExpense(rawInput: string, profileId: string): Promise<ExtractionRes
 }
 ```
 
+**Provider:** Google Gemini, not Claude — see the amendment note at the end of
+this section.
+
 **Prompt design principle:** keep extraction and translation in a single LLM call (not two separate calls) — reduces latency and cost. The prompt instructs: detect language → translate internally → extract fields → return JSON only, no prose.
 
 **Failure handling:** LLM calls can fail (timeout, malformed output, rate limit). Every extraction that fails validation still gets written to `ReviewQueueItem` with `confidenceScore: null` and status `PENDING`, with `rawInput` preserved — so the user can still manually complete it. **Never silently drop a user's input.**
+
+---
+
+### Amendment — LLM provider is Gemini, not Claude
+
+This section was written against Claude. The build uses **Google Gemini Pro**
+(`@google/genai`), which changes three things:
+
+- **Structured output is constrained, not requested.** Gemini takes a
+  `responseSchema` with `responseMimeType: application/json`, so the model
+  cannot emit malformed JSON. Step 5's retry becomes a rare fallback rather
+  than the primary mechanism — schema validation still runs, because
+  constrained decoding prevents malformed output, not *wrong* output.
+- **Receipts need no separate vision model.** Gemini reads JPG and PDF
+  natively through the same interface, which removes a step from the
+  receipt-ingestion design entirely.
+- **Two-tier routing.** Pro for multilingual extraction and receipts; Flash
+  for merchant normalisation and recurrence hints, which are high-volume and
+  trivially structured. Model ids are pinned per task in config, never at the
+  call site.
+
+Access goes through an `LlmPort` interface in `infra/llm/` so the provider
+stays one folder deep. See `~/.claude/plans/zazzy-finding-feather.md` Part 4.
 
 ---
 
