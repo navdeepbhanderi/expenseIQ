@@ -27,8 +27,12 @@ describe('permission matrix', () => {
     // The feature spec is explicit that these are server-side rules, because
     // a hidden button is not a restriction.
     it('cannot link a credit card or loan', () => {
+      // The spec restricts "card and loan linking" specifically, not accounts
+      // as a concept — a kid tracking cash is exactly the manual entry it does
+      // allow. So account:create is granted and account:linkCredit is not;
+      // AccountsService gates the credit types on the latter.
       expect(can(ProfileRole.CHILD, 'account:linkCredit')).toBe(false);
-      expect(can(ProfileRole.CHILD, 'account:create')).toBe(false);
+      expect(can(ProfileRole.CHILD, 'account:create')).toBe(true);
     });
 
     it('cannot enable Gmail or SMS parsing', () => {

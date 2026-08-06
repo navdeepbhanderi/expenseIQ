@@ -108,14 +108,24 @@ const ADULT_ACTIONS: readonly Action[] = [
  * A CHILD can see their own money and log it by hand or by voice, and nothing
  * else. No credit products, no integrations, no control over their own limits.
  *
- * `nlu:parse` is deliberately allowed: the spec's design rationale is nudging
- * over blocking, and voice entry is the feature most likely to get a kid
- * logging expenses at all. What's blocked is *automated ingestion* — Gmail and
- * SMS parsing — which is `integration:enable`.
+ * Two deliberate allowances:
+ *
+ * `nlu:parse` — the spec's design rationale is nudging over blocking, and
+ * voice entry is the feature most likely to get a kid logging expenses at
+ * all. What's blocked is *automated ingestion* (Gmail, SMS), which is
+ * `integration:enable`.
+ *
+ * `account:create` without `account:linkCredit` — the spec restricts "card
+ * and loan linking" specifically, not accounts as a concept. A kid tracking
+ * cash or a piggy bank is exactly the manual entry the spec does allow. The
+ * credit restriction is enforced separately, in AccountsService, because
+ * whether a request is a credit product depends on the body rather than the
+ * route and route metadata cannot see it.
  */
 const CHILD_ACTIONS: readonly Action[] = [
   'profile:view',
   'account:view',
+  'account:create',
   'transaction:view',
   'transaction:create',
   'transaction:edit',

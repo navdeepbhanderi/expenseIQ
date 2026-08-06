@@ -124,10 +124,20 @@ token revokes the entire family descended from that login.
 confirms it exists, which lets anyone enumerate profile ids by watching status
 codes. Inaccessible and nonexistent must look identical from outside.
 
+**Derived values are computed on read, never stored.** Statement dates, credit
+utilisation and the amortisation position are pure functions of the account's
+terms and today's date. Persisting them would mean every one going stale at
+midnight with no write to trigger a refresh.
+
+**CSV export neutralises formulas.** A cell starting with `=`, `+`, `-` or `@`
+executes when opened in Excel or Sheets. Merchant names and notes are user
+input — and from Phase 4 will come from parsed emails — so an exported ledger
+is a real injection vector.
+
 ## Status
 
-Phases 0–1 complete: foundation, auth, profiles and RBAC.
-Phases 2–8 per the plan.
+Phases 0–2 complete: foundation, auth, profiles and RBAC, money core.
+Phases 3–8 per the plan.
 
 ### Auth flow, locally
 

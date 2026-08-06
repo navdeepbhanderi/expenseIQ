@@ -21,6 +21,10 @@ import { HealthModule } from './modules/health/health.module';
 import { AccessModule } from './modules/access/access.module';
 import { ProfilesModule } from './modules/profiles/profiles.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { CategoriesModule } from './modules/categories/categories.module';
+import { AccountsModule } from './modules/accounts/accounts.module';
+import { MerchantsModule } from './modules/merchants/merchants.module';
+import { TransactionsModule } from './modules/transactions/transactions.module';
 
 @Module({
   imports: [
@@ -43,6 +47,10 @@ import { AuthModule } from './modules/auth/auth.module';
     HealthModule,
     AuthModule,
     ProfilesModule,
+    CategoriesModule,
+    AccountsModule,
+    MerchantsModule,
+    TransactionsModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },
