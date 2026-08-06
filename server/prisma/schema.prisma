@@ -1,0 +1,633 @@
+// ExpenseIQ data model.
+//
+// Departures from expenseiq-backend-architecture.md are deliberate and are
+// justified in the approved plan (~/.claude/plans/zazzy-finding-feather.md).
+// The two structural ones:
+//
+//   1. Family/FamilyMember are replaced by ProfileMember. A profile is
+//      personal when it has one member, shared when it has several, and
+//      restricted when its subject member holds the CHILD role. This is what
+//      lets design screen 2c switch *into* "Sharma family" as a real profile
+//      with its own transactions and its own review queue.
+//
+//   2. NluRequest sits above ReviewQueueItem, because design screen 4b turns
+//      one utterance ("groceries 300, uber 640, and bijli ka bill 2400") into
+//      three candidate transactions. The doc's model assumed 1 input → 1 item.
+//
+// All money is `BigInt` paise in a column suffixed `Minor`. Never Decimal,
+// never Float. See src/common/money/money.ts.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Identity ────────────────────────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  passwordHash  String?
+  googleId      String?   @unique
+  displayName   String?
+  emailVerified Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  memberships   ProfileMember[]
+  refreshTokens RefreshToken[]
+  verifications EmailVerification[]
+  sentInvites   ProfileInvite[]     @relation("InviteSender")
+
+  @@map("users")
+}
+
+/// Refresh tokens are stored hashed and grouped into a "family" — a chain of
+/// rotations descending from one login. Presenting an already-used token means
+/// the chain leaked, so the whole family is revoked rather than just that token.
+model RefreshToken {
+  id        String    @id @default(uuid())
+  userId    String
+  familyId  String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([familyId])
+  @@map("refresh_tokens")
+}
+
+model EmailVerification {
+  id         String    @id @default(uuid())
+  userId     String
+  tokenHash  String    @unique
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("email_verifications")
+}
+
+// ─── Profiles & access ───────────────────────────────────────────────────────
+
+model Profile {
+  id          String      @id @default(uuid())
+  name        String
+  kind        ProfileKind @default(PERSONAL)
+  /// Two-letter monogram and tint — the profile's visual identity in the
+  /// switcher (design 2c). Stored rather than derived so a rename doesn't
+  /// silently change the user's colour.
+  initials    String
+  avatarColor String      @default("#1F6F5C")
+  locale      String      @default("en-IN")
+  currency    String      @default("INR")
+  isDefault   Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  members      ProfileMember[]
+  invites      ProfileInvite[]
+  accounts     Account[]
+  transactions Transaction[]
+  categories   Category[]
+  merchants    Merchant[]
+  budgets      Budget[]
+  reviewItems  ReviewQueueItem[]
+  nluRequests  NluRequest[]
+  receipts     Receipt[]
+  recurring    RecurringRule[]
+  integrations Integration[]
+  spendLimits  SpendLimit[]
+  goals        SavingsGoal[]
+  notifications Notification[]
+
+  @@map("profiles")
+}
+
+enum ProfileKind {
+  PERSONAL
+  SHARED
+  CHILD
+}
+
+/// The single source of truth for "can this user touch this profile".
+/// ProfileAccessGuard resolves every request through this table.
+model ProfileMember {
+  id        String     @id @default(uuid())
+  profileId String
+  userId    String
+  role      ProfileRole @default(OWNER)
+  joinedAt  DateTime   @default(now())
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, userId])
+  @@index([userId])
+  @@map("profile_members")
+}
+
+enum ProfileRole {
+  OWNER
+  ADULT
+  CHILD
+}
+
+model ProfileInvite {
+  id           String       @id @default(uuid())
+  profileId    String
+  email        String
+  role         ProfileRole  @default(ADULT)
+  tokenHash    String       @unique
+  invitedByUserId String
+  expiresAt    DateTime
+  acceptedAt   DateTime?
+  revokedAt    DateTime?
+  createdAt    DateTime     @default(now())
+
+  profile     Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  invitedBy   User    @relation("InviteSender", fields: [invitedByUserId], references: [id])
+
+  @@index([profileId])
+  @@index([email])
+  @@map("profile_invites")
+}
+
+// ─── Categories & merchants ──────────────────────────────────────────────────
+
+model Category {
+  id        String   @id @default(uuid())
+  /// null = system default, seeded for every profile to reference.
+  profileId String?
+  name      String
+  /// Two-letter monogram (design 2f) — no icon set to maintain, and it scales
+  /// to arbitrary custom categories.
+  monogram  String
+  tint      String
+  isIncome  Boolean  @default(false)
+  isSystem  Boolean  @default(false)
+  sortOrder Int      @default(0)
+  archivedAt DateTime?
+  createdAt DateTime @default(now())
+
+  profile          Profile?          @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  transactions     Transaction[]
+  budgets          Budget[]
+  spendLimits      SpendLimit[]
+  recurringRules   RecurringRule[]
+  merchantDefaults Merchant[]
+
+  @@unique([profileId, name])
+  @@index([profileId])
+  @@map("categories")
+}
+
+/// Backs merchant autocomplete and "Not a known merchant — add it?" (design 6b),
+/// and doubles as the normalisation cache: "SWIGGY*BLR9284" → "Swiggy", so a
+/// repeat merchant never costs a second LLM call.
+model Merchant {
+  id                String   @id @default(uuid())
+  /// null = global/system merchant, shared across profiles.
+  profileId         String?
+  normalizedName    String
+  rawAliases        String[] @default([])
+  defaultCategoryId String?
+  defaultAccountId  String?
+  seenCount         Int      @default(0)
+  lastSeenAt        DateTime?
+  createdAt         DateTime @default(now())
+
+  profile         Profile?      @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  defaultCategory Category?     @relation(fields: [defaultCategoryId], references: [id], onDelete: SetNull)
+  defaultAccount  Account?      @relation(fields: [defaultAccountId], references: [id], onDelete: SetNull)
+  transactions    Transaction[]
+  recurringRules  RecurringRule[]
+
+  @@unique([profileId, normalizedName])
+  @@index([profileId, normalizedName])
+  @@map("merchants")
+}
+
+// ─── Accounts ────────────────────────────────────────────────────────────────
+
+model Account {
+  id        String      @id @default(uuid())
+  profileId String
+  type      AccountType
+  name      String
+  /// design 6g/6h add-account form: "Issuer: HDFC", "Last 4 digits: 8842".
+  issuer    String?
+  last4     String?
+  currency  String      @default("INR")
+
+  balanceMinor     BigInt  @default(0)
+  creditLimitMinor BigInt?
+
+  /// Day of month, 1–31. The real dates are computed — a statement day of 31
+  /// has to clamp in February. See accounts/domain/billing-cycle.ts.
+  statementDay Int?
+  dueDay       Int?
+  /// Percentage of outstanding that forms the minimum due (design 2d: "min ₹1,180").
+  minDuePercent Float? @default(5)
+
+  // Loan fields
+  principalMinor  BigInt?
+  emiAmountMinor  BigInt?
+  interestRate    Float?
+  tenureMonths    Int?
+  emisPaid        Int?     @default(0)
+  firstEmiDate    DateTime?
+  isFloatingRate  Boolean  @default(false)
+
+  autoDebit Boolean   @default(false)
+  openedAt  DateTime?
+  closedAt  DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  profile        Profile         @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  transactions   Transaction[]
+  reminders      Reminder[]
+  recurringRules RecurringRule[]
+  merchantDefaults Merchant[]
+
+  @@index([profileId])
+  @@map("accounts")
+}
+
+enum AccountType {
+  BANK
+  CREDIT_CARD
+  LOAN
+  CASH
+}
+
+// ─── Transactions ────────────────────────────────────────────────────────────
+
+model Transaction {
+  id          String            @id @default(uuid())
+  profileId   String
+  accountId   String?
+  categoryId  String?
+  merchantId  String?
+  /// Always positive. Direction carries the sign, so a query never has to
+  /// reason about negative amounts to tell spend from income.
+  amountMinor BigInt
+  direction   Direction
+  currency    String            @default("INR")
+  date        DateTime
+  note        String?
+  source      TransactionSource @default(MANUAL)
+  /// Which language the user actually spoke/typed, for the "voice · हिं"
+  /// provenance pill in design 2e.
+  sourceLanguage  String?
+  nluRequestId    String?
+  recurringRuleId String?
+  receiptId       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  profile       Profile        @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  account       Account?       @relation(fields: [accountId], references: [id], onDelete: SetNull)
+  category      Category?      @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  merchant      Merchant?      @relation(fields: [merchantId], references: [id], onDelete: SetNull)
+  nluRequest    NluRequest?    @relation(fields: [nluRequestId], references: [id], onDelete: SetNull)
+  recurringRule RecurringRule? @relation(fields: [recurringRuleId], references: [id], onDelete: SetNull)
+
+  @@index([profileId, date])
+  @@index([profileId, categoryId])
+  @@index([accountId])
+  @@map("transactions")
+}
+
+enum Direction {
+  DEBIT
+  CREDIT
+}
+
+enum TransactionSource {
+  MANUAL
+  NLU_TEXT
+  NLU_VOICE
+  EMAIL
+  SMS
+  RECEIPT
+  RECURRING
+}
+
+// ─── NLU & review queue ──────────────────────────────────────────────────────
+
+/// One parse attempt. Owns N candidates, and carries the observability that
+/// makes the Pro/Flash routing split measurable and powers the "21 of 23 read
+/// correctly" stat in design 2b.
+model NluRequest {
+  id               String   @id @default(uuid())
+  profileId        String
+  rawInput         String
+  inputMode        InputMode
+  detectedLanguage String?
+  model            String?
+  latencyMs        Int?
+  inputTokens      Int?
+  outputTokens     Int?
+  candidateCount   Int      @default(0)
+  failed           Boolean  @default(false)
+  errorReason      String?
+  createdAt        DateTime @default(now())
+
+  profile      Profile           @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  reviewItems  ReviewQueueItem[]
+  transactions Transaction[]
+  receipt      Receipt?
+
+  @@index([profileId, createdAt])
+  @@map("nlu_requests")
+}
+
+enum InputMode {
+  TEXT
+  VOICE
+  AUDIO
+  IMAGE
+  EMAIL
+  SMS
+}
+
+model ReviewQueueItem {
+  id           String @id @default(uuid())
+  profileId    String
+  nluRequestId String?
+
+  parsedAmountMinor BigInt?
+  parsedDirection   Direction @default(DEBIT)
+  parsedCategoryId  String?
+  parsedMerchant    String?
+  parsedAccountId   String?
+  parsedDate        DateTime?
+  parsedNote        String?
+
+  confidence      Float?
+  confidenceBand  ConfidenceBand?
+  /// Per-field scores, so the UI can underline just the uncertain field
+  /// rather than flagging the whole card (design 2f).
+  fieldConfidences Json?
+  missingFields    String[] @default([])
+  /// Ranked account guesses behind "You usually put fuel on HDFC" (design 3d).
+  suggestedAccountIds String[] @default([])
+
+  status ReviewStatus @default(PENDING)
+  source TransactionSource
+  /// Gmail message id / SMS hash. Paired with `source` for idempotency.
+  sourceRefId String?
+
+  createdAt  DateTime  @default(now())
+  resolvedAt DateTime?
+
+  profile     Profile      @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  nluRequest  NluRequest?  @relation(fields: [nluRequestId], references: [id], onDelete: SetNull)
+  corrections Correction[]
+
+  /// DB-level idempotency for ingestion. Enforced here rather than in app
+  /// logic so it holds under concurrent workers.
+  @@unique([source, sourceRefId])
+  @@index([profileId, status])
+  @@map("review_queue_items")
+}
+
+enum ReviewStatus {
+  PENDING
+  CONFIRMED
+  EDITED
+  DISCARDED
+}
+
+enum ConfidenceBand {
+  CLEAR
+  FAIRLY_SURE
+  NEEDS_FIELD
+}
+
+/// Every field the user changed before confirming. This is the feedback loop —
+/// it drives per-profile accuracy stats and, later, category learning.
+model Correction {
+  id           String   @id @default(uuid())
+  reviewItemId String
+  field        String
+  oldValue     String?
+  newValue     String?
+  createdAt    DateTime @default(now())
+
+  reviewItem ReviewQueueItem @relation(fields: [reviewItemId], references: [id], onDelete: Cascade)
+
+  @@index([reviewItemId])
+  @@map("corrections")
+}
+
+model Receipt {
+  id           String        @id @default(uuid())
+  profileId    String
+  storageRef   String
+  mimeType     String
+  sizeBytes    Int
+  status       ReceiptStatus @default(PENDING)
+  nluRequestId String?       @unique
+  createdAt    DateTime      @default(now())
+
+  profile    Profile     @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  nluRequest NluRequest? @relation(fields: [nluRequestId], references: [id], onDelete: SetNull)
+
+  @@index([profileId])
+  @@map("receipts")
+}
+
+enum ReceiptStatus {
+  PENDING
+  PARSED
+  FAILED
+}
+
+// ─── Budgets, limits, goals ──────────────────────────────────────────────────
+
+model Budget {
+  id          String   @id @default(uuid())
+  profileId   String
+  /// null = the overall monthly budget ("₹15,790 left of ₹80,000", design 2a).
+  categoryId  String?
+  /// First day of the month this budget applies to.
+  month       DateTime
+  amountMinor BigInt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  profile  Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, categoryId, month])
+  @@index([profileId, month])
+  @@map("budgets")
+}
+
+model SpendLimit {
+  id           String   @id @default(uuid())
+  profileId    String
+  categoryId   String?
+  monthlyLimitMinor BigInt
+  setByUserId  String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  profile  Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, categoryId])
+  @@map("spend_limits")
+}
+
+model SavingsGoal {
+  id           String    @id @default(uuid())
+  profileId    String
+  name         String
+  targetMinor  BigInt
+  savedMinor   BigInt    @default(0)
+  targetDate   DateTime?
+  achievedAt   DateTime?
+  createdAt    DateTime  @default(now())
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+  @@map("savings_goals")
+}
+
+// ─── Recurring ───────────────────────────────────────────────────────────────
+
+model RecurringRule {
+  id          String   @id @default(uuid())
+  profileId   String
+  merchantId  String?
+  categoryId  String?
+  accountId   String?
+  amountMinor BigInt
+  direction   Direction @default(DEBIT)
+  cadence     Cadence
+  dayOfMonth  Int?
+  nextDueDate DateTime?
+  autoDebit   Boolean  @default(false)
+  /// Detected rules start unconfirmed — they surface as a suggestion before
+  /// they ever create a transaction.
+  confidence  Float?
+  confirmed   Boolean  @default(false)
+  enabled     Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  profile      Profile       @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  merchant     Merchant?     @relation(fields: [merchantId], references: [id], onDelete: SetNull)
+  category     Category?     @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  account      Account?      @relation(fields: [accountId], references: [id], onDelete: SetNull)
+  transactions Transaction[]
+
+  @@index([profileId])
+  @@map("recurring_rules")
+}
+
+enum Cadence {
+  WEEKLY
+  MONTHLY
+  QUARTERLY
+  YEARLY
+}
+
+// ─── Reminders, notifications, integrations ──────────────────────────────────
+
+model Reminder {
+  id         String   @id @default(uuid())
+  accountId  String
+  offsetDays Int      @default(3)
+  /// Minutes past midnight in the profile's timezone. Design 6h: "3 days
+  /// ahead, 9 am" — the doc modelled the offset but not the hour.
+  timeOfDay  Int      @default(540)
+  channels   ReminderChannel[] @default([EMAIL])
+  enabled    Boolean  @default(true)
+  /// Which billing cycle last fired, so a settings change mid-cycle can't
+  /// cause a duplicate reminder.
+  lastFiredCycle String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId])
+  @@map("reminders")
+}
+
+enum ReminderChannel {
+  EMAIL
+  PUSH
+  CALENDAR
+  TASKS
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  profileId String
+  kind      String
+  title     String
+  body      String?
+  payload   Json?
+  severity  NotificationSeverity @default(INFO)
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId, readAt])
+  @@map("notifications")
+}
+
+enum NotificationSeverity {
+  INFO
+  SUCCESS
+  WARNING
+  ERROR
+}
+
+model Integration {
+  id            String          @id @default(uuid())
+  profileId     String
+  type          IntegrationType
+  enabled       Boolean         @default(false)
+  /// A reference into secret storage — never the raw token.
+  oauthTokenRef String?
+  scopes        String[]        @default([])
+  lastSyncedAt  DateTime?
+  syncCursor    String?
+  connectedAt   DateTime?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, type])
+  @@map("integrations")
+}
+
+enum IntegrationType {
+  GMAIL
+  GOOGLE_CALENDAR
+  GOOGLE_TASKS
+  SMS
+}

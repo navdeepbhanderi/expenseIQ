@@ -1,0 +1,20 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "noEmit": false,
+    // Kept inside dist deliberately. `nest build` sets deleteOutDir, so dist is
+    // wiped before each build — if the incremental cache lived outside it, tsc
+    // would consult a cache describing files it had "already emitted", decide
+    // nothing changed, and exit 0 having written nothing at all.
+    "tsBuildInfoFile": "dist/.tsbuildinfo"
+  },
+  "include": ["src/**/*"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "test",
+    "prisma",
+    "**/*.spec.ts"
+  ]
+}

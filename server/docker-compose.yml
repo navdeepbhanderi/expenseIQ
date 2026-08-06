@@ -1,0 +1,55 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: expenseiq-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: expenseiq
+      POSTGRES_PASSWORD: expenseiq
+      POSTGRES_DB: expenseiq
+    ports:
+      - '5435:5432'
+    volumes:
+      - expenseiq-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U expenseiq -d expenseiq']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Separate database for integration tests, so a test run never touches dev data.
+  postgres-test:
+    image: postgres:16-alpine
+    container_name: expenseiq-postgres-test
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: expenseiq
+      POSTGRES_PASSWORD: expenseiq
+      POSTGRES_DB: expenseiq_test
+    ports:
+      - '5434:5432'
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U expenseiq -d expenseiq_test']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: expenseiq-redis
+    restart: unless-stopped
+    ports:
+      - '6380:6379'
+    volumes:
+      - expenseiq-redisdata:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  expenseiq-pgdata:
+  expenseiq-redisdata:
