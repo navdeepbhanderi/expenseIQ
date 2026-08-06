@@ -1,9 +1,14 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { PrismaService } from '@/infra/prisma/prisma.service';
+import { Public } from '@/common/decorators/public.decorator';
 
 @ApiTags('health')
 @Controller('health')
+// Health probes must never require a token: an orchestrator, uptime monitor
+// or load balancer has no credentials, and a 401 here would be read as the
+// service being down.
+@Public()
 export class HealthController {
   constructor(private readonly prisma: PrismaService) {}
 

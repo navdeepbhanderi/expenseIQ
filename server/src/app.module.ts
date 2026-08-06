@@ -11,10 +11,16 @@ import { configuration } from './config/configuration';
 import { validateEnv } from './config/env.validation';
 import { LoggerModule } from './common/logger/logger.module';
 import { PrismaModule } from './infra/prisma/prisma.module';
+import { MailerModule } from './infra/mailer/mailer.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
+import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
+
 import { HealthModule } from './modules/health/health.module';
+import { AccessModule } from './modules/access/access.module';
+import { ProfilesModule } from './modules/profiles/profiles.module';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -25,16 +31,24 @@ import { HealthModule } from './modules/health/health.module';
       cache: true,
     }),
 
-    // A baseline ceiling on every route. Auth and NLU endpoints will tighten
-    // this with their own @Throttle — NLU because each call costs money.
+    // A baseline ceiling on every route. Auth tightens this to 10/min with its
+    // own @Throttle, and NLU will do the same in Phase 4 — each call costs money.
     ThrottlerModule.forRoot([{ name: 'default', ttl: 60_000, limit: 120 }]),
 
     LoggerModule,
     PrismaModule,
+    MailerModule,
+    AccessModule,
+
     HealthModule,
+    AuthModule,
+    ProfilesModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },
+    // Authentication is global and opt-out via @Public(), so a route that
+    // forgets its decorator is locked rather than exposed.
+    { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_FILTER, useClass: HttpExceptionFilter },
     { provide: APP_INTERCEPTOR, useClass: LoggingInterceptor },
   ],
