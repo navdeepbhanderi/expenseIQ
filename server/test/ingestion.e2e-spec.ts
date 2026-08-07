@@ -559,6 +559,134 @@ describe('Ingestion (e2e)', () => {
       expect(res.body).toEqual([]);
     });
 
+    it('stages a due rule in the review queue, never the ledger', async () => {
+      // A confirmed rule is the user's own instruction for the *schedule*,
+      // but the amount is a prediction — design 2e's own example varies
+      // between ₹1,890 and ₹3,120, and writing a predicted figure into the
+      // ledger would silently corrupt every downstream total.
+      const { token, profileId } = await setup();
+      await seedMonthly(profileId, 'Netflix', [649, 649, 649, 649]);
+
+      const detected = await request(server)
+        .get(`/api/v1/profiles/${profileId}/recurring/detected`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      const rule = await request(server)
+        .post(`/api/v1/profiles/${profileId}/recurring`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ signature: detected.body[0].signature })
+        .expect(201);
+
+      // Bring the rule due.
+      await harness.prisma.recurringRule.update({
+        where: { id: rule.body.id as string },
+        data: { nextDueDate: new Date(Date.now() - 86_400_000) },
+      });
+
+      const before = await harness.prisma.transaction.count({
+        where: { profileId },
+      });
+
+      const run = await request(server)
+        .post(`/api/v1/profiles/${profileId}/recurring/generate-due`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(201);
+
+      expect(run.body.generated).toBe(1);
+
+      // Nothing reached the ledger.
+      expect(
+        await harness.prisma.transaction.count({ where: { profileId } }),
+      ).toBe(before);
+
+      const staged = await harness.prisma.reviewQueueItem.findFirstOrThrow({
+        where: { profileId, source: 'RECURRING' },
+      });
+      expect(Number(staged.parsedAmountMinor)).toBe(649_00);
+      expect(staged.parsedMerchant).toBe('Netflix');
+      // Fully pre-filled, so confirming is one tap.
+      expect(staged.missingFields).toEqual([]);
+    });
+
+    it('cannot double-generate for the same due date', async () => {
+      // A scheduler firing twice, or a retried job, must not quietly double
+      // someone's recorded spending.
+      const { token, profileId } = await setup();
+      await seedMonthly(profileId, 'Netflix', [649, 649, 649, 649]);
+
+      const detected = await request(server)
+        .get(`/api/v1/profiles/${profileId}/recurring/detected`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+      const rule = await request(server)
+        .post(`/api/v1/profiles/${profileId}/recurring`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ signature: detected.body[0].signature })
+        .expect(201);
+
+      const dueDate = new Date(Date.now() - 86_400_000);
+      await harness.prisma.recurringRule.update({
+        where: { id: rule.body.id as string },
+        data: { nextDueDate: dueDate },
+      });
+
+      await request(server)
+        .post(`/api/v1/profiles/${profileId}/recurring/generate-due`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(201);
+
+      // Wind it back to the same date and run again.
+      await harness.prisma.recurringRule.update({
+        where: { id: rule.body.id as string },
+        data: { nextDueDate: dueDate },
+      });
+
+      const second = await request(server)
+        .post(`/api/v1/profiles/${profileId}/recurring/generate-due`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(201);
+
+      expect(second.body.generated).toBe(0);
+      expect(second.body.skipped).toBe(1);
+      expect(
+        await harness.prisma.reviewQueueItem.count({
+          where: { profileId, source: 'RECURRING' },
+        }),
+      ).toBe(1);
+    });
+
+    it('advances the schedule so a rule is not due forever', async () => {
+      const { token, profileId } = await setup();
+      await seedMonthly(profileId, 'Netflix', [649, 649, 649, 649]);
+
+      const detected = await request(server)
+        .get(`/api/v1/profiles/${profileId}/recurring/detected`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+      const rule = await request(server)
+        .post(`/api/v1/profiles/${profileId}/recurring`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ signature: detected.body[0].signature })
+        .expect(201);
+
+      await harness.prisma.recurringRule.update({
+        where: { id: rule.body.id as string },
+        data: { nextDueDate: new Date('2026-01-31T00:00:00.000Z') },
+      });
+
+      await request(server)
+        .post(`/api/v1/profiles/${profileId}/recurring/generate-due`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(201);
+
+      const after = await harness.prisma.recurringRule.findUniqueOrThrow({
+        where: { id: rule.body.id as string },
+      });
+      // Calendar month, clamped: 31 Jan → 28 Feb.
+      expect(after.nextDueDate?.toISOString().slice(0, 10)).toBe('2026-02-28');
+    });
+
     it('404s on another profile`s rule', async () => {
       const aarav = await setup('aarav@example.com');
       const meera = await setup('meera@example.com');

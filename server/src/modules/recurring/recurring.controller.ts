@@ -21,6 +21,7 @@ import {
   RecurringService,
   type RecurrenceSuggestion,
 } from './recurring.service';
+import { RecurrenceGeneratorService } from './recurrence-generator.service';
 import { ConfirmRecurrenceDto, UpdateRecurringDto } from './dto/recurring.dto';
 
 @ApiTags('recurring')
@@ -28,7 +29,10 @@ import { ConfirmRecurrenceDto, UpdateRecurringDto } from './dto/recurring.dto';
 @Controller('profiles/:profileId/recurring')
 @UseGuards(ProfileAccessGuard)
 export class RecurringController {
-  constructor(private readonly recurring: RecurringService) {}
+  constructor(
+    private readonly recurring: RecurringService,
+    private readonly generator: RecurrenceGeneratorService,
+  ) {}
 
   @Get()
   @RequireAction('transaction:view')
@@ -81,6 +85,25 @@ export class RecurringController {
     @Param('ruleId', ParseUUIDPipe) ruleId: string,
   ): Promise<{ labelled: number }> {
     return this.recurring.labelMatchingTransactions(profileId, ruleId);
+  }
+
+  @Post('generate-due')
+  @RequireAction('transaction:create')
+  @ApiOperation({
+    summary: 'Stage entries for rules that have come due',
+    description:
+      'Generated entries land in the review queue, not the ledger. A ' +
+      "confirmed rule is the user's own instruction, but only for the " +
+      "*schedule* — the amount is a prediction, and design 2e's own example " +
+      'varies between ₹1,890 and ₹3,120. They arrive fully pre-filled, and a ' +
+      'rule with a steady amount is marked CLEAR so it confirms in one tap. ' +
+      'Idempotent per rule per due date, so a scheduler firing twice cannot ' +
+      "double someone's recorded spending. Phase 6 puts this on a cron.",
+  })
+  generateDue(
+    @Param('profileId', ParseUUIDPipe) profileId: string,
+  ): Promise<{ generated: number; skipped: number }> {
+    return this.generator.generateDue(profileId);
   }
 
   @Patch(':ruleId')

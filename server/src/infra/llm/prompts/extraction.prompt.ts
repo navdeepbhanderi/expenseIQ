@@ -58,11 +58,19 @@ ${
 }
 
 CONFIDENCE
-Score every field 0–1 by how certain you are it is correct — not by how
+Score every field 0-1 by how certain you are it is correct — not by how
 plausible it is. Be honest and be harsh: a low score sends the entry for a
 human glance, which is cheap. A wrongly confident score corrupts someone's
-ledger, which is not. If a field was inferred rather than stated, it is below
-0.6. If it was not mentioned at all, set the field to null and score it 0.
+ledger, which is not.
+
+- Stated outright: 0.9-1.0.
+- Inferred from context and genuinely uncertain: below 0.6.
+- Not mentioned at all: set the field to null and score it 0.
+
+ONE EXCEPTION, and it matters. When no date is given, use today and score it
+0.9. People log expenses as they happen, so "no date stated" almost always
+means today — this is a near-certainty, not a guess, and scoring it low would
+send every ordinary entry for review over the one field nobody doubts.
 
 Return only the structured object. No prose, no explanation.`;
 }

@@ -187,6 +187,23 @@ four seconds for the whole speak-to-confirmed flow. The same trap silently
 broke merchant normalisation — 29 thinking tokens against a 32-token ceiling
 returned an empty string with a 200 response.
 
+### Voice input: transcript first, audio as fallback
+
+Measured against real Gemini, not assumed:
+
+| Path | Accuracy | Latency |
+|---|---|---|
+| Browser transcript → `POST /nlu/parse` | 2/2 | **2.2–2.6s** |
+| Audio → `POST /nlu/parse/audio` | 3/3 | 4.7–5.1s |
+
+Both are accurate — Gemini reconstructs `"teen so rupee kirana pay kharch
+kiya"` as ₹300 Groceries without difficulty, which was the exact failure mode
+that made the audio path look necessary. So the default is the browser
+transcript: twice as fast, a fraction of the cost, and the Web Speech API
+supplies the live on-screen text design `5b` needs anyway. Send audio when the
+browser returns *no* transcript, which is its real failure mode on Gujarati
+and heavy code-mixing.
+
 ### Running without a Gemini key
 
 `LLM_DRIVER=fake` selects a deterministic stand-in adapter that genuinely
