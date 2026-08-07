@@ -38,7 +38,8 @@ decisions worth knowing.
 | 3 | Insights — dashboard, budgets, spend norms | ✅ |
 | 4 | NLU & review queue — multilingual parsing, confidence, corrections | ✅ |
 | 5 | Ingestion — receipts, recurring detection | ✅ |
-| 6 | Reminders & integrations — Gmail, Calendar, Tasks | — |
+| 6 | Reminders & notifications | ✅ |
+| 6b | Google integrations — Gmail, Calendar, Tasks | — (needs OAuth credentials) |
 | 7 | Family — invites, roles, spend limits, allowances | — |
 | 8 | Hardening | — |
 

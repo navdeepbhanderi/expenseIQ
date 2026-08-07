@@ -144,6 +144,19 @@ runs jobs in-process; anything else uses BullMQ on Redis. Tests use inline,
 because a test that enqueues work and polls for a worker is slow, flaky, and
 ends up testing BullMQ rather than this application.
 
+**Reminders key on the billing cycle, not the calendar day.** The spec's edge
+case — "if reminder settings change after a reminder for that cycle already
+fired, don't re-fire" — is unsolvable with a "is today the day?" scan, which
+also sends nothing at all if it misses its window during a restart. Keying on
+the due date fixes both: at most one send per cycle, and a late scan still
+catches up. `lastFiredCycle` is written *after* delivery, because a duplicate
+notification is a far smaller failure than a missed bill.
+
+**"9 am" means 9 am where the user is.** `timeOfDay` is minutes past *local*
+midnight, resolved through `Intl` rather than a hardcoded offset — 9 am UTC
+would arrive at 2:30 pm in India. Tested against daylight saving too, even
+though India has none.
+
 **Detection proposes, the user disposes.** A detected recurring payment is
 never auto-created as a rule. A pattern that silently started generating
 transactions would put rows in the ledger the user never entered — the same
@@ -160,10 +173,14 @@ is a real injection vector.
 
 ## Status
 
-Phases 0–5 complete: foundation, auth, profiles and RBAC, money core,
+Phases 0–6 complete: foundation, auth, profiles and RBAC, money core,
 insights, natural-language entry and the review queue, receipt scanning and
-recurrence detection.
-Phases 6–8 per the plan.
+recurrence detection, reminders and notifications.
+
+**Phase 6 is partial**: reminders and in-app notifications are done; the
+Google integrations (Gmail parsing, Calendar, Tasks) are not started and need
+OAuth credentials — `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` are still
+blank. Phases 7–8 per the plan.
 
 ### Gemini setup
 

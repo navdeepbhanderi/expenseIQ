@@ -34,6 +34,8 @@ import { ReportsModule } from './modules/reports/reports.module';
 import { QueueModule } from './infra/queue/queue.module';
 import { ReceiptsModule } from './modules/receipts/receipts.module';
 import { RecurringModule } from './modules/recurring/recurring.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
+import { RemindersModule } from './modules/reminders/reminders.module';
 
 @Module({
   imports: [
@@ -69,6 +71,8 @@ import { RecurringModule } from './modules/recurring/recurring.module';
     ReportsModule,
     ReceiptsModule,
     RecurringModule,
+    NotificationsModule,
+    RemindersModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },
