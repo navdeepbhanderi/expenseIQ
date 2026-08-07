@@ -100,7 +100,7 @@ async function main(): Promise<void> {
 
       for (const candidate of parsed.candidates ?? []) {
         const rupees =
-          candidate.amountMinor === undefined || candidate.amountMinor === null
+          candidate.amountMinor === undefined
             ? '?'
             : (candidate.amountMinor / 100).toLocaleString('en-IN');
         console.log(

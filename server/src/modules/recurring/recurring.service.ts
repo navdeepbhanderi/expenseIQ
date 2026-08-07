@@ -148,10 +148,20 @@ export class RecurringService {
       },
     });
 
+    // Labelled here rather than left to a second call. The payments that
+    // revealed the pattern are the ones the user is looking at when they
+    // accept it, and design 2e shows the pill on them — requiring an extra
+    // round trip to make that true invites it being forgotten.
+    const { labelled } = await this.labelMatchingTransactions(
+      profileId,
+      rule.id,
+    );
+
     this.logger.log('Recurrence confirmed', {
       profileId,
       ruleId: rule.id,
       cadence: rule.cadence,
+      labelled,
     });
 
     return rule;
@@ -227,19 +237,5 @@ export class RecurringService {
     }
 
     return rule;
-  }
-
-  /** Exposed for the dashboard's upcoming-dues strip. */
-  async upcoming(profileId: string, withinDays = 14): Promise<RecurringRule[]> {
-    const until = new Date(Date.now() + withinDays * 86_400_000);
-
-    return this.prisma.recurringRule.findMany({
-      where: {
-        profileId,
-        enabled: true,
-        nextDueDate: { not: null, lte: until },
-      },
-      orderBy: { nextDueDate: 'asc' },
-    });
   }
 }

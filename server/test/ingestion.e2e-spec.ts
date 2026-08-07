@@ -384,7 +384,43 @@ describe('Ingestion (e2e)', () => {
         .expect(400);
     });
 
-    it('labels the transactions that revealed the pattern — design 2e`s pill', async () => {
+    it('surfaces a due recurring payment on the dashboard', async () => {
+      // Design 2a's "Needs your eye" strip is about money about to leave. A
+      // subscription renewing tomorrow qualifies as much as a card statement,
+      // and a profile whose only commitments are subscriptions previously saw
+      // an empty panel while money was in fact about to go.
+      const { token, profileId } = await setup();
+      await seedMonthly(profileId, 'Netflix', [649, 649, 649, 649]);
+
+      const detected = await request(server)
+        .get(`/api/v1/profiles/${profileId}/recurring/detected`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      await request(server)
+        .post(`/api/v1/profiles/${profileId}/recurring`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ signature: detected.body[0].signature })
+        .expect(201);
+
+      const dashboard = await request(server)
+        .get(`/api/v1/profiles/${profileId}/dashboard`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      const dues = dashboard.body.upcomingDues as {
+        kind: string;
+        name: string;
+      }[];
+      const recurring = dues.find((due) => due.kind === 'RECURRING');
+
+      expect(recurring).toBeDefined();
+      expect(recurring?.name).toBe('Netflix');
+    });
+
+    it('labels history at the moment the rule is accepted', async () => {
+      // Requiring a second call to make design 2e's pill true invites it
+      // being forgotten.
       const { token, profileId } = await setup();
       await seedMonthly(profileId, 'Netflix', [649, 649, 649, 649]);
 
@@ -399,15 +435,70 @@ describe('Ingestion (e2e)', () => {
         .send({ signature: detected.body[0].signature })
         .expect(201);
 
-      const labelled = await request(server)
+      const labelled = await harness.prisma.transaction.count({
+        where: { profileId, recurringRuleId: rule.body.id as string },
+      });
+      expect(labelled).toBe(4);
+
+      // And the transaction list carries the rule, so the pill can render.
+      const listed = await request(server)
+        .get(`/api/v1/profiles/${profileId}/transactions`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      const items = listed.body.items as { recurringRule: unknown }[];
+      expect(items[0]?.recurringRule).not.toBeNull();
+    });
+
+    it('re-labels transactions that arrive after the rule exists', async () => {
+      // Confirming already labels the history, so this endpoint's remaining
+      // job is catching up on payments that landed since — it is a backfill,
+      // not the primary path.
+      const { token, profileId } = await setup();
+      const merchant = await seedMonthly(
+        profileId,
+        'Netflix',
+        [649, 649, 649, 649],
+      );
+
+      const detected = await request(server)
+        .get(`/api/v1/profiles/${profileId}/recurring/detected`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      const rule = await request(server)
+        .post(`/api/v1/profiles/${profileId}/recurring`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ signature: detected.body[0].signature })
+        .expect(201);
+
+      // Nothing left to do immediately after confirming.
+      const noop = await request(server)
         .post(
           `/api/v1/profiles/${profileId}/recurring/${rule.body.id}/label-transactions`,
         )
         .set('Authorization', `Bearer ${token}`)
         .expect(201);
+      expect(noop.body.labelled).toBe(0);
 
-      // Applied to history, not just to future entries.
-      expect(labelled.body.labelled).toBe(4);
+      // A new payment from the same merchant arrives.
+      await harness.prisma.transaction.create({
+        data: {
+          profileId,
+          merchantId: merchant.id,
+          amountMinor: 649_00n,
+          direction: 'DEBIT',
+          date: new Date(),
+        },
+      });
+
+      const backfill = await request(server)
+        .post(
+          `/api/v1/profiles/${profileId}/recurring/${rule.body.id}/label-transactions`,
+        )
+        .set('Authorization', `Bearer ${token}`)
+        .expect(201);
+      expect(backfill.body.labelled).toBe(1);
     });
 
     it('disables a rule without deleting its history', async () => {

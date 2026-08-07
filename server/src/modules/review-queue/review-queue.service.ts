@@ -13,7 +13,10 @@ import {
 import { PrismaService } from '@/infra/prisma/prisma.service';
 import { MerchantsService } from '@/modules/merchants/merchants.service';
 import { AppLogger } from '@/common/logger/app-logger.service';
-import { canOneTapConfirm } from '@/modules/nlu/domain/confidence';
+import {
+  canOneTapConfirm,
+  isConfirmable,
+} from '@/modules/nlu/domain/confidence';
 
 import type { EditReviewItemDto } from './dto/review-queue.dto';
 
@@ -174,7 +177,17 @@ export class ReviewQueueService {
       throw new BadRequestException('This entry has already been resolved');
     }
 
-    if (item.parsedAmountMinor === null || item.parsedAmountMinor <= 0n) {
+    // Shares the domain rule rather than re-stating it. Two copies of "what
+    // makes an entry confirmable" is exactly how the API and the UI end up
+    // disagreeing about whether a button should be enabled.
+    if (
+      !isConfirmable({
+        amountMinor:
+          item.parsedAmountMinor === null
+            ? null
+            : Number(item.parsedAmountMinor),
+      })
+    ) {
       // Design 3d: "amount not found — add it to continue".
       throw new BadRequestException({
         message: 'Add an amount before confirming this entry',

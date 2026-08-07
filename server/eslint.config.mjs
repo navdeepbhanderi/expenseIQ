@@ -83,8 +83,9 @@ export default tseslint.config(
   },
 
   {
-    // The seed script is a CLI: printing to stdout is its job.
-    files: ['prisma/**/*.ts'],
+    // Seed and check scripts are CLIs: stdout is their output device, not a
+    // stray debug statement.
+    files: ['prisma/**/*.ts', 'scripts/**/*.ts'],
     rules: { 'no-console': 'off' },
   },
 );

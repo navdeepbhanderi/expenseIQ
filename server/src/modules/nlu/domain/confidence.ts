@@ -75,8 +75,18 @@ export function findMissingFields(candidate: ExtractedCandidate): string[] {
   return missing;
 }
 
-/** Whether the candidate can be written to the ledger at all. */
-export function isConfirmable(candidate: ExtractedCandidate): boolean {
+/**
+ * Whether the candidate can be written to the ledger at all.
+ *
+ * Takes only the amount, because that is the only hard requirement — and
+ * narrowing the parameter lets the review queue reuse this rule against a
+ * stored row rather than restating it. Two copies of "what makes an entry
+ * confirmable" is how the API and the UI end up disagreeing about whether a
+ * button should be enabled.
+ */
+export function isConfirmable(candidate: {
+  amountMinor: number | null;
+}): boolean {
   return candidate.amountMinor !== null && candidate.amountMinor > 0;
 }
 

@@ -22,7 +22,12 @@ import type {
 } from './dto/transaction.dto';
 
 type TransactionWithRelations = Prisma.TransactionGetPayload<{
-  include: { category: true; account: true; merchant: true };
+  include: {
+    category: true;
+    account: true;
+    merchant: true;
+    recurringRule: true;
+  };
 }>;
 
 /** One entry in the filter sidebar — design 6c's "Groceries 18". */
@@ -50,6 +55,11 @@ const RELATIONS = {
   category: true,
   account: true,
   merchant: true,
+  // Included so design 2e can render the "Recurring" pill. The `source` enum
+  // only says RECURRING for rows a rule *generated*; a row that merely
+  // belongs to a detected pattern is identified by this relation, and that is
+  // the case the pill actually marks.
+  recurringRule: true,
 } as const;
 
 @Injectable()

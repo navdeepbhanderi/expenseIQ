@@ -26,10 +26,16 @@ export interface CategorySlice {
   sharePercent: number;
 }
 
+export type DueKind = 'CARD' | 'LOAN' | 'RECURRING';
+
 export interface UpcomingDue {
-  accountId: string;
+  kind: DueKind;
+  /** Null for a recurring rule that isn't tied to an account. */
+  accountId: string | null;
+  /** Set only when the due comes from a recurring rule. */
+  recurringRuleId?: string;
   name: string;
-  type: AccountType;
+  type: AccountType | null;
   amount: Money;
   dueDate: Date;
   daysUntilDue: number;
@@ -121,6 +127,13 @@ export class DashboardService {
       this.overallBudget(profileId, monthStart),
     ]);
 
+    // Merged and re-sorted, so a subscription renewing tomorrow outranks a
+    // card statement due next week rather than being appended after it.
+    const upcomingDues = [
+      ...this.accountDues(accounts, asOf),
+      ...(await this.recurringDues(profileId, asOf)),
+    ].sort((a, b) => a.daysUntilDue - b.daysUntilDue);
+
     return {
       greetingName: profile?.members[0]?.user.displayName ?? null,
       asOf,
@@ -131,7 +144,7 @@ export class DashboardService {
         versusLastMonth: compareToPrevious(thisMonth.spent, lastMonth.spent),
       },
       topCategories,
-      upcomingDues: this.upcomingDues(accounts, asOf),
+      upcomingDues,
       pendingReviewCount,
       accounts,
       netWorth: this.netWorth(accounts),
@@ -188,7 +201,7 @@ export class DashboardService {
   }
 
   /** Design 2a's "Needs your eye" strip and 4c's due card. */
-  private upcomingDues(accounts: Account[], asOf: Date): UpcomingDue[] {
+  private accountDues(accounts: Account[], asOf: Date): UpcomingDue[] {
     const dues: UpcomingDue[] = [];
 
     for (const account of accounts) {
@@ -211,6 +224,7 @@ export class DashboardService {
         // A settled card isn't "needing your eye".
         if (position.outstanding.isPositive) {
           dues.push({
+            kind: 'CARD',
             accountId: account.id,
             name: account.name,
             type: account.type,
@@ -234,6 +248,7 @@ export class DashboardService {
           if (!summary.nextEmiDate) continue;
 
           dues.push({
+            kind: 'LOAN',
             accountId: account.id,
             name: account.name,
             type: account.type,
@@ -372,7 +387,9 @@ export class DashboardService {
   async dueDatesInMonth(
     profileId: string,
     month: Date,
-  ): Promise<{ date: Date; accountId: string; name: string; amount: Money }[]> {
+  ): Promise<
+    { date: Date; accountId: string | null; name: string; amount: Money }[]
+  > {
     const accounts = await this.prisma.account.findMany({
       where: { profileId, closedAt: null },
     });
@@ -380,7 +397,7 @@ export class DashboardService {
     const start = startOfMonth(month);
     const end = addMonths(start, 1);
 
-    return this.upcomingDues(accounts, start)
+    return this.accountDues(accounts, start)
       .filter(
         (due) =>
           due.dueDate.getTime() >= start.getTime() &&
@@ -392,6 +409,47 @@ export class DashboardService {
         name: due.name,
         amount: due.amount,
       }));
+  }
+
+  /**
+   * Confirmed recurring payments falling due soon.
+   *
+   * Design 2a's "Needs your eye" strip is about money about to leave, and a
+   * ₹649 subscription renewing tomorrow qualifies exactly as much as a card
+   * statement. Leaving these out meant the strip only ever showed accounts,
+   * so a profile whose only commitments were subscriptions saw an empty
+   * panel while money was in fact about to go.
+   */
+  private async recurringDues(
+    profileId: string,
+    asOf: Date,
+    withinDays = 30,
+  ): Promise<UpcomingDue[]> {
+    const until = new Date(asOf.getTime() + withinDays * 86_400_000);
+
+    const rules = await this.prisma.recurringRule.findMany({
+      where: {
+        profileId,
+        enabled: true,
+        confirmed: true,
+        nextDueDate: { not: null, lte: until },
+      },
+      include: { merchant: { select: { normalizedName: true } } },
+    });
+
+    return rules.map((rule) => ({
+      kind: 'RECURRING' as const,
+      accountId: rule.accountId,
+      recurringRuleId: rule.id,
+      name: rule.merchant?.normalizedName ?? 'Recurring payment',
+      type: null,
+      amount: Money.fromBigInt(rule.amountMinor),
+      dueDate: rule.nextDueDate!,
+      daysUntilDue: daysBetween(rule.nextDueDate!, asOf),
+      isOverdue: rule.nextDueDate!.getTime() < startOfDay(asOf).getTime(),
+      autoDebit: rule.autoDebit,
+      minimumDue: null,
+    }));
   }
 
   private async overallBudget(
