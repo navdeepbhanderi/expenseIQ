@@ -35,11 +35,15 @@ export const envSchema = z.object({
   // Optional until Phase 4 so the app boots without an LLM key while the
   // core CRUD phases are being built. NluModule asserts it at init.
   GEMINI_API_KEY: z.string().optional(),
-  // Defaults to Flash, not Pro: gemini-2.5-pro's free-tier quota is zero, so
-  // an unbilled project gets 429 on every extraction. Point this at
-  // gemini-2.5-pro once billing is on.
-  GEMINI_MODEL_PRO: z.string().default('gemini-2.5-flash'),
-  GEMINI_MODEL_FLASH: z.string().default('gemini-2.5-flash'),
+  // Comma-separated fallback chains, strongest first — see DEFAULT_CHAINS in
+  // gemini.adapter.ts for why a chain rather than one model. Left empty, the
+  // adapter's own defaults apply.
+  //
+  // Both default to Flash models, not Pro: every Pro model has a free-tier
+  // quota of zero, so an unbilled project gets 429 on every extraction. Put
+  // gemini-3.1-pro-preview at the head of the pro chain once billing is on.
+  GEMINI_MODEL_PRO: z.string().default('gemini-3.5-flash'),
+  GEMINI_MODEL_FLASH: z.string().default('gemini-3.1-flash-lite'),
   // Gemini 2.5 spends "thinking" tokens before answering, billed as output and
   // counted against maxOutputTokens. Measured on the hardest extraction case
   // here, thinking cost 610 tokens and 2.1 extra seconds for an identical
