@@ -139,6 +139,20 @@ block is removed in Prisma 7. The config file loads before anything populates
 `process.env`, so it imports `dotenv/config` explicitly — without that,
 `DATABASE_URL` is undefined and every migrate command fails confusingly.
 
+**Background work is behind a port, like the LLM.** `QUEUE_DRIVER=inline`
+runs jobs in-process; anything else uses BullMQ on Redis. Tests use inline,
+because a test that enqueues work and polls for a worker is slow, flaky, and
+ends up testing BullMQ rather than this application.
+
+**Detection proposes, the user disposes.** A detected recurring payment is
+never auto-created as a rule. A pattern that silently started generating
+transactions would put rows in the ledger the user never entered — the same
+thing the review queue exists to prevent for parsed input.
+
+**Amount variance does not disqualify a recurrence.** An electricity bill is
+obviously recurring and is a different number every month. Cadence is decided
+by the dates; amount stability is reported alongside as metadata.
+
 **CSV export neutralises formulas.** A cell starting with `=`, `+`, `-` or `@`
 executes when opened in Excel or Sheets. Merchant names and notes are user
 input — and from Phase 4 will come from parsed emails — so an exported ledger
@@ -146,9 +160,10 @@ is a real injection vector.
 
 ## Status
 
-Phases 0–4 complete: foundation, auth, profiles and RBAC, money core,
-insights, natural-language entry and the review queue.
-Phases 5–8 per the plan.
+Phases 0–5 complete: foundation, auth, profiles and RBAC, money core,
+insights, natural-language entry and the review queue, receipt scanning and
+recurrence detection.
+Phases 6–8 per the plan.
 
 ### Gemini setup
 

@@ -31,7 +31,12 @@ export class FakeLlmAdapter implements LlmPort {
     input: ParseInput,
     context: ExtractionContext,
   ): Promise<ExtractionResult> {
-    const text = input.kind === 'text' ? input.text : '';
+    // Image and audio inputs get a plausible low-confidence result rather than
+    // nothing. Real vision output is not reproducible offline, but the
+    // pipeline downstream — staging, banding, confirmation — is the same, and
+    // it must be exercised without a network call.
+    const text =
+      input.kind === 'text' ? input.text : describeBinary(input.data);
     const startedAt = Date.now();
 
     // Split on separators people actually use when listing several expenses.
@@ -202,4 +207,16 @@ function detectLanguage(text: string): string {
     return 'hi-en';
   }
   return 'en';
+}
+
+/**
+ * A stand-in reading of a binary upload.
+ *
+ * Derived from the bytes so it is deterministic per file: the same receipt
+ * always "reads" the same, which is what makes duplicate-detection and
+ * idempotency tests meaningful.
+ */
+function describeBinary(data: Buffer): string {
+  const amount = 100 + (data.byteLength % 9900);
+  return `${amount} groceries`;
 }

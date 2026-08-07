@@ -37,7 +37,7 @@ decisions worth knowing.
 | 2 | Money core — accounts, transactions, card & loan math | ✅ |
 | 3 | Insights — dashboard, budgets, spend norms | ✅ |
 | 4 | NLU & review queue — multilingual parsing, confidence, corrections | ✅ |
-| 5 | Ingestion — receipts, recurring detection | — |
+| 5 | Ingestion — receipts, recurring detection | ✅ |
 | 6 | Reminders & integrations — Gmail, Calendar, Tasks | — |
 | 7 | Family — invites, roles, spend limits, allowances | — |
 | 8 | Hardening | — |

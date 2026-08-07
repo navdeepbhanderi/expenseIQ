@@ -85,6 +85,10 @@ export class NluService {
     input: ParseInput,
     inputMode: InputMode,
     rawInput: string,
+    // Overridden by ingestion paths — a receipt and a spoken sentence take the
+    // same route through here but must stay distinguishable in the ledger,
+    // because design 2e renders the provenance pill from it.
+    sourceOverride?: TransactionSource,
   ): Promise<ParseResult> {
     const context = await this.buildContext(profileId);
     const { categories, accounts } = context.lookups;
@@ -96,7 +100,13 @@ export class NluService {
       // Never silently drop a user's input. A failed parse still becomes a
       // review item carrying the raw text, so the user can complete it by
       // hand instead of losing what they said.
-      return this.recordFailure(profileId, rawInput, inputMode, error);
+      return this.recordFailure(
+        profileId,
+        rawInput,
+        inputMode,
+        error,
+        sourceOverride,
+      );
     }
 
     const request = await this.prisma.nluRequest.create({
@@ -114,9 +124,10 @@ export class NluService {
     });
 
     const source =
-      inputMode === InputMode.VOICE || inputMode === InputMode.AUDIO
+      sourceOverride ??
+      (inputMode === InputMode.VOICE || inputMode === InputMode.AUDIO
         ? TransactionSource.NLU_VOICE
-        : TransactionSource.NLU_TEXT;
+        : TransactionSource.NLU_TEXT);
 
     const affinity = await this.accountAffinity(profileId);
 
@@ -249,6 +260,7 @@ export class NluService {
     rawInput: string,
     inputMode: InputMode,
     error: unknown,
+    sourceOverride?: TransactionSource,
   ): Promise<ParseResult> {
     const reason = error instanceof Error ? error.message : String(error);
 
@@ -276,7 +288,7 @@ export class NluService {
         confidenceBand: ConfidenceBand.NEEDS_FIELD,
         missingFields: ['amount', 'category', 'account', 'date'],
         status: ReviewStatus.PENDING,
-        source: TransactionSource.NLU_TEXT,
+        source: sourceOverride ?? TransactionSource.NLU_TEXT,
       },
     });
 

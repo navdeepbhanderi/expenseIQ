@@ -31,6 +31,9 @@ import { LlmModule } from './infra/llm/llm.module';
 import { NluModule } from './modules/nlu/nlu.module';
 import { ReviewQueueModule } from './modules/review-queue/review-queue.module';
 import { ReportsModule } from './modules/reports/reports.module';
+import { QueueModule } from './infra/queue/queue.module';
+import { ReceiptsModule } from './modules/receipts/receipts.module';
+import { RecurringModule } from './modules/recurring/recurring.module';
 
 @Module({
   imports: [
@@ -49,6 +52,7 @@ import { ReportsModule } from './modules/reports/reports.module';
     PrismaModule,
     MailerModule,
     LlmModule,
+    QueueModule,
     AccessModule,
 
     HealthModule,
@@ -63,6 +67,8 @@ import { ReportsModule } from './modules/reports/reports.module';
     NluModule,
     ReviewQueueModule,
     ReportsModule,
+    ReceiptsModule,
+    RecurringModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },
