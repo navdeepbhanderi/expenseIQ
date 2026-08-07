@@ -63,6 +63,17 @@ describe('Money', () => {
     it('treats a ratio against zero as 0%, not NaN', () => {
       expect(Money.fromMajor(100).ratioOf(Money.zero())).toBe(0);
     });
+
+    it('returns a clean percentage, free of float artefacts', () => {
+      // The raw division gives 112.00000000000001, which would reach the UI.
+      expect(Money.fromMajor(1_12_000).ratioOf(Money.fromMajor(1_00_000))).toBe(
+        112,
+      );
+      expect(Money.fromMajor(1).ratioOf(Money.fromMajor(3))).toBeCloseTo(
+        33.3333,
+        4,
+      );
+    });
   });
 
   describe('allocate', () => {

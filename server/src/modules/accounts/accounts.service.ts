@@ -28,6 +28,7 @@ import {
   type LoanTerms,
   type PrepaySimulation,
 } from './domain/amortization';
+import { loanTermsFrom } from './domain/loan-terms';
 import type { CreateAccountDto, UpdateAccountDto } from './dto/account.dto';
 
 /** An account plus whatever derived view its type calls for. */
@@ -304,25 +305,15 @@ function requiredFields(entries: [string, unknown][]): string[] {
     .map(([field]) => field);
 }
 
+/** Throws where the dashboard's loanTermsFrom() returns null: this path is the
+ * account-detail endpoint, where a half-configured loan should fail loudly
+ * rather than silently render as an empty panel. */
 function toLoanTerms(account: Account): LoanTerms {
-  if (
-    account.principalMinor === null ||
-    account.interestRate === null ||
-    account.tenureMonths === null ||
-    account.firstEmiDate === null
-  ) {
+  const terms = loanTermsFrom(account);
+
+  if (!terms) {
     throw new BadRequestException('This loan is missing its terms');
   }
 
-  return {
-    principal: Money.fromBigInt(account.principalMinor),
-    annualRatePercent: account.interestRate,
-    tenureMonths: account.tenureMonths,
-    // Only when the user actually supplied one — a stored zero would be read
-    // as "an EMI of nothing" rather than "not specified".
-    ...(account.emiAmountMinor !== null && account.emiAmountMinor > 0n
-      ? { emi: Money.fromBigInt(account.emiAmountMinor) }
-      : {}),
-    firstEmiDate: account.firstEmiDate,
-  };
+  return terms;
 }

@@ -146,8 +146,8 @@ is a real injection vector.
 
 ## Status
 
-Phases 0–2 complete: foundation, auth, profiles and RBAC, money core.
-Phases 3–8 per the plan.
+Phases 0–3 complete: foundation, auth, profiles and RBAC, money core, insights.
+Phases 4–8 per the plan.
 
 ### Auth flow, locally
 

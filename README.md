@@ -35,7 +35,7 @@ decisions worth knowing.
 | 0 | Foundation — scaffold, data model, money handling, tooling | ✅ |
 | 1 | Identity & access — auth, profiles, RBAC | ✅ |
 | 2 | Money core — accounts, transactions, card & loan math | ✅ |
-| 3 | Insights — dashboard, budgets, spend norms | — |
+| 3 | Insights — dashboard, budgets, spend norms | ✅ |
 | 4 | NLU & review queue — multilingual parsing, confidence, corrections | — |
 | 5 | Ingestion — receipts, recurring detection | — |
 | 6 | Reminders & integrations — Gmail, Calendar, Tasks | — |

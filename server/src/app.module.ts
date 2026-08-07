@@ -25,6 +25,8 @@ import { CategoriesModule } from './modules/categories/categories.module';
 import { AccountsModule } from './modules/accounts/accounts.module';
 import { MerchantsModule } from './modules/merchants/merchants.module';
 import { TransactionsModule } from './modules/transactions/transactions.module';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
+import { BudgetsModule } from './modules/budgets/budgets.module';
 
 @Module({
   imports: [
@@ -51,6 +53,8 @@ import { TransactionsModule } from './modules/transactions/transactions.module';
     AccountsModule,
     MerchantsModule,
     TransactionsModule,
+    DashboardModule,
+    BudgetsModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },

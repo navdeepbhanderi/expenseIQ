@@ -171,7 +171,13 @@ export class Money {
   ratioOf(total: Money): number {
     this.assertSameCurrency(total);
     if (total.minor === 0) return 0;
-    return (this.minor / total.minor) * 100;
+
+    // Normalised through 12 significant digits because the raw division
+    // produces artefacts — ₹1,12,000 of a ₹1,00,000 budget is exactly 112%,
+    // but the float says 112.00000000000001, and that reaches the UI.
+    // Twelve digits is far more precision than any percentage needs and far
+    // less than float64's ~15-17, so it only ever removes noise.
+    return Number(((this.minor / total.minor) * 100).toPrecision(12));
   }
 
   // ─── Comparison ────────────────────────────────────────────────────────────
