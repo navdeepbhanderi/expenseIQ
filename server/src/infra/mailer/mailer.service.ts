@@ -31,6 +31,20 @@ export class MailerService {
   async send(email: Email): Promise<void> {
     const mail = this.config.get<AppConfig['mail']>('mail');
 
+    // Tests never send. Once a real provider key exists in .env — which the
+    // harness loads — every signup in the suite fires a live API call: six
+    // times slower, burning quota, and failing anyway because providers
+    // reject example.com recipients. A test that depends on a third party
+    // being up is not testing this application.
+    if (this.config.get<AppConfig['isTest']>('isTest')) {
+      this.logger.debug('Email suppressed in test', {
+        to: email.to,
+        subject: email.subject,
+        body: email.text,
+      });
+      return;
+    }
+
     if (!mail?.resendApiKey) {
       this.logger.log('Email not sent — no provider configured', {
         to: email.to,

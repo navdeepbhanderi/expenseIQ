@@ -42,6 +42,7 @@ model User {
   refreshTokens RefreshToken[]
   verifications EmailVerification[]
   sentInvites   ProfileInvite[]     @relation("InviteSender")
+  grantedAllowances Allowance[]     @relation("AllowanceGrantor")
 
   @@map("users")
 }
@@ -111,6 +112,7 @@ model Profile {
   integrations Integration[]
   spendLimits  SpendLimit[]
   goals        SavingsGoal[]
+  allowance    Allowance?
   notifications Notification[]
 
   @@map("profiles")
@@ -496,6 +498,38 @@ model SpendLimit {
   @@map("spend_limits")
 }
 
+/**
+ * A recurring credit an OWNER grants a CHILD profile.
+ *
+ * The spec suggests modelling this as "an income transaction auto-created
+ * monthly", and that is exactly what it produces — but it needs its own row
+ * rather than reusing RecurringRule, because it carries who granted it and
+ * because it must not appear among the user's own detected subscriptions.
+ *
+ * `lastCreditedMonth` is the idempotency guard: a scheduler that fires twice
+ * in a month must not hand out pocket money twice.
+ */
+model Allowance {
+  id          String   @id @default(uuid())
+  /// The CHILD profile being credited.
+  profileId   String   @unique
+  amountMinor BigInt
+  /// Day of month the allowance lands. Clamped in short months.
+  dayOfMonth  Int      @default(1)
+  setByUserId String
+  enabled     Boolean  @default(true)
+  /// "YYYY-MM" of the last month credited.
+  lastCreditedMonth String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  setBy   User    @relation("AllowanceGrantor", fields: [setByUserId], references: [id])
+
+  @@index([profileId])
+  @@map("allowances")
+}
+
 model SavingsGoal {
   id           String    @id @default(uuid())
   profileId    String
@@ -505,11 +539,34 @@ model SavingsGoal {
   targetDate   DateTime?
   achievedAt   DateTime?
   createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
-  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  profile       Profile             @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  contributions GoalContribution[]
 
   @@index([profileId])
   @@map("savings_goals")
+}
+
+/**
+ * Money put towards a goal, and by whom.
+ *
+ * Kept as a ledger rather than only a running total, because design 6.5 lets
+ * an OWNER contribute to a CHILD's goal — and "who added this" is the part a
+ * bare `savedMinor` column throws away.
+ */
+model GoalContribution {
+  id          String   @id @default(uuid())
+  goalId      String
+  amountMinor BigInt
+  byUserId    String
+  note        String?
+  createdAt   DateTime @default(now())
+
+  goal SavingsGoal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+
+  @@index([goalId])
+  @@map("goal_contributions")
 }
 
 // ─── Recurring ───────────────────────────────────────────────────────────────

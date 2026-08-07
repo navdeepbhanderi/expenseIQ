@@ -36,6 +36,7 @@ import { ReceiptsModule } from './modules/receipts/receipts.module';
 import { RecurringModule } from './modules/recurring/recurring.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { RemindersModule } from './modules/reminders/reminders.module';
+import { FamilyModule } from './modules/family/family.module';
 
 @Module({
   imports: [
@@ -73,6 +74,7 @@ import { RemindersModule } from './modules/reminders/reminders.module';
     RecurringModule,
     NotificationsModule,
     RemindersModule,
+    FamilyModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },

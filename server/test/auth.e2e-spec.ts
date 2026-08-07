@@ -400,8 +400,23 @@ describe('Auth (e2e)', () => {
   });
 
   describe('google sign-in', () => {
-    it('reports 501 rather than a 500 when not configured', async () => {
-      await request(server).get('/api/v1/auth/google').expect(501);
+    it('redirects to Google, or reports 501 if this machine has no credentials', async () => {
+      // Asserted against the environment rather than a fixed status, because
+      // both outcomes are correct and which one applies depends on whether
+      // .env carries a client id. The earlier version hardcoded 501 and
+      // started failing the moment real credentials were added — a test that
+      // breaks on correct configuration is worse than no test.
+      const configured = Boolean(process.env.GOOGLE_CLIENT_ID);
+
+      const res = await request(server).get('/api/v1/auth/google');
+
+      if (configured) {
+        expect(res.status).toBe(302);
+        expect(res.headers.location).toContain('accounts.google.com');
+      } else {
+        // 501, not a 500 with passport's opaque "Unknown strategy".
+        expect(res.status).toBe(501);
+      }
     });
   });
 

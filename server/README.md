@@ -45,6 +45,12 @@ Unit tests live beside the code as `*.spec.ts`. Integration tests live in
 with a tmpfs volume, so they can truncate freely and never touch dev data.
 `global-setup.ts` refuses to run if `TEST_DATABASE_URL` equals `DATABASE_URL`.
 
+**Run only one e2e suite at a time.** They share a single test database and
+truncate between tests, so two concurrent runs interleave and produce failures
+that look like real bugs (duplicate-signup 409s, missing rows) but aren't.
+Isolating each run in its own Postgres schema would fix it properly; until
+then, `pkill -f jest` before starting a run if you're unsure.
+
 ## Layout
 
 ```
@@ -144,6 +150,16 @@ runs jobs in-process; anything else uses BullMQ on Redis. Tests use inline,
 because a test that enqueues work and polls for a worker is slow, flaky, and
 ends up testing BullMQ rather than this application.
 
+**Spend limits nudge, they never block.** The spec's rationale is worth
+repeating: refusing a transaction pushes kids to stop logging, which destroys
+the data the feature exists to produce. Exceeding a limit records the spend,
+flags it, and tells the owner — on the *owner's own* profile, because a parent
+does not routinely open their child's.
+
+**A profile always has at least one owner.** Demoting or removing the last one
+would leave live financial data nobody can administer, invite to, or delete —
+recoverable only through direct database access.
+
 **Reminders key on the billing cycle, not the calendar day.** The spec's edge
 case — "if reminder settings change after a reminder for that cycle already
 fired, don't re-fire" — is unsolvable with a "is today the day?" scan, which
@@ -177,7 +193,7 @@ Phases 0–6 complete: foundation, auth, profiles and RBAC, money core,
 insights, natural-language entry and the review queue, receipt scanning and
 recurrence detection, reminders and notifications.
 
-**Phase 6 is partial**: reminders and in-app notifications are done; the
+**Phase 7 is done.** Phase 6 is partial: reminders and in-app notifications are done; the
 Google integrations (Gmail parsing, Calendar, Tasks) are not started and need
 OAuth credentials — `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` are still
 blank. Phases 7–8 per the plan.

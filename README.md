@@ -40,7 +40,7 @@ decisions worth knowing.
 | 5 | Ingestion — receipts, recurring detection | ✅ |
 | 6 | Reminders & notifications | ✅ |
 | 6b | Google integrations — Gmail, Calendar, Tasks | — (needs OAuth credentials) |
-| 7 | Family — invites, roles, spend limits, allowances | — |
+| 7 | Family — invites, roles, spend limits, allowances, goals | ✅ |
 | 8 | Hardening | — |
 
 ## Notable design decisions
