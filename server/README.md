@@ -146,8 +146,18 @@ is a real injection vector.
 
 ## Status
 
-Phases 0–3 complete: foundation, auth, profiles and RBAC, money core, insights.
-Phases 4–8 per the plan.
+Phases 0–4 complete: foundation, auth, profiles and RBAC, money core,
+insights, natural-language entry and the review queue.
+Phases 5–8 per the plan.
+
+### Running without a Gemini key
+
+`LLM_DRIVER=fake` selects a deterministic stand-in adapter that genuinely
+parses a useful subset of input — Hindi, Gujarati, Hinglish, Indian scale
+words, multi-expense sentences. It's what the integration tests use, so the
+whole pipeline is exercised with no network call and no bill, and it makes the
+feature developable before anyone has a key. The default falls back to it when
+`GEMINI_API_KEY` is unset.
 
 ### Auth flow, locally
 

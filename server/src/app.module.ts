@@ -27,6 +27,9 @@ import { MerchantsModule } from './modules/merchants/merchants.module';
 import { TransactionsModule } from './modules/transactions/transactions.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { BudgetsModule } from './modules/budgets/budgets.module';
+import { LlmModule } from './infra/llm/llm.module';
+import { NluModule } from './modules/nlu/nlu.module';
+import { ReviewQueueModule } from './modules/review-queue/review-queue.module';
 
 @Module({
   imports: [
@@ -44,6 +47,7 @@ import { BudgetsModule } from './modules/budgets/budgets.module';
     LoggerModule,
     PrismaModule,
     MailerModule,
+    LlmModule,
     AccessModule,
 
     HealthModule,
@@ -55,6 +59,8 @@ import { BudgetsModule } from './modules/budgets/budgets.module';
     TransactionsModule,
     DashboardModule,
     BudgetsModule,
+    NluModule,
+    ReviewQueueModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },
