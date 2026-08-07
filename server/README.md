@@ -150,6 +150,28 @@ Phases 0–4 complete: foundation, auth, profiles and RBAC, money core,
 insights, natural-language entry and the review queue.
 Phases 5–8 per the plan.
 
+### Gemini setup
+
+```bash
+npm run llm:check     # verifies the key, both model tiers, and reports latency
+```
+
+Two things measured on a real free-tier key, both of which will bite:
+
+- **`gemini-2.5-pro` has a free-tier quota of zero.** It returns 429 with
+  `limit: 0` on every call. `GEMINI_MODEL_PRO` therefore defaults to
+  `gemini-2.5-flash`; point it at Pro once billing is enabled.
+- **The free tier allows ~20 requests per day**, which is not enough to
+  develop against. Enable billing, or use `LLM_DRIVER=fake`.
+
+`GEMINI_THINKING_BUDGET` defaults to `0`. Gemini 2.5 spends "thinking" tokens
+before answering, billed as output and counted against `maxOutputTokens`.
+Measured on the hardest extraction case here: 610 thinking tokens and 2.1
+extra seconds for an *identical* result, against a design that budgets about
+four seconds for the whole speak-to-confirmed flow. The same trap silently
+broke merchant normalisation — 29 thinking tokens against a 32-token ceiling
+returned an empty string with a 200 response.
+
 ### Running without a Gemini key
 
 `LLM_DRIVER=fake` selects a deterministic stand-in adapter that genuinely

@@ -23,6 +23,7 @@ import {
   type TransactionListResult,
 } from './transactions.service';
 import {
+  BulkDeleteTransactionsDto,
   CreateTransactionDto,
   QueryTransactionsDto,
   UpdateTransactionDto,
@@ -77,6 +78,21 @@ export class TransactionsController {
     @Body() dto: CreateTransactionDto,
   ) {
     return this.transactions.create(profileId, dto);
+  }
+
+  @Post('bulk-delete')
+  @RequireAction('transaction:delete')
+  @ApiOperation({
+    summary: 'Soft-delete several transactions',
+    description:
+      'Scoped to this profile in the same statement, so ids belonging to ' +
+      'another profile match nothing rather than being checked separately.',
+  })
+  removeMany(
+    @Param('profileId', ParseUUIDPipe) profileId: string,
+    @Body() dto: BulkDeleteTransactionsDto,
+  ): Promise<{ deleted: number }> {
+    return this.transactions.removeMany(profileId, dto.transactionIds);
   }
 
   @Get(':transactionId')

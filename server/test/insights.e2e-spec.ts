@@ -449,6 +449,8 @@ describe('Insights (e2e)', () => {
     });
   });
 
+  // Norms live under /reports (design 2a's sidebar item), not /budgets —
+  // one canonical path per concept.
   describe('category norms', () => {
     it('reports "usual" from complete months only', async () => {
       const { token, profileId } = await createUser();
@@ -460,7 +462,7 @@ describe('Insights (e2e)', () => {
       await spend(profileId, 18_720, thisMonth(2), 'Groceries');
 
       const res = await request(server)
-        .get(`/api/v1/profiles/${profileId}/budgets/norms`)
+        .get(`/api/v1/profiles/${profileId}/reports/category-norms`)
         .set('Authorization', `Bearer ${token}`)
         .expect(200);
 
@@ -485,7 +487,7 @@ describe('Insights (e2e)', () => {
       await spend(profileId, 18_720, thisMonth(2), 'Groceries');
 
       const res = await request(server)
-        .get(`/api/v1/profiles/${profileId}/budgets/norms`)
+        .get(`/api/v1/profiles/${profileId}/reports/category-norms`)
         .set('Authorization', `Bearer ${token}`)
         .expect(200);
 
@@ -507,7 +509,7 @@ describe('Insights (e2e)', () => {
       await spend(profileId, 3_00_000, monthsAgo(6), 'Groceries');
 
       const res = await request(server)
-        .get(`/api/v1/profiles/${profileId}/budgets/norms`)
+        .get(`/api/v1/profiles/${profileId}/reports/category-norms`)
         .set('Authorization', `Bearer ${token}`)
         .expect(200);
 

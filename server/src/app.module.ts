@@ -30,6 +30,7 @@ import { BudgetsModule } from './modules/budgets/budgets.module';
 import { LlmModule } from './infra/llm/llm.module';
 import { NluModule } from './modules/nlu/nlu.module';
 import { ReviewQueueModule } from './modules/review-queue/review-queue.module';
+import { ReportsModule } from './modules/reports/reports.module';
 
 @Module({
   imports: [
@@ -61,6 +62,7 @@ import { ReviewQueueModule } from './modules/review-queue/review-queue.module';
     BudgetsModule,
     NluModule,
     ReviewQueueModule,
+    ReportsModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },

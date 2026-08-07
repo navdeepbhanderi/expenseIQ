@@ -35,8 +35,17 @@ export const envSchema = z.object({
   // Optional until Phase 4 so the app boots without an LLM key while the
   // core CRUD phases are being built. NluModule asserts it at init.
   GEMINI_API_KEY: z.string().optional(),
-  GEMINI_MODEL_PRO: z.string().default('gemini-2.5-pro'),
+  // Defaults to Flash, not Pro: gemini-2.5-pro's free-tier quota is zero, so
+  // an unbilled project gets 429 on every extraction. Point this at
+  // gemini-2.5-pro once billing is on.
+  GEMINI_MODEL_PRO: z.string().default('gemini-2.5-flash'),
   GEMINI_MODEL_FLASH: z.string().default('gemini-2.5-flash'),
+  // Gemini 2.5 spends "thinking" tokens before answering, billed as output and
+  // counted against maxOutputTokens. Measured on the hardest extraction case
+  // here, thinking cost 610 tokens and 2.1 extra seconds for an identical
+  // result — against a design that budgets about four seconds for the whole
+  // speak-to-confirmed flow. Raise it if extraction quality ever needs it.
+  GEMINI_THINKING_BUDGET: z.coerce.number().int().min(0).default(0),
 });
 
 export type Env = z.infer<typeof envSchema>;

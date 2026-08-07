@@ -221,6 +221,25 @@ export class TransactionsService {
     });
   }
 
+  /**
+   * Soft-deletes several at once.
+   *
+   * Scoped by profileId in the same statement rather than looked up first:
+   * a caller passing another profile's ids simply matches nothing, instead of
+   * the check and the write being two steps something could slip between.
+   */
+  async removeMany(
+    profileId: string,
+    transactionIds: string[],
+  ): Promise<{ deleted: number }> {
+    const result = await this.prisma.transaction.updateMany({
+      where: { id: { in: transactionIds }, profileId, deletedAt: null },
+      data: { deletedAt: new Date() },
+    });
+
+    return { deleted: result.count };
+  }
+
   async restore(
     profileId: string,
     transactionId: string,

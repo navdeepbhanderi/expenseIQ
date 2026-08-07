@@ -2,6 +2,8 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Direction, TransactionSource } from '@prisma/client';
 import { Transform, Type } from 'class-transformer';
 import {
+  ArrayMaxSize,
+  ArrayMinSize,
   IsArray,
   IsDateString,
   IsEnum,
@@ -118,6 +120,15 @@ export class UpdateTransactionDto {
   @IsString()
   @Length(0, 140)
   note?: string;
+}
+
+export class BulkDeleteTransactionsDto {
+  @ApiProperty({ type: [String], format: 'uuid' })
+  @IsArray()
+  @ArrayMinSize(1)
+  @ArrayMaxSize(200)
+  @IsUUID(undefined, { each: true })
+  transactionIds!: string[];
 }
 
 /** Design 2e's filter bar. Every field is combinable. */

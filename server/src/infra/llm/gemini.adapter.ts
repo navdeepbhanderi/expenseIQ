@@ -71,6 +71,7 @@ export class GeminiAdapter implements LlmPort, OnModuleInit {
           // Deterministic extraction. This is a parsing task, not a creative
           // one — the same sentence must produce the same transaction twice.
           temperature: 0,
+          thinkingConfig: { thinkingBudget: this.thinkingBudget() },
         },
       });
 
@@ -115,6 +116,7 @@ export class GeminiAdapter implements LlmPort, OnModuleInit {
           responseMimeType: 'application/json',
           responseSchema: EXTRACTION_SCHEMA as unknown as object,
           temperature: 0,
+          thinkingConfig: { thinkingBudget: this.thinkingBudget() },
         },
       });
 
@@ -164,7 +166,16 @@ export class GeminiAdapter implements LlmPort, OnModuleInit {
               ? ` Prefer these known spellings when they match: ${known.slice(0, 40).join(', ')}.`
               : ''),
           temperature: 0,
-          maxOutputTokens: 32,
+          // Thinking disabled, and this is not an optimisation.
+          //
+          // Gemini 2.5 spends "thinking" tokens out of the SAME maxOutputTokens
+          // budget as the answer. Measured on this exact call: 29 thinking
+          // tokens against a 32-token ceiling left 0 for the reply, and
+          // "SWIGGY*BLR9284" came back as an empty string — silently, with a
+          // 200 response. Naming a merchant needs no reasoning, so the budget
+          // goes entirely to the answer.
+          thinkingConfig: { thinkingBudget: 0 },
+          maxOutputTokens: 64,
         },
       });
 
@@ -190,10 +201,19 @@ export class GeminiAdapter implements LlmPort, OnModuleInit {
     return this.client;
   }
 
+  /**
+   * Zero by default — see the env schema for the measurement behind it.
+   * Thinking is billed as output and counted against maxOutputTokens, and on
+   * a structured extraction task it bought no accuracy for 2.1 extra seconds.
+   */
+  private thinkingBudget(): number {
+    return this.config.get<AppConfig['llm']>('llm')?.thinkingBudget ?? 0;
+  }
+
   private model(tier: 'pro' | 'flash'): string {
     const llm = this.config.get<AppConfig['llm']>('llm');
     return tier === 'pro'
-      ? (llm?.models.pro ?? 'gemini-2.5-pro')
+      ? (llm?.models.pro ?? 'gemini-2.5-flash')
       : (llm?.models.flash ?? 'gemini-2.5-flash');
   }
 }

@@ -386,6 +386,30 @@ export class NluService {
     return affinity;
   }
 
+  /**
+   * Ranked account guesses for a category, independent of a parse.
+   *
+   * Design 2b shows "Usually: SBI Savings, Cash, HDFC Millennia" when the
+   * user taps the account field on an entry that never named one — that is a
+   * fresh question, not something the original parse response can answer,
+   * because the user may have just changed the category.
+   */
+  async suggestAccountsFor(
+    profileId: string,
+    categoryId: string | null,
+  ): Promise<{ id: string; name: string; reason: string }[]> {
+    const [accounts, affinity] = await Promise.all([
+      this.prisma.account.findMany({
+        where: { profileId, closedAt: null },
+        select: { id: true, name: true },
+        orderBy: { createdAt: 'asc' },
+      }),
+      this.accountAffinity(profileId),
+    ]);
+
+    return suggestAccounts({ accounts, categoryId, affinity, exclude: null });
+  }
+
   /** Design 2b's "21 of 23 entries read correctly on the first try". */
   async accuracy(
     profileId: string,

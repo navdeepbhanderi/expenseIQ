@@ -26,7 +26,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\" \"prisma/**/*.ts\"",
-    "verify": "npm run typecheck && npm run lint && npm test"
+    "verify": "npm run typecheck && npm run lint && npm test",
+    "llm:check": "ts-node -r tsconfig-paths/register scripts/check-llm.ts"
   },
   "dependencies": {
     "@google/genai": "^2.16.0",

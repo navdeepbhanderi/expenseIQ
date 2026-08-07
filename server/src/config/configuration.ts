@@ -45,6 +45,7 @@ export const configuration = (): AppConfig => {
         pro: env.GEMINI_MODEL_PRO,
         flash: env.GEMINI_MODEL_FLASH,
       },
+      thinkingBudget: Number(env.GEMINI_THINKING_BUDGET),
     },
   };
 };
@@ -69,5 +70,6 @@ export interface AppConfig {
   llm: {
     apiKey?: string;
     models: { pro: string; flash: string };
+    thinkingBudget: number;
   };
 }

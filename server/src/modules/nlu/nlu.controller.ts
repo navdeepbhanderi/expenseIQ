@@ -18,7 +18,11 @@ import { ProfileAccessGuard } from '@/modules/access/profile-access.guard';
 import { RequireAction } from '@/modules/access/require-action.decorator';
 
 import { NluService, type ParseResult } from './nlu.service';
-import { AccuracyQueryDto, ParseDto } from './dto/nlu.dto';
+import {
+  AccountSuggestionQueryDto,
+  AccuracyQueryDto,
+  ParseDto,
+} from './dto/nlu.dto';
 
 @ApiTags('nlu')
 @ApiBearerAuth()
@@ -82,6 +86,22 @@ export class NluController {
         }
       })();
     });
+  }
+
+  @Get('suggestions/account')
+  @RequireAction('transaction:view')
+  @ApiOperation({
+    summary: 'Which account this expense probably belongs on',
+    description:
+      'Design 2b\'s "Usually: SBI Savings, Cash, HDFC Millennia". Pure ' +
+      'transaction history, no model call — which card someone puts petrol ' +
+      'on is a database question, answered better and for free.',
+  })
+  suggestAccounts(
+    @Param('profileId', ParseUUIDPipe) profileId: string,
+    @Query() query: AccountSuggestionQueryDto,
+  ) {
+    return this.nlu.suggestAccountsFor(profileId, query.categoryId ?? null);
   }
 
   @Get('accuracy')
