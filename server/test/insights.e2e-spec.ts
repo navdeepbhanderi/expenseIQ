@@ -143,8 +143,28 @@ describe('Insights (e2e)', () => {
       expect(res.body.topCategories).toHaveLength(2);
       expect(res.body.topCategories[0].name).toBe('Groceries');
       expect(res.body.pendingReviewCount).toBe(0);
-      expect(res.body.recentTransactionIds).toHaveLength(3);
+      expect(res.body.recentTransactions).toHaveLength(3);
       expect(res.body.netWorth).toBeDefined();
+
+      // Hydrated, not ids — design 2a draws these rows without a second call.
+      const [recent] = res.body.recentTransactions;
+      expect(recent.amountMinor).toBeDefined();
+      expect(recent.date).toBeDefined();
+      expect(recent.category).toMatchObject({
+        name: expect.any(String),
+        monogram: expect.any(String),
+        tint: expect.any(String),
+      });
+      expect(recent).toHaveProperty('account');
+      expect(recent).toHaveProperty('merchant');
+      // Drives design 2e's "Recurring" pill; null here, but the key must exist.
+      expect(recent).toHaveProperty('recurringRule');
+
+      // Newest first, and stable when two share a date.
+      const dates = (res.body.recentTransactions as { date: string }[]).map(
+        (t) => t.date,
+      );
+      expect([...dates].sort().reverse()).toEqual(dates);
     });
 
     it('reports the month-over-month delta design 6f renders', async () => {

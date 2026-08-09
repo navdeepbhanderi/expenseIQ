@@ -15,6 +15,10 @@ import {
   type Comparison,
 } from '@/modules/budgets/domain/norms';
 import { loanTermsFrom } from '@/modules/accounts/domain/loan-terms';
+import {
+  TRANSACTION_RELATIONS,
+  type TransactionWithRelations,
+} from '@/modules/transactions/transaction-view';
 
 export interface CategorySlice {
   categoryId: string | null;
@@ -65,7 +69,17 @@ export interface DashboardSummary {
   pendingReviewCount: number;
   accounts: Account[];
   netWorth: NetWorth;
-  recentTransactionIds: string[];
+  /**
+   * Fully hydrated, not ids.
+   *
+   * Design 2a renders these rows inline — amount, category monogram and tint,
+   * account, merchant, and the "Recurring" pill. Returning ids would have
+   * forced the client into a second round trip to draw the panel, which is
+   * the exact thing this single aggregate endpoint exists to avoid. Same
+   * shape as GET /transactions, from the same include, so one UI component
+   * renders both.
+   */
+  recentTransactions: TransactionWithRelations[];
 }
 
 @Injectable()
@@ -120,9 +134,11 @@ export class DashboardService {
       }),
       this.prisma.transaction.findMany({
         where: { profileId, deletedAt: null },
+        // id breaks ties so the ordering is stable when several transactions
+        // share a date — which they routinely do, since date is a day.
         orderBy: [{ date: 'desc' }, { id: 'desc' }],
         take: 10,
-        select: { id: true },
+        include: TRANSACTION_RELATIONS,
       }),
       this.overallBudget(profileId, monthStart),
     ]);
@@ -148,7 +164,7 @@ export class DashboardService {
       pendingReviewCount,
       accounts,
       netWorth: this.netWorth(accounts),
-      recentTransactionIds: recent.map((row) => row.id),
+      recentTransactions: recent,
     };
   }
 

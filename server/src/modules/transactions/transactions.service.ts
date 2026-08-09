@@ -20,15 +20,10 @@ import type {
   QueryTransactionsDto,
   UpdateTransactionDto,
 } from './dto/transaction.dto';
-
-type TransactionWithRelations = Prisma.TransactionGetPayload<{
-  include: {
-    category: true;
-    account: true;
-    merchant: true;
-    recurringRule: true;
-  };
-}>;
+import {
+  TRANSACTION_RELATIONS,
+  type TransactionWithRelations,
+} from './transaction-view';
 
 /** One entry in the filter sidebar — design 6c's "Groceries 18". */
 export interface Facet {
@@ -50,17 +45,6 @@ export interface TransactionListResult extends PageResult<TransactionWithRelatio
     sources: Facet[];
   };
 }
-
-const RELATIONS = {
-  category: true,
-  account: true,
-  merchant: true,
-  // Included so design 2e can render the "Recurring" pill. The `source` enum
-  // only says RECURRING for rows a rule *generated*; a row that merely
-  // belongs to a detected pattern is identified by this relation, and that is
-  // the case the pill actually marks.
-  recurringRule: true,
-} as const;
 
 @Injectable()
 export class TransactionsService {
@@ -104,7 +88,7 @@ export class TransactionsService {
       await Promise.all([
         this.prisma.transaction.findMany({
           where: { AND: [where, cursorClause] },
-          include: RELATIONS,
+          include: TRANSACTION_RELATIONS,
           // id breaks ties so the cursor is stable when several transactions
           // share a date — which they routinely do, since date is a day.
           orderBy: [{ date: 'desc' }, { id: 'desc' }],
@@ -134,7 +118,7 @@ export class TransactionsService {
   ): Promise<TransactionWithRelations> {
     const transaction = await this.prisma.transaction.findUnique({
       where: { id: transactionId },
-      include: RELATIONS,
+      include: TRANSACTION_RELATIONS,
     });
 
     if (transaction?.profileId !== profileId || transaction.deletedAt) {
@@ -171,7 +155,7 @@ export class TransactionsService {
         note: dto.note ?? null,
         source: dto.source ?? TransactionSource.MANUAL,
       },
-      include: RELATIONS,
+      include: TRANSACTION_RELATIONS,
     });
   }
 
@@ -210,7 +194,7 @@ export class TransactionsService {
     return this.prisma.transaction.update({
       where: { id: transactionId },
       data,
-      include: RELATIONS,
+      include: TRANSACTION_RELATIONS,
     });
   }
 
@@ -275,7 +259,7 @@ export class TransactionsService {
   ): Promise<string> {
     const rows = await this.prisma.transaction.findMany({
       where: this.buildWhere(profileId, query),
-      include: RELATIONS,
+      include: TRANSACTION_RELATIONS,
       orderBy: [{ date: 'desc' }, { id: 'desc' }],
       // Bounded so a profile with years of history can't exhaust memory
       // building one string.
