@@ -131,3 +131,76 @@ export const EXTRACTION_SCHEMA = {
   },
   required: ['candidates'],
 } as const;
+
+/**
+ * The same contract as EXTRACTION_SCHEMA, in the JSON Schema dialect that
+ * OpenAI-compatible providers (OpenRouter) expect.
+ *
+ * Two dialects rather than one because the differences are not cosmetic:
+ * Gemini marks optional fields `nullable: true`, while strict-mode JSON Schema
+ * has no such keyword — nullability is a type union, and *every* property must
+ * appear in `required` with `additionalProperties: false`. Feeding either
+ * schema to the other provider is rejected outright.
+ *
+ * Kept beside its twin so a field added to one is obviously missing from the
+ * other. The nullable fields carry `null` in their type union precisely so
+ * "not stated" stays expressible — a model forced to emit a string for a date
+ * nobody gave will invent one.
+ */
+export const EXTRACTION_JSON_SCHEMA = {
+  type: 'object',
+  additionalProperties: false,
+  required: ['detectedLanguage', 'candidates'],
+  properties: {
+    detectedLanguage: {
+      type: ['string', 'null'],
+      description: 'Language of the input, e.g. "hi", "gu", "en", "hi-en"',
+    },
+    candidates: {
+      type: 'array',
+      items: {
+        type: 'object',
+        additionalProperties: false,
+        required: [
+          'amountMinor',
+          'direction',
+          'category',
+          'merchant',
+          'date',
+          'account',
+          'note',
+          'confidence',
+          'fieldConfidence',
+        ],
+        properties: {
+          amountMinor: {
+            type: ['integer', 'null'],
+            description: 'Amount in paise. Null if not stated.',
+          },
+          direction: { type: 'string', enum: ['DEBIT', 'CREDIT'] },
+          category: { type: ['string', 'null'] },
+          merchant: { type: ['string', 'null'] },
+          date: {
+            type: ['string', 'null'],
+            description: 'ISO date, YYYY-MM-DD',
+          },
+          account: { type: ['string', 'null'] },
+          note: { type: ['string', 'null'] },
+          confidence: { type: 'number' },
+          fieldConfidence: {
+            type: 'object',
+            additionalProperties: false,
+            required: ['amount', 'category', 'merchant', 'date', 'account'],
+            properties: {
+              amount: { type: 'number' },
+              category: { type: 'number' },
+              merchant: { type: 'number' },
+              date: { type: 'number' },
+              account: { type: 'number' },
+            },
+          },
+        },
+      },
+    },
+  },
+} as const;

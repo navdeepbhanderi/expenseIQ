@@ -46,6 +46,14 @@ export const configuration = (): AppConfig => {
         flash: env.GEMINI_MODEL_FLASH,
       },
       thinkingBudget: Number(env.GEMINI_THINKING_BUDGET),
+      openRouter: {
+        apiKey: env.OPENROUTER_API_KEY,
+        models: {
+          text: env.OPENROUTER_MODELS_TEXT,
+          vision: env.OPENROUTER_MODELS_VISION,
+        },
+        timeoutMs: Number(env.OPENROUTER_TIMEOUT_MS),
+      },
     },
   };
 };
@@ -71,5 +79,10 @@ export interface AppConfig {
     apiKey?: string;
     models: { pro: string; flash: string };
     thinkingBudget: number;
+    openRouter: {
+      apiKey?: string;
+      models: { text?: string; vision?: string };
+      timeoutMs: number;
+    };
   };
 }

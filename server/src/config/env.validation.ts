@@ -50,6 +50,30 @@ export const envSchema = z.object({
   // result — against a design that budgets about four seconds for the whole
   // speak-to-confirmed flow. Raise it if extraction quality ever needs it.
   GEMINI_THINKING_BUDGET: z.coerce.number().int().min(0).default(0),
+
+  OPENROUTER_API_KEY: z.string().optional(),
+  // Comma-separated chains, same convention as the Gemini ones. Left empty,
+  // the adapter's measured defaults apply — see openrouter.adapter.ts.
+  OPENROUTER_MODELS_TEXT: z.string().optional(),
+  // Receipts. Must be a model that does BOTH vision and structured output,
+  // which on the free tier is a much shorter list than either alone.
+  OPENROUTER_MODELS_VISION: z.string().optional(),
+  /**
+   * How long one OpenRouter model gets before the adapter abandons it for the
+   * next in the chain.
+   *
+   * This exists because of a measured failure, not a hypothetical. Free-tier
+   * capacity is contended: a model that answered in 280-405ms in isolation
+   * later sat in a queue until OpenRouter's own upstream idle timeout fired
+   * at ~120 seconds, turning a two-second parse into a two-MINUTE one. With
+   * no deadline of our own we inherit theirs, and the user watches a spinner
+   * for all of it.
+   *
+   * Twelve seconds is well past any healthy response and far short of a wait
+   * anyone tolerates, so a contended model costs one short pause rather than
+   * dominating the request.
+   */
+  OPENROUTER_TIMEOUT_MS: z.coerce.number().int().min(1000).default(12_000),
 });
 
 export type Env = z.infer<typeof envSchema>;
