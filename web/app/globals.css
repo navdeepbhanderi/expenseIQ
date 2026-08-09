@@ -1,0 +1,166 @@
+@import "tailwindcss";
+
+/*
+ * Ledger Warm — the design system's palette, verbatim from screens 2a–6i.
+ *
+ * Every colour is a CSS variable rather than a Tailwind literal so that one
+ * `data-theme="dark"` on <html> repaints the whole app into Night Ledger (2g)
+ * without a single component knowing a theme exists. A component that reaches
+ * for #1F6F5C directly is a component that will be wrong in dark mode.
+ */
+:root {
+  /* Surfaces — ivory paper stock, the ledger metaphor the design is built on */
+  --paper: #faf6ef;
+  --paper-raised: #f1ebe0;
+  --paper-sunken: #f3ede2;
+  --canvas: #edeae4;
+
+  /* Ink */
+  --ink: #1b1815;
+  --ink-muted: #6b6459;
+  --ink-faint: #8a8378;
+
+  /* Rules */
+  --line: #ded5c7;
+  --line-soft: #e7dfd1;
+  --line-strong: #e2d9ca;
+
+  /* Brand — green carries trust without the blue-bank cliché */
+  --green: #1f6f5c;
+  --green-hover: #12503f;
+  --green-soft: #e7f0ea;
+
+  /*
+   * Attention. Marigold is reserved ONLY for "needs your eye" — the review
+   * queue and upcoming dues. The design is explicit that attention gets one
+   * colour and must never compete with spend red. Using this for anything
+   * else is the single easiest way to break the visual language.
+   */
+  --attention: #e39b2e;
+  --attention-soft: #fdf3e1;
+  --attention-line: #efd9ae;
+  --attention-ink: #8a6a1e;
+
+  /* Money. Direction only — never decoration. */
+  --spend: #b5442f;
+  --income: #3e8e5a;
+
+  --focus: #1f6f5c;
+
+  color-scheme: light;
+}
+
+/*
+ * Night Ledger (2g) — "same semantics, warm charcoal surfaces, brass for
+ * attention". Note this is a warm dark, not a grey one: the charcoals carry
+ * the same paper warmth, and red/green are lightened so they read as status
+ * rather than alarm on a dark field.
+ */
+[data-theme="dark"] {
+  --paper: #1d1a17;
+  --paper-raised: #262220;
+  --paper-sunken: #141210;
+  --canvas: #0f0d0c;
+
+  --ink: #f5f0e8;
+  --ink-muted: #9a9188;
+  --ink-faint: #7b736a;
+
+  --line: #2c2823;
+  --line-soft: #2c2823;
+  --line-strong: #35302a;
+
+  --green: #5cbfa3;
+  --green-hover: #7fd4bb;
+  --green-soft: rgba(92, 191, 163, 0.12);
+
+  --attention: #d9a441;
+  --attention-soft: rgba(217, 164, 65, 0.1);
+  --attention-line: rgba(217, 164, 65, 0.4);
+  --attention-ink: #d9a441;
+
+  --spend: #f0705e;
+  --income: #7bd489;
+
+  --focus: #d9a441;
+
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-paper-raised: var(--paper-raised);
+  --color-paper-sunken: var(--paper-sunken);
+  --color-canvas: var(--canvas);
+
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-faint: var(--ink-faint);
+
+  --color-line: var(--line);
+  --color-line-soft: var(--line-soft);
+  --color-line-strong: var(--line-strong);
+
+  --color-green: var(--green);
+  --color-green-hover: var(--green-hover);
+  --color-green-soft: var(--green-soft);
+
+  --color-attention: var(--attention);
+  --color-attention-soft: var(--attention-soft);
+  --color-attention-line: var(--attention-line);
+  --color-attention-ink: var(--attention-ink);
+
+  --color-spend: var(--spend);
+  --color-income: var(--income);
+
+  /*
+   * Newsreader for headline money, IBM Plex Sans for UI, Mono for tabular
+   * figures and eyebrow labels. Devanagari is not optional — users type
+   * "300 रुपये किराने पे खर्च किए" and the fallback renders it badly.
+   */
+  --font-display: var(--font-newsreader), ui-serif, Georgia, serif;
+  --font-sans:
+    var(--font-plex-sans), var(--font-plex-devanagari), system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+
+  /* Radii, read off the design: cards 16px, controls 10-11px, chips 9px */
+  --radius-chip: 9px;
+  --radius-control: 11px;
+  --radius-card: 16px;
+  --radius-panel: 20px;
+}
+
+body {
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/*
+ * One visible focus ring everywhere. Keyboard users are not a special case,
+ * and Radix gives us correct focus movement only if the ring is actually
+ * visible when it lands.
+ */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+}
+
+/* Tabular figures for money, so columns of amounts line up digit-for-digit. */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
