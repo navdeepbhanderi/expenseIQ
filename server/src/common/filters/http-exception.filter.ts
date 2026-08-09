@@ -27,6 +27,9 @@ export interface ErrorEnvelope {
  */
 const SERVER_ERROR_FLOOR: number = HttpStatus.INTERNAL_SERVER_ERROR;
 
+/** Same reason as SERVER_ERROR_FLOOR: compared against a plain number. */
+const PAYLOAD_TOO_LARGE: number = HttpStatus.PAYLOAD_TOO_LARGE;
+
 /** ValidationPipe returns `message` as a string[]; most others as a string. */
 function isMessage(value: unknown): value is string | string[] {
   return (
@@ -111,6 +114,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const prismaEnvelope = this.fromPrisma(exception, requestId);
     if (prismaEnvelope) return prismaEnvelope;
 
+    const middlewareEnvelope = this.fromMiddleware(exception, requestId);
+    if (middlewareEnvelope) return middlewareEnvelope;
+
     return {
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
       error: 'InternalServerError',
@@ -119,6 +125,46 @@ export class HttpExceptionFilter implements ExceptionFilter {
         : exception instanceof Error
           ? exception.message
           : String(exception),
+      requestId,
+    };
+  }
+
+  /**
+   * Express middleware throws plain Errors that already carry an HTTP status —
+   * body-parser's PayloadTooLargeError (413) and its malformed-JSON
+   * SyntaxError (400) are the ones reachable here.
+   *
+   * Without this they fall through to the catch-all and become 500s, which is
+   * wrong twice over: the caller is told the server broke when in fact their
+   * request did, and every oversized body gets logged at error level as an
+   * unhandled fault. A 413 is a normal, expected answer to a 2MB login.
+   */
+  private fromMiddleware(
+    exception: unknown,
+    requestId?: string,
+  ): ErrorEnvelope | null {
+    if (!(exception instanceof Error)) {
+      return null;
+    }
+
+    const status = (exception as { status?: unknown; statusCode?: unknown })
+      .status;
+    const statusCode = (exception as { statusCode?: unknown }).statusCode;
+    const resolved = typeof status === 'number' ? status : statusCode;
+
+    // Client-error range only. A middleware error carrying a 5xx is a genuine
+    // server fault and should keep the catch-all's redaction.
+    if (typeof resolved !== 'number' || resolved < 400 || resolved >= 500) {
+      return null;
+    }
+
+    return {
+      statusCode: resolved,
+      error: exception.name,
+      message:
+        resolved === PAYLOAD_TOO_LARGE
+          ? 'Request body is too large'
+          : exception.message,
       requestId,
     };
   }

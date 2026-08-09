@@ -95,6 +95,31 @@ describe('findMissingFields', () => {
       'account',
     ]);
   });
+
+  it('reports a missing category', () => {
+    expect(findMissingFields(candidate({ category: null }))).toEqual([
+      'category',
+    ]);
+  });
+
+  it('reports a missing date', () => {
+    expect(findMissingFields(candidate({ date: null }))).toEqual(['date']);
+  });
+
+  it('reports every missing field at once, amount first', () => {
+    // Order matters to the UI, which prompts for the first blocking field.
+    // Only `amount` blocks confirmation, so it has to lead.
+    expect(
+      findMissingFields(
+        candidate({
+          amountMinor: null,
+          category: null,
+          account: null,
+          date: null,
+        }),
+      ),
+    ).toEqual(['amount', 'category', 'account', 'date']);
+  });
 });
 
 describe('isConfirmable', () => {
