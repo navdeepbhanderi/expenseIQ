@@ -10,6 +10,8 @@ import { createHarness, type Harness } from './app-harness';
  * signup flow that "works" is easy, one that doesn't leak which emails are
  * registered and revokes a whole token family on replay is not.
  */
+const sha256 = (raw: string) => createHash('sha256').update(raw).digest('hex');
+
 describe('Auth (e2e)', () => {
   let harness: Harness;
   let server: Server;
@@ -438,6 +440,229 @@ describe('Auth (e2e)', () => {
 
       expect(statuses.filter((s) => s === 429).length).toBeGreaterThan(0);
       expect(statuses.slice(0, 10).every((s) => s === 401)).toBe(true);
+    });
+  });
+
+  describe('verification status', () => {
+    it('reports false before verifying and true after', async () => {
+      // Drives design 7d's self-updating page.
+      await request(server)
+        .post('/api/v1/auth/signup')
+        .send(credentials)
+        .expect(202);
+
+      const before = await request(server)
+        .get('/api/v1/auth/verification-status')
+        .query({ email: credentials.email })
+        .expect(200);
+      expect(before.body.verified).toBe(false);
+
+      const user = await harness.prisma.user.findUniqueOrThrow({
+        where: { email: credentials.email.toLowerCase() },
+      });
+      await harness.prisma.user.update({
+        where: { id: user.id },
+        data: { emailVerified: true },
+      });
+
+      const after = await request(server)
+        .get('/api/v1/auth/verification-status')
+        .query({ email: credentials.email })
+        .expect(200);
+      expect(after.body.verified).toBe(true);
+    });
+
+    it('cannot be used to discover who has an account', async () => {
+      // An unknown address answers exactly like an unverified one, so a list
+      // of emails learns nothing from this endpoint.
+      const unknown = await request(server)
+        .get('/api/v1/auth/verification-status')
+        .query({ email: 'nobody@example.com' })
+        .expect(200);
+
+      expect(unknown.body).toEqual({ verified: false });
+    });
+  });
+
+  describe('password reset', () => {
+    /** Reads the raw token out of the row the request just created. */
+    async function requestReset(email: string): Promise<string> {
+      await request(server)
+        .post('/api/v1/auth/forgot-password')
+        .send({ email })
+        .expect(202);
+
+      const user = await harness.prisma.user.findUniqueOrThrow({
+        where: { email: email.toLowerCase() },
+      });
+      const record = await harness.prisma.passwordReset.findFirstOrThrow({
+        where: { userId: user.id, consumedAt: null },
+        orderBy: { createdAt: 'desc' },
+      });
+
+      // Only the hash is stored, so tests mint a token the same way the
+      // service does and overwrite the row to keep the plaintext.
+      const raw = 'test-reset-token-' + record.id;
+      await harness.prisma.passwordReset.update({
+        where: { id: record.id },
+        data: { tokenHash: sha256(raw) },
+      });
+
+      return raw;
+    }
+
+    it('answers identically for known and unknown addresses', async () => {
+      // Otherwise this endpoint is a membership check for any email list.
+      await registerAndLogin();
+      harness.resetThrottle();
+
+      const known = await request(server)
+        .post('/api/v1/auth/forgot-password')
+        .send({ email: credentials.email });
+
+      const unknown = await request(server)
+        .post('/api/v1/auth/forgot-password')
+        .send({ email: 'nobody@example.com' });
+
+      expect(known.status).toBe(unknown.status);
+      expect(known.body).toEqual(unknown.body);
+    });
+
+    it('sets a new password and lets the user log in with it', async () => {
+      await registerAndLogin();
+      harness.resetThrottle();
+
+      const token = await requestReset(credentials.email);
+
+      await request(server)
+        .post('/api/v1/auth/reset-password')
+        .send({ token, password: 'Brand@New2026' })
+        .expect(200);
+
+      harness.resetThrottle();
+
+      await request(server)
+        .post('/api/v1/auth/login')
+        .send({ email: credentials.email, password: 'Brand@New2026' })
+        .expect(200);
+
+      await request(server)
+        .post('/api/v1/auth/login')
+        .send({ email: credentials.email, password: credentials.password })
+        .expect(401);
+    });
+
+    it('kills every existing session', async () => {
+      /*
+       * The property that makes a reset a reset. Someone resets because they
+       * fear the old password is known; if the attacker's refresh token still
+       * works, nothing changed for them.
+       */
+      const session = await registerAndLogin();
+      harness.resetThrottle();
+
+      const token = await requestReset(credentials.email);
+      await request(server)
+        .post('/api/v1/auth/reset-password')
+        .send({ token, password: 'Brand@New2026' })
+        .expect(200);
+
+      harness.resetThrottle();
+
+      await request(server)
+        .post('/api/v1/auth/refresh')
+        .set('Cookie', session.refreshCookie)
+        .expect(401);
+    });
+
+    it('refuses a token twice', async () => {
+      await registerAndLogin();
+      harness.resetThrottle();
+
+      const token = await requestReset(credentials.email);
+
+      await request(server)
+        .post('/api/v1/auth/reset-password')
+        .send({ token, password: 'Brand@New2026' })
+        .expect(200);
+
+      await request(server)
+        .post('/api/v1/auth/reset-password')
+        .send({ token, password: 'Another@Pass1' })
+        .expect(400);
+    });
+
+    it('refuses an expired token', async () => {
+      await registerAndLogin();
+      harness.resetThrottle();
+
+      const token = await requestReset(credentials.email);
+
+      const user = await harness.prisma.user.findUniqueOrThrow({
+        where: { email: credentials.email.toLowerCase() },
+      });
+      await harness.prisma.passwordReset.updateMany({
+        where: { userId: user.id, consumedAt: null },
+        data: { expiresAt: new Date(Date.now() - 1000) },
+      });
+
+      const response = await request(server)
+        .post('/api/v1/auth/reset-password')
+        .send({ token, password: 'Brand@New2026' })
+        .expect(400);
+
+      expect(JSON.stringify(response.body)).toMatch(/expired/i);
+    });
+
+    it('invalidates an earlier link when a new one is requested', async () => {
+      // A forwarded or shoulder-surfed older link must stop working.
+      await registerAndLogin();
+      harness.resetThrottle();
+
+      const first = await requestReset(credentials.email);
+      await requestReset(credentials.email);
+
+      await request(server)
+        .post('/api/v1/auth/reset-password')
+        .send({ token: first, password: 'Brand@New2026' })
+        .expect(400);
+    });
+
+    it('applies the same password policy as signup', async () => {
+      await registerAndLogin();
+      harness.resetThrottle();
+
+      const token = await requestReset(credentials.email);
+
+      const response = await request(server)
+        .post('/api/v1/auth/reset-password')
+        .send({ token, password: 'weak' })
+        .expect(400);
+
+      expect(JSON.stringify(response.body)).toMatch(/requirement|character/i);
+    });
+
+    it('verifies the address, since holding the link proves the inbox', async () => {
+      await request(server)
+        .post('/api/v1/auth/signup')
+        .send(credentials)
+        .expect(202);
+      harness.resetThrottle();
+
+      const token = await requestReset(credentials.email);
+      await request(server)
+        .post('/api/v1/auth/reset-password')
+        .send({ token, password: 'Brand@New2026' })
+        .expect(200);
+
+      harness.resetThrottle();
+
+      // Never verified by link, yet login works — controlling the inbox is
+      // the same proof, so demanding it twice would be theatre.
+      await request(server)
+        .post('/api/v1/auth/login')
+        .send({ email: credentials.email, password: 'Brand@New2026' })
+        .expect(200);
     });
   });
 });

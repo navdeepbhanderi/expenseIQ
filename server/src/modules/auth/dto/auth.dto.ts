@@ -66,3 +66,33 @@ export class RefreshDto {
   @Length(1, 200)
   refreshToken?: string;
 }
+
+export class ForgotPasswordDto {
+  @ApiProperty({ example: 'aarav@example.com' })
+  @NormalisedEmail()
+  email!: string;
+}
+
+export class ResetPasswordDto {
+  @ApiProperty({ description: 'The token from the emailed reset link' })
+  @IsString()
+  @Length(1, 200)
+  token!: string;
+
+  @ApiProperty({
+    example: 'Kirana@2026',
+    minLength: MIN_PASSWORD_LENGTH,
+    description:
+      'Same policy as signup — at least 8 characters, one number, one ' +
+      'special character. Enforced server-side by domain/password-policy.ts.',
+  })
+  @IsString()
+  @Length(1, MAX_PASSWORD_BYTES)
+  password!: string;
+}
+
+export class VerificationStatusQueryDto {
+  @ApiProperty({ example: 'aarav@example.com' })
+  @NormalisedEmail()
+  email!: string;
+}

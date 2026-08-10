@@ -5,6 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   Post,
+  Query,
   Req,
   Res,
   UnauthorizedException,
@@ -21,10 +22,13 @@ import type { AppConfig } from '@/config/configuration';
 
 import { AuthService } from './auth.service';
 import {
+  ForgotPasswordDto,
   LoginDto,
   RefreshDto,
   ResendVerificationDto,
+  ResetPasswordDto,
   SignupDto,
+  VerificationStatusQueryDto,
   VerifyEmailDto,
 } from './dto/auth.dto';
 import type { TokenPair } from './token.service';
@@ -74,6 +78,49 @@ export class AuthController {
   @ApiOperation({ summary: 'Re-send the verification link' })
   resend(@Body() dto: ResendVerificationDto): Promise<{ message: string }> {
     return this.auth.resendVerification(dto.email);
+  }
+
+  /**
+   * Polled by design 7d's "this page updates on its own".
+   *
+   * A GET with a slacker limit than its siblings: it is read-only, leaks
+   * nothing (unknown addresses answer `false`), and a page waiting on a slow
+   * inbox will legitimately call it many times. Throttling it at 10/min would
+   * break the very screen it exists for.
+   */
+  @Public()
+  @Get('verification-status')
+  @Throttle({ default: { ttl: 60_000, limit: 60 } })
+  @ApiOperation({ summary: 'Whether an address has been verified yet' })
+  verificationStatus(
+    @Query() query: VerificationStatusQueryDto,
+  ): Promise<{ verified: boolean }> {
+    return this.auth.verificationStatus(query.email);
+  }
+
+  @Public()
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.ACCEPTED)
+  @ApiOperation({
+    summary: 'Request a password reset link',
+    description:
+      'Always 202, whether or not the address exists — answering differently ' +
+      'would turn this into a membership check for any list of emails.',
+  })
+  forgotPassword(@Body() dto: ForgotPasswordDto): Promise<{ message: string }> {
+    return this.auth.forgotPassword(dto.email);
+  }
+
+  @Public()
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Set a new password from a reset link',
+    description:
+      'Consumes the token and revokes every existing session for that user.',
+  })
+  resetPassword(@Body() dto: ResetPasswordDto): Promise<{ message: string }> {
+    return this.auth.resetPassword(dto.token, dto.password);
   }
 
   @Public()

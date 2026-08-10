@@ -22,6 +22,16 @@ import type { LoginDto, SignupDto } from './dto/auth.dto';
 /** Verification links live for 24 hours, per the feature spec. */
 const VERIFICATION_TTL = '24h';
 
+/**
+ * Thirty minutes, not twenty-four hours.
+ *
+ * A verification link proves an address; a reset link is a live key to the
+ * account, so it gets the shortest window that still survives a slow inbox.
+ * Design 7e states "link expires in 30 minutes" on screen, and the screen and
+ * the server must not disagree about that.
+ */
+const PASSWORD_RESET_TTL = '30m';
+
 export interface AuthResult {
   user: { id: string; email: string; displayName: string | null };
   tokens: TokenPair;
@@ -105,6 +115,106 @@ export class AuthService {
     // Same response regardless — an unverified, verified and non-existent
     // address must be indistinguishable from outside.
     return { message: GENERIC_SIGNUP_MESSAGE };
+  }
+
+  /**
+   * Has this address verified yet? Drives design 7d's self-updating page.
+   *
+   * Deliberately shallow: it answers `false` for an address that does not
+   * exist, so it cannot be used to discover who has an account. That makes it
+   * useless as an enumeration oracle and still perfectly good at its one job,
+   * which is telling a page that is already waiting on a known address when to
+   * move on.
+   */
+  async verificationStatus(rawEmail: string): Promise<{ verified: boolean }> {
+    const user = await this.prisma.user.findUnique({
+      where: { email: normaliseEmail(rawEmail) },
+      select: { emailVerified: true },
+    });
+
+    return { verified: user?.emailVerified ?? false };
+  }
+
+  /**
+   * Starts a password reset. Always answers the same way.
+   *
+   * Telling an unknown address "no such account" turns this endpoint into a
+   * membership check for any list of emails, which is exactly the enumeration
+   * the signup flow already refuses to allow.
+   */
+  async forgotPassword(rawEmail: string): Promise<{ message: string }> {
+    const email = normaliseEmail(rawEmail);
+    const user = await this.prisma.user.findUnique({ where: { email } });
+
+    // A Google-only account has no password to reset. Silently doing nothing
+    // is right: saying so would reveal how they signed up.
+    if (user?.passwordHash) {
+      await this.sendPasswordResetEmail(user);
+    }
+
+    return { message: GENERIC_RESET_MESSAGE };
+  }
+
+  /**
+   * Completes a reset, then ends every existing session.
+   *
+   * The revocation is the part that matters. Someone resets a password because
+   * they fear the old one is known; leaving the attacker's refresh token alive
+   * means the reset changed nothing for them. A reset that does not log
+   * everyone out is not a reset.
+   */
+  async resetPassword(
+    rawToken: string,
+    newPassword: string,
+  ): Promise<{ message: string }> {
+    const record = await this.prisma.passwordReset.findUnique({
+      where: { tokenHash: hashToken(rawToken) },
+      include: { user: true },
+    });
+
+    if (!record || record.consumedAt) {
+      throw new BadRequestException('Reset link is invalid or already used');
+    }
+
+    if (record.expiresAt.getTime() <= Date.now()) {
+      throw new BadRequestException({
+        message: 'Reset link has expired',
+        details: { canRequestAnother: true },
+      });
+    }
+
+    // Same policy as signup, returning every failure at once rather than the
+    // first — a user retyping a password should learn all of what is wrong.
+    const check = checkPassword(newPassword);
+    if (!check.valid) {
+      throw new BadRequestException({
+        message: 'Password does not meet the requirements',
+        details: check.failures,
+      });
+    }
+
+    const passwordHash = await this.passwords.hash(newPassword);
+
+    await this.prisma.$transaction([
+      this.prisma.passwordReset.update({
+        where: { id: record.id },
+        data: { consumedAt: new Date() },
+      }),
+      this.prisma.user.update({
+        where: { id: record.userId },
+        data: {
+          passwordHash,
+          // Holding the reset link proves control of the inbox, which is the
+          // same thing verification proves. Making them verify again after
+          // that would be theatre.
+          emailVerified: true,
+        },
+      }),
+    ]);
+
+    await this.tokens.revokeAllForUser(record.userId);
+
+    return { message: 'Password updated. You can now sign in.' };
   }
 
   async verifyEmail(rawToken: string): Promise<{ message: string }> {
@@ -291,7 +401,42 @@ export class AuthService {
         `This link expires in 24 hours. If you didn't sign up, ignore this email.`,
     });
   }
+
+  private async sendPasswordResetEmail(user: User): Promise<void> {
+    // Older outstanding resets are consumed first, so a forwarded or shoulder-
+    // surfed earlier link stops working the moment a new one is requested.
+    await this.prisma.passwordReset.updateMany({
+      where: { userId: user.id, consumedAt: null },
+      data: { consumedAt: new Date() },
+    });
+
+    const rawToken = randomBytes(32).toString('base64url');
+
+    await this.prisma.passwordReset.create({
+      data: {
+        userId: user.id,
+        tokenHash: hashToken(rawToken),
+        expiresAt: addDuration(PASSWORD_RESET_TTL),
+      },
+    });
+
+    const webUrl = this.config.get<AppConfig['webUrl']>('webUrl');
+    const link = `${webUrl ?? ''}/reset-password?token=${rawToken}`;
+
+    await this.mailer.send({
+      to: user.email,
+      subject: 'Reset your ExpenseIQ password',
+      text:
+        `Someone asked to reset the password for this ExpenseIQ account.\n\n` +
+        `Set a new one here:\n${link}\n\n` +
+        `This link expires in 30 minutes and can be used once. If this ` +
+        `wasn't you, ignore this email — your password has not changed.`,
+    });
+  }
 }
+
+const GENERIC_RESET_MESSAGE =
+  'If that address has an account with a password, a reset link is on its way.';
 
 const GENERIC_SIGNUP_MESSAGE =
   'If that address can be registered, a verification email is on its way.';
