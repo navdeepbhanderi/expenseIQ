@@ -86,7 +86,7 @@ export function Pill({
   children,
   className,
 }: {
-  tone?: "neutral" | "green" | "attention" | "spend" | "income";
+  tone?: "neutral" | "green" | "attention" | "spend" | "income" | "soon";
   children: React.ReactNode;
   className?: string;
 }) {
@@ -96,6 +96,13 @@ export function Pill({
     attention: "border-attention-line bg-attention-soft text-attention-ink",
     spend: "border-spend/25 bg-spend/10 text-spend",
     income: "border-income/25 bg-income/10 text-income",
+    /*
+     * "Soon" — deliberately dashed and unsaturated, and deliberately NOT
+     * marigold. Marigold means "needs your eye" in this product; a feature
+     * that does not exist yet needs nothing from the user, and borrowing the
+     * attention colour for it would dilute the one signal that matters.
+     */
+    soon: "border-dashed border-line bg-transparent text-ink-faint",
   };
 
   return (

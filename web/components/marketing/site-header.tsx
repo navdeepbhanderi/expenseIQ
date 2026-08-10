@@ -4,12 +4,17 @@ import Link from "next/link";
 import { useState } from "react";
 import { Menu, Moon, Sun, X } from "lucide-react";
 import { Button, IconButton } from "@/components/ui/button";
+import { Logo } from "@/components/brand/logo";
 import { useTheme } from "@/lib/theme";
 import { cn } from "@/lib/cn";
 
+/** Design 8a's nav. */
 const LINKS = [
-  { href: "#features", label: "Features" },
   { href: "#how", label: "How it works" },
+  { href: "#features", label: "Features" },
+  { href: "#families", label: "Families" },
+  { href: "#security", label: "Security" },
+  { href: "#pricing", label: "Pricing" },
 ];
 
 export function SiteHeader() {
@@ -19,16 +24,11 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-30 border-b border-line-soft bg-paper/85 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-5 sm:px-8">
-        <Link href="/" className="flex items-center gap-2">
-          <span className="flex size-8 items-center justify-center rounded-[10px] bg-green font-display text-base font-semibold text-paper">
-            E
-          </span>
-          <span className="font-display text-lg font-medium text-ink">
-            ExpenseIQ
-          </span>
+        <Link href="/" aria-label="ExpenseIQ home">
+          <Logo size={30} />
         </Link>
 
-        <nav className="hidden items-center gap-1 md:flex">
+        <nav className="hidden items-center gap-0.5 lg:flex">
           {LINKS.map((link) => (
             <Link
               key={link.href}
@@ -55,11 +55,16 @@ export function SiteHeader() {
             )}
           </IconButton>
 
-          <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
+          <Button
+            asChild
+            variant="ghost"
+            size="sm"
+            className="hidden sm:inline-flex"
+          >
             <Link href="/login">Log in</Link>
           </Button>
           <Button asChild size="sm">
-            <Link href="/signup">Get started</Link>
+            <Link href="/signup">Start free</Link>
           </Button>
 
           <IconButton
@@ -67,7 +72,7 @@ export function SiteHeader() {
             aria-expanded={open}
             size="sm"
             onClick={() => setOpen((v) => !v)}
-            className="md:hidden"
+            className="lg:hidden"
           >
             {open ? (
               <X className="size-4" aria-hidden="true" />
@@ -80,8 +85,8 @@ export function SiteHeader() {
 
       <div
         className={cn(
-          "overflow-hidden border-t border-line-soft transition-[max-height] md:hidden",
-          open ? "max-h-40" : "max-h-0 border-t-0",
+          "overflow-hidden border-t border-line-soft transition-[max-height] lg:hidden",
+          open ? "max-h-80" : "max-h-0 border-t-0",
         )}
       >
         <nav className="flex flex-col p-3">
