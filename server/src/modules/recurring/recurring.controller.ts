@@ -22,7 +22,11 @@ import {
   type RecurrenceSuggestion,
 } from './recurring.service';
 import { RecurrenceGeneratorService } from './recurrence-generator.service';
-import { ConfirmRecurrenceDto, UpdateRecurringDto } from './dto/recurring.dto';
+import {
+  ConfirmRecurrenceDto,
+  CreateRecurringDto,
+  UpdateRecurringDto,
+} from './dto/recurring.dto';
 
 @ApiTags('recurring')
 @ApiBearerAuth()
@@ -69,6 +73,25 @@ export class RecurringController {
     @Body() dto: ConfirmRecurrenceDto,
   ): Promise<RecurringRule> {
     return this.recurring.confirmDetected(profileId, dto);
+  }
+
+  @Post('manual')
+  @RequireAction('transaction:create')
+  @ApiOperation({
+    summary: 'Create a recurring entry from scratch',
+    description:
+      'For schedules the user already knows — a salary on the 1st, rent on ' +
+      'the 5th. Detection needs three occurrences before a pattern is ' +
+      'visible, which is a quarter for anything monthly, and income may ' +
+      'never be detected at all if it is the only credit on the account. ' +
+      'Set direction: CREDIT for salary. dayOfMonth clamps to the last day ' +
+      'in shorter months, so the 31st still fires in February.',
+  })
+  createManual(
+    @Param('profileId', ParseUUIDPipe) profileId: string,
+    @Body() dto: CreateRecurringDto,
+  ): Promise<RecurringRule> {
+    return this.recurring.createManual(profileId, dto);
   }
 
   @Post(':ruleId/label-transactions')

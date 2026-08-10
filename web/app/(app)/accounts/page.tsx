@@ -10,20 +10,15 @@ import { Button } from "@/components/ui/button";
 import { EmptyState, Pill, Progress } from "@/components/ui/feedback";
 import { AccountsSkeleton } from "@/components/ui/skeletons";
 import { Modal } from "@/components/ui/overlay";
-import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
 import { useToast } from "@/components/ui/toast";
 import { ApiError } from "@/lib/api/client";
-import { parseAmountToMinor } from "@/lib/money";
+import {
+  AccountForm,
+  emptyValues,
+  toPayload,
+  TYPE_LABELS,
+} from "@/components/accounts/account-form";
 import type { Account, AccountType } from "@/lib/api/types";
-
-const TYPE_LABELS: Record<AccountType, string> = {
-  BANK: "Bank",
-  CREDIT_CARD: "Credit card",
-  LOAN: "Loan",
-  CASH: "Cash",
-  WALLET: "Wallet",
-};
 
 /** Accounts list — design 2d's parent, with the add form from 6g. */
 export default function AccountsPage() {
@@ -163,41 +158,14 @@ function AddAccountModal({
   const { activeId } = useProfile();
   const create = useCreateAccount(activeId);
   const { toast } = useToast();
+  const [values, setValues] = useState(() => emptyValues());
 
-  const [type, setType] = useState<AccountType>("BANK");
-  const [name, setName] = useState("");
-  const [issuer, setIssuer] = useState("");
-  const [last4, setLast4] = useState("");
-  const [balance, setBalance] = useState("");
-  const [limit, setLimit] = useState("");
-  const [statementDay, setStatementDay] = useState("");
-  const [dueDay, setDueDay] = useState("");
-
-  const isCard = type === "CREDIT_CARD";
-
-  async function submit(event: React.FormEvent) {
-    event.preventDefault();
-
+  async function submit() {
     try {
-      await create.mutateAsync({
-        type,
-        name: name.trim(),
-        ...(issuer.trim() ? { issuer: issuer.trim() } : {}),
-        ...(last4.trim() ? { last4: last4.trim() } : {}),
-        balanceMinor: parseAmountToMinor(balance) ?? 0,
-        ...(isCard && limit
-          ? { creditLimitMinor: parseAmountToMinor(limit) ?? undefined }
-          : {}),
-        ...(isCard && statementDay ? { statementDay: Number(statementDay) } : {}),
-        ...(isCard && dueDay ? { dueDay: Number(dueDay) } : {}),
-      });
-
-      toast({ title: `${name.trim()} added`, tone: "success" });
+      await create.mutateAsync(toPayload(values));
+      toast({ title: `${values.name.trim()} added`, tone: "success" });
       onOpenChange(false);
-      setName("");
-      setIssuer("");
-      setLast4("");
-      setBalance("");
+      setValues(emptyValues());
     } catch (caught) {
       toast({
         title: "Couldn't add that account",
@@ -220,98 +188,20 @@ function AddAccountModal({
             Cancel
           </Button>
           <Button
-            type="submit"
-            form="add-account"
             isLoading={create.isPending}
-            disabled={name.trim() === ""}
+            disabled={values.name.trim() === ""}
+            onClick={() => void submit()}
           >
             Add account
           </Button>
         </>
       }
     >
-      <form id="add-account" onSubmit={submit} className="flex flex-col gap-4">
-        <Select
-          label="Type"
-          value={type}
-          onValueChange={(value) => setType(value as AccountType)}
-          options={(
-            ["BANK", "CASH", "WALLET", "CREDIT_CARD", "LOAN"] as AccountType[]
-          )
-            .filter(
-              (t) =>
-                allowCredit || (t !== "CREDIT_CARD" && t !== "LOAN"),
-            )
-            .map((t) => ({ value: t, label: TYPE_LABELS[t] }))}
-        />
-
-        <Input
-          label="Name"
-          placeholder={isCard ? "HDFC Millennia" : "SBI Savings"}
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-        />
-
-        <div className="grid grid-cols-2 gap-4">
-          <Input
-            label="Issuer"
-            placeholder="HDFC"
-            value={issuer}
-            onChange={(e) => setIssuer(e.target.value)}
-          />
-          <Input
-            label="Last 4 digits"
-            placeholder="8842"
-            inputMode="numeric"
-            maxLength={4}
-            value={last4}
-            onChange={(e) => setLast4(e.target.value.replace(/\D/g, ""))}
-          />
-        </div>
-
-        <Input
-          label={isCard ? "Outstanding" : "Current balance"}
-          placeholder="0"
-          inputMode="decimal"
-          adornment="₹"
-          value={balance}
-          onChange={(e) => setBalance(e.target.value)}
-        />
-
-        {isCard && (
-          <>
-            <Input
-              label="Credit limit"
-              placeholder="2,00,000"
-              inputMode="decimal"
-              adornment="₹"
-              value={limit}
-              onChange={(e) => setLimit(e.target.value)}
-            />
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-                label="Statement day"
-                placeholder="28"
-                inputMode="numeric"
-                hint="Day of month"
-                value={statementDay}
-                onChange={(e) =>
-                  setStatementDay(e.target.value.replace(/\D/g, ""))
-                }
-              />
-              <Input
-                label="Due day"
-                placeholder="12"
-                inputMode="numeric"
-                hint="Day of month"
-                value={dueDay}
-                onChange={(e) => setDueDay(e.target.value.replace(/\D/g, ""))}
-              />
-            </div>
-          </>
-        )}
-      </form>
+      <AccountForm
+        values={values}
+        onChange={setValues}
+        allowCredit={allowCredit}
+      />
     </Modal>
   );
 }

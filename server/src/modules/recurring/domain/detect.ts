@@ -257,3 +257,60 @@ function addDays(date: Date, days: number): Date {
 function clamp01(value: number): number {
   return Math.max(0, Math.min(1, value));
 }
+
+/**
+ * The next time a `dayOfMonth` schedule fires, from today.
+ *
+ * Clamped to the month's last day, so "the 31st" still pays out in February
+ * rather than silently skipping it — the same month-end problem the card
+ * billing cycle solves, and the same answer.
+ *
+ * Today counts as still upcoming: someone setting up a salary on the 1st, on
+ * the 1st, means this month.
+ */
+export function nextOccurrence(
+  cadence: Cadence,
+  dayOfMonth: number,
+  from: Date = new Date(),
+): Date {
+  const monthStep =
+    cadence === 'YEARLY'
+      ? 12
+      : cadence === 'QUARTERLY'
+        ? 3
+        : cadence === 'WEEKLY'
+          ? 0
+          : 1;
+
+  // Weekly has no day-of-month; it simply lands seven days out.
+  if (monthStep === 0) {
+    return new Date(from.getTime() + 7 * 24 * 60 * 60 * 1000);
+  }
+
+  const clampedThisMonth = clampToMonth(
+    from.getUTCFullYear(),
+    from.getUTCMonth(),
+    dayOfMonth,
+  );
+
+  if (clampedThisMonth.getTime() >= startOfDay(from).getTime()) {
+    return clampedThisMonth;
+  }
+
+  return clampToMonth(
+    from.getUTCFullYear(),
+    from.getUTCMonth() + monthStep,
+    dayOfMonth,
+  );
+}
+
+function clampToMonth(year: number, month: number, day: number): Date {
+  const lastDay = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
+  return new Date(Date.UTC(year, month, Math.min(day, lastDay)));
+}
+
+function startOfDay(date: Date): Date {
+  return new Date(
+    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()),
+  );
+}

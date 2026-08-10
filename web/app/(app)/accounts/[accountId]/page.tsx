@@ -12,6 +12,7 @@ import { EmptyState, Pill, Progress } from "@/components/ui/feedback";
 import { AccountDetailSkeleton } from "@/components/ui/skeletons";
 import { EditAccount } from "@/components/accounts/edit-account";
 import { formatCompact, formatMinor } from "@/lib/money";
+import { cn } from "@/lib/cn";
 import type { CardPosition, LoanPosition } from "@/lib/api/types";
 
 /**
@@ -137,22 +138,56 @@ function CardPanel({ card }: { card: CardPosition }) {
         </p>
       </section>
 
-      <section className="rounded-[var(--radius-card)] border border-attention-line bg-attention-soft p-5 shadow-[inset_3px_0_0_var(--attention)]">
-        <Eyebrow>This cycle</Eyebrow>
+      <section
+        className={cn(
+          "rounded-[var(--radius-card)] border p-5",
+          card.cycle.isOverdue
+            ? "border-spend/30 bg-spend/10 shadow-[inset_3px_0_0_var(--spend)]"
+            : "border-attention-line bg-attention-soft shadow-[inset_3px_0_0_var(--attention)]",
+        )}
+      >
+        <Eyebrow>Current cycle</Eyebrow>
         <p className="mt-1.5 text-sm text-ink">
           Statement{" "}
           <span className="font-semibold">
-            {formatDate(card.cycle.statementDate)}
+            {formatDate(card.cycle.lastStatementDate)}
           </span>{" "}
           · due{" "}
           <span className="font-semibold">
             {formatDate(card.cycle.dueDate)}
           </span>
         </p>
-        <p className="mt-0.5 text-[13px] text-attention-ink">
-          {card.cycle.daysUntilDue === 0
-            ? "Due today"
-            : `In ${card.cycle.daysUntilDue} days`}
+        <p
+          className={cn(
+            "mt-0.5 text-[13px]",
+            card.cycle.isOverdue ? "text-spend" : "text-attention-ink",
+          )}
+        >
+          {card.cycle.isOverdue
+            ? `${Math.abs(card.cycle.daysUntilDue)} days overdue`
+            : card.cycle.daysUntilDue === 0
+              ? "Due today"
+              : `In ${card.cycle.daysUntilDue} days`}
+        </p>
+
+        {/*
+         * The next cycle, stated explicitly.
+         *
+         * Without it, a card whose statement day has not arrived this month
+         * shows the *previous* cycle's due date and looks wrong: "statement
+         * on the 15th, due on the 5th" reads as the 5th of the same month
+         * unless the app says otherwise. It does not — a due day earlier in
+         * the month than the statement day always falls in the month after.
+         */}
+        <p className="mt-3 border-t border-current/10 pt-3 text-[13px] text-ink-muted">
+          Next statement{" "}
+          <span className="text-ink">
+            {formatDate(card.cycle.nextStatementDate)}
+          </span>
+          , due{" "}
+          <span className="text-ink">
+            {formatDate(card.cycle.nextDueDate)}
+          </span>
         </p>
       </section>
     </>

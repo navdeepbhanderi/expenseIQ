@@ -8,9 +8,14 @@ import { Direction, type RecurringRule } from '@prisma/client';
 import { PrismaService } from '@/infra/prisma/prisma.service';
 import { AppLogger } from '@/common/logger/app-logger.service';
 
-import { detectRecurrences, type DetectedRecurrence } from './domain/detect';
+import {
+  detectRecurrences,
+  nextOccurrence,
+  type DetectedRecurrence,
+} from './domain/detect';
 import type {
   ConfirmRecurrenceDto,
+  CreateRecurringDto,
   UpdateRecurringDto,
 } from './dto/recurring.dto';
 
@@ -162,6 +167,50 @@ export class RecurringService {
       ruleId: rule.id,
       cadence: rule.cadence,
       labelled,
+    });
+
+    return rule;
+  }
+
+  /**
+   * Creates a rule the user described, rather than one the detector found.
+   *
+   * Detection needs three occurrences, which is a quarter for anything
+   * monthly — and income may never be detected at all if it is the only
+   * credit on an account. Someone who knows their salary lands on the 1st
+   * should be able to say so.
+   *
+   * `confidence` stays null on purpose: it means "the model's certainty",
+   * and there was no model involved. A user-stated schedule is not a guess.
+   */
+  async createManual(
+    profileId: string,
+    dto: CreateRecurringDto,
+  ): Promise<RecurringRule> {
+    const rule = await this.prisma.recurringRule.create({
+      data: {
+        profileId,
+        accountId: dto.accountId ?? null,
+        categoryId: dto.categoryId ?? null,
+        amountMinor: BigInt(dto.amountMinor),
+        direction: dto.direction ?? Direction.DEBIT,
+        cadence: dto.cadence,
+        dayOfMonth: dto.dayOfMonth,
+        nextDueDate: nextOccurrence(dto.cadence, dto.dayOfMonth),
+        autoDebit: dto.autoDebit ?? false,
+        confidence: null,
+        // Stated by the user, so it is confirmed by definition — it never
+        // passes through the suggestion stage.
+        confirmed: true,
+        enabled: true,
+      },
+    });
+
+    this.logger.log('Recurrence created manually', {
+      profileId,
+      ruleId: rule.id,
+      cadence: rule.cadence,
+      direction: rule.direction,
     });
 
     return rule;

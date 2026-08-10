@@ -55,12 +55,48 @@ export function useDetectedRecurring(profileId: string | null) {
   });
 }
 
+/** Accepts a pattern the detector found. Takes only its signature. */
+export function useConfirmRecurring(profileId: string | null) {
+  const client = useQueryClient();
+
+  return useMutation({
+    mutationFn: (body: { signature: string; autoDebit?: boolean }) =>
+      api.post(`/profiles/${profileId}/recurring`, body),
+    onSuccess: () => invalidate(client, profileId),
+  });
+}
+
+/**
+ * Creates a schedule the user already knows — a salary on the 1st, rent on
+ * the 5th. Detection needs three occurrences, so without this a monthly
+ * income would take a quarter to appear, if it ever did.
+ */
 export function useCreateRecurring(profileId: string | null) {
   const client = useQueryClient();
 
   return useMutation({
-    mutationFn: (body: Record<string, unknown>) =>
-      api.post(`/profiles/${profileId}/recurring`, body),
+    mutationFn: (body: {
+      amountMinor: number;
+      cadence: string;
+      dayOfMonth: number;
+      direction?: "DEBIT" | "CREDIT";
+      accountId?: string;
+      categoryId?: string;
+      autoDebit?: boolean;
+    }) => api.post(`/profiles/${profileId}/recurring/manual`, body),
+    onSuccess: () => invalidate(client, profileId),
+  });
+}
+
+/** Stages any rules that have come due into the review queue. */
+export function useGenerateDue(profileId: string | null) {
+  const client = useQueryClient();
+
+  return useMutation({
+    mutationFn: () =>
+      api.post<{ generated: number; skipped: number }>(
+        `/profiles/${profileId}/recurring/generate-due`,
+      ),
     onSuccess: () => invalidate(client, profileId),
   });
 }

@@ -109,10 +109,22 @@ export interface CardPosition {
   minimumDue: Money;
   utilizationPercent: number;
   isHighUtilization: boolean;
+  /**
+   * The full cycle, transcribed from the server's BillingCycle.
+   *
+   * Both the current and the next are given, and the UI needs both: when this
+   * month's statement has not generated yet, `dueDate` is the *previous*
+   * cycle's — correct, but baffling on its own. Showing "next statement 15
+   * Aug, due 5 Sep" alongside it is what makes the current figure make sense.
+   */
   cycle: {
-    statementDate: string;
+    lastStatementDate: string;
+    nextStatementDate: string;
     dueDate: string;
+    nextDueDate: string;
+    /** Negative once overdue. */
     daysUntilDue: number;
+    isOverdue: boolean;
   };
 }
 

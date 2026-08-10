@@ -4,14 +4,17 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Toggle } from "@/components/ui/controls";
 import { ConfirmDialog, Modal } from "@/components/ui/overlay";
 import { useToast } from "@/components/ui/toast";
 import { useProfile } from "@/components/providers/profile-provider";
 import { useDeleteAccount, useUpdateAccount } from "@/lib/api/accounts";
 import { ApiError } from "@/lib/api/client";
-import { formatMinor, parseAmountToMinor } from "@/lib/money";
+import { formatMinor } from "@/lib/money";
+import {
+  AccountForm,
+  toPayload,
+  valuesFrom,
+} from "./account-form";
 import type { Account } from "@/lib/api/types";
 
 /**
@@ -31,49 +34,11 @@ export function EditAccount({ account }: { account: Account }) {
 
   const [open, setOpen] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
-
-  const [name, setName] = useState(account.name);
-  const [issuer, setIssuer] = useState(account.issuer ?? "");
-  const [last4, setLast4] = useState(account.last4 ?? "");
-  const [balance, setBalance] = useState(String(account.balanceMinor / 100));
-  const [limit, setLimit] = useState(
-    account.creditLimitMinor ? String(account.creditLimitMinor / 100) : "",
-  );
-  const [statementDay, setStatementDay] = useState(
-    account.statementDay ? String(account.statementDay) : "",
-  );
-  const [dueDay, setDueDay] = useState(
-    account.dueDay ? String(account.dueDay) : "",
-  );
-  const [autoDebit, setAutoDebit] = useState(account.autoDebit);
-  const [emisPaid, setEmisPaid] = useState(String(account.emisPaid));
-
-  const isCard = account.type === "CREDIT_CARD";
-  const isLoan = account.type === "LOAN";
+  const [values, setValues] = useState(() => valuesFrom(account));
 
   async function save() {
     try {
-      await update.mutateAsync({
-        id: account.id,
-        patch: {
-          name: name.trim(),
-          issuer: issuer.trim() || null,
-          last4: last4.trim() || null,
-          balanceMinor: parseAmountToMinor(balance) ?? account.balanceMinor,
-          autoDebit,
-          ...(isCard
-            ? {
-                creditLimitMinor: limit
-                  ? parseAmountToMinor(limit)
-                  : null,
-                statementDay: statementDay ? Number(statementDay) : null,
-                dueDay: dueDay ? Number(dueDay) : null,
-              }
-            : {}),
-          ...(isLoan ? { emisPaid: Number(emisPaid) || 0 } : {}),
-        },
-      });
-
+      await update.mutateAsync({ id: account.id, patch: toPayload(values) });
       toast({ title: "Account updated", tone: "success" });
       setOpen(false);
     } catch (caught) {
@@ -89,7 +54,16 @@ export function EditAccount({ account }: { account: Account }) {
   return (
     <>
       <div className="flex gap-2">
-        <Button variant="secondary" size="sm" onClick={() => setOpen(true)}>
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() => {
+            // Re-seeded on open, so the form always reflects the saved
+            // account rather than a stale draft from a previous cancel.
+            setValues(valuesFrom(account));
+            setOpen(true);
+          }}
+        >
           Edit
         </Button>
         <Button
@@ -114,7 +88,7 @@ export function EditAccount({ account }: { account: Account }) {
             </Button>
             <Button
               isLoading={update.isPending}
-              disabled={!name.trim()}
+              disabled={values.name.trim() === ""}
               onClick={() => void save()}
             >
               Save changes
@@ -122,83 +96,9 @@ export function EditAccount({ account }: { account: Account }) {
           </>
         }
       >
-        <div className="flex flex-col gap-4">
-          <Input
-            label="Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-
-          <div className="grid grid-cols-2 gap-4">
-            <Input
-              label="Issuer"
-              value={issuer}
-              onChange={(e) => setIssuer(e.target.value)}
-            />
-            <Input
-              label="Last 4 digits"
-              inputMode="numeric"
-              maxLength={4}
-              value={last4}
-              onChange={(e) => setLast4(e.target.value.replace(/\D/g, ""))}
-            />
-          </div>
-
-          <Input
-            label={isCard ? "Outstanding" : "Balance"}
-            inputMode="decimal"
-            adornment="₹"
-            value={balance}
-            onChange={(e) => setBalance(e.target.value)}
-          />
-
-          {isCard && (
-            <>
-              <Input
-                label="Credit limit"
-                inputMode="decimal"
-                adornment="₹"
-                value={limit}
-                onChange={(e) => setLimit(e.target.value)}
-              />
-              <div className="grid grid-cols-2 gap-4">
-                <Input
-                  label="Statement day"
-                  inputMode="numeric"
-                  hint="Day of month"
-                  value={statementDay}
-                  onChange={(e) =>
-                    setStatementDay(e.target.value.replace(/\D/g, ""))
-                  }
-                />
-                <Input
-                  label="Due day"
-                  inputMode="numeric"
-                  hint="Day of month"
-                  value={dueDay}
-                  onChange={(e) => setDueDay(e.target.value.replace(/\D/g, ""))}
-                />
-              </div>
-            </>
-          )}
-
-          {isLoan && (
-            <Input
-              label="EMIs paid"
-              inputMode="numeric"
-              hint={`of ${account.tenureMonths ?? "?"} total`}
-              value={emisPaid}
-              onChange={(e) => setEmisPaid(e.target.value.replace(/\D/g, ""))}
-            />
-          )}
-
-          <Toggle
-            label="Auto-debit"
-            description="Paid automatically on the due date"
-            checked={autoDebit}
-            onCheckedChange={setAutoDebit}
-          />
-        </div>
+        {/* Type is locked: the API has no path for changing an account's
+            kind, and a bank account cannot become a loan. */}
+        <AccountForm values={values} onChange={setValues} lockType />
       </Modal>
 
       <ConfirmDialog
