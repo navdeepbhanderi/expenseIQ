@@ -26,11 +26,12 @@ export default function MarketingLayout({ children }: LayoutProps<"/">) {
               </p>
             </div>
 
-            <nav className="grid grid-cols-2 gap-x-10 gap-y-2 text-[13px] sm:grid-cols-3">
+            <nav className="grid grid-cols-2 gap-x-10 gap-y-4 text-[13px] sm:grid-cols-4">
               {[
                 ["Product", [["Features", "#features"], ["How it works", "#how"], ["Pricing", "#pricing"]]],
                 ["Company", [["Security", "#security"], ["Families", "#families"]]],
                 ["Account", [["Log in", "/login"], ["Start free", "/signup"]]],
+                ["Legal", [["Terms & privacy", "/terms"]]],
               ].map(([heading, links]) => (
                 <div key={heading as string}>
                   <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-faint">
