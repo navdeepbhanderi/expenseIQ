@@ -87,6 +87,22 @@ export class MailerService {
         status: response.status,
         body,
       });
+
+      // Outside production, fall back to printing the message.
+      //
+      // Providers reject example.com addresses, which is exactly what local
+      // development uses — so without this the verification link is never
+      // visible anywhere and signup cannot be completed by hand on a dev
+      // machine. Never in production, where a real link in the logs is a
+      // credential sitting in log storage.
+      if (!this.config.get<AppConfig['isProduction']>('isProduction')) {
+        this.logger.warn('Delivery failed — message body follows', {
+          to: email.to,
+          subject: email.subject,
+          body: email.text,
+        });
+      }
+
       return;
     }
 
