@@ -19,36 +19,71 @@ import type { AuthUser } from "@/lib/api/types";
  * header of whatever loads next. It does mean only the browser can read it,
  * which is why this page exists at all.
  *
- * Two things happen here and both matter:
- *
- *   1. The fragment is stripped from history immediately. Left alone, the
- *      token sits in the back button, in a shared screenshot, and in whatever
- *      the browser syncs between devices.
- *   2. The token goes into memory, never localStorage — same rule as the
- *      password flow. The httpOnly refresh cookie the server set alongside it
- *      is what survives a reload.
+ * Failures arrive the same way, as `#error=<code>`. The server sends a code
+ * rather than a sentence so the copy lives here and so the UI can route on it
+ * — an unverified account belongs on the verify screen, not on a dead end.
  */
+
+interface Failure {
+  title: string;
+  body: string;
+  action: { href: string; label: string };
+}
+
+function describe(code: string | null, email: string): Failure {
+  switch (code) {
+    case "unverified":
+      return {
+        title: "Verify your email first",
+        body: "You already have an account with this address, created with a password. Confirm the email we sent, then Google will link to it automatically.",
+        action: {
+          href: `/verify-email?email=${encodeURIComponent(email)}`,
+          label: "Go to verification",
+        },
+      };
+    case "failed":
+      return {
+        title: "Google sign-in didn't finish",
+        body: "Google returned, but we couldn't complete the sign-in. Nothing was changed on your account.",
+        action: { href: "/login", label: "Back to log in" },
+      };
+    default:
+      return {
+        title: "Sign-in didn't finish",
+        body: "Google didn't return a session. Try signing in again.",
+        action: { href: "/login", label: "Back to log in" },
+      };
+  }
+}
+
 export default function GoogleCallbackPage() {
   const router = useRouter();
-  const [error, setError] = useState<string | null>(null);
+  const [failure, setFailure] = useState<Failure | null>(null);
 
   useEffect(() => {
     // Everything runs inside the async path, including the failure branch:
     // setting state synchronously in an effect body cascades a second render
     // before the first has painted.
     void (async () => {
-      const fragment = window.location.hash.replace(/^#/, "");
-      const token = new URLSearchParams(fragment).get("accessToken");
+      const fragment = new URLSearchParams(
+        window.location.hash.replace(/^#/, ""),
+      );
 
-      if (!token) {
-        setError("Google didn't return a session. Try signing in again.");
+      const errorCode = fragment.get("error");
+      const email = fragment.get("email") ?? "";
+      const token = fragment.get("accessToken");
+
+      // Clear the fragment before anything else. It holds either a live token
+      // or the user's email, and left alone both sit in the back button, in a
+      // shared screenshot, and in whatever the browser syncs across devices.
+      window.history.replaceState(null, "", window.location.pathname);
+
+      if (errorCode || !token) {
+        setFailure(describe(errorCode, email));
         return;
       }
 
       setAccessToken(token);
-
-      // Replace, not push: the token must not be reachable by going back.
-      window.history.replaceState(null, "", window.location.pathname);
 
       try {
         // Confirms the token actually works before sending them into the app,
@@ -57,25 +92,28 @@ export default function GoogleCallbackPage() {
         router.replace("/dashboard");
       } catch {
         setAccessToken(null);
-        setError("That sign-in didn't complete. Try again.");
+        setFailure(describe("failed", email));
       }
     })();
   }, [router]);
 
-  if (error) {
+  if (failure) {
     return (
       <AuthShell
-        title="Sign-in didn't finish"
+        title={failure.title}
         footer={
-          <Link href="/signup" className="font-medium text-green hover:underline">
-            Create an account instead
+          <Link
+            href="/signup"
+            className="font-medium text-green hover:underline"
+          >
+            Create a new account instead
           </Link>
         }
       >
         <div className="flex flex-col gap-4">
-          <Banner tone="error">{error}</Banner>
+          <Banner tone="warning">{failure.body}</Banner>
           <Button asChild className="h-11 w-full">
-            <Link href="/login">Back to log in</Link>
+            <Link href={failure.action.href}>{failure.action.label}</Link>
           </Button>
         </div>
       </AuthShell>

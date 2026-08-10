@@ -10,6 +10,10 @@ import { Sidebar } from "./sidebar";
 import { TabBar } from "./tab-bar";
 import { Topbar } from "./topbar";
 import { Logo } from "@/components/brand/logo";
+import { CaptureDock } from "@/components/capture/capture-dock";
+import { CaptureSheet } from "@/components/capture/capture-sheet";
+import { useDashboard } from "@/lib/api/hooks";
+import { useProfile } from "@/components/providers/profile-provider";
 import { useEffect } from "react";
 
 /**
@@ -22,7 +26,7 @@ import { useEffect } from "react";
 export function AppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { user, isLoading } = useAuth();
-  const [, setCaptureOpen] = useState(false);
+
 
   // Waits for the session to be restored before deciding. Treating "no user
   // yet" as logged out would bounce every reload to the login page while the
@@ -46,25 +50,51 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <TooltipProvider>
       <ToastProvider>
         <ProfileProvider>
-          <div className="flex min-h-dvh bg-canvas">
-            <Sidebar />
-
-            <div className="flex min-w-0 flex-1 flex-col">
-              <Topbar onCapture={() => setCaptureOpen(true)} />
-
-              {/*
-               * Bottom padding clears the fixed tab bar and the FAB that
-               * overhangs it, so the last row of any list stays tappable.
-               */}
-              <main className="flex-1 pb-[calc(88px+env(safe-area-inset-bottom))] lg:pb-0">
-                {children}
-              </main>
-            </div>
-
-            <TabBar onCapture={() => setCaptureOpen(true)} />
-          </div>
+          <Frame>{children}</Frame>
         </ProfileProvider>
       </ToastProvider>
     </TooltipProvider>
+  );
+}
+
+/**
+ * Inside ProfileProvider, so capture can reach the active profile's accounts.
+ *
+ * Capture is owned by the shell rather than by each page because the mic is
+ * reachable from every screen — the tab bar FAB, the topbar button and the
+ * space-bar shortcut all have to open the same thing.
+ */
+function Frame({ children }: { children: React.ReactNode }) {
+  const [captureOpen, setCaptureOpen] = useState(false);
+  const { activeId } = useProfile();
+  const { data: dashboard } = useDashboard(activeId);
+  const accounts = dashboard?.accounts ?? [];
+
+  return (
+    <div className="flex min-h-dvh bg-canvas">
+      <Sidebar />
+
+      <div className="flex min-w-0 flex-1 flex-col">
+        <Topbar onCapture={() => setCaptureOpen(true)} />
+
+        {/*
+         * Bottom padding clears the fixed tab bar and the FAB that overhangs
+         * it, so the last row of any list stays tappable.
+         */}
+        <main className="flex-1 pb-[calc(88px+env(safe-area-inset-bottom))] lg:pb-0">
+          {children}
+        </main>
+
+        <CaptureDock accounts={accounts} />
+      </div>
+
+      <TabBar onCapture={() => setCaptureOpen(true)} />
+
+      <CaptureSheet
+        open={captureOpen}
+        onOpenChange={setCaptureOpen}
+        accounts={accounts}
+      />
+    </div>
   );
 }
