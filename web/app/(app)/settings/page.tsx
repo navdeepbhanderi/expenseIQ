@@ -78,6 +78,7 @@ export default function SettingsPage() {
 
       <section className="overflow-hidden rounded-[var(--radius-card)] border border-line-strong bg-paper">
         {[
+          ["Categories", "/settings/categories"],
           ["Family & profiles", "/family"],
           ["Recurring rules", "/recurring"],
           ["Notifications", "/notifications"],

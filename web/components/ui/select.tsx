@@ -31,6 +31,14 @@ export interface SelectProps extends FieldProps {
   disabled?: boolean;
   className?: string;
   name?: string;
+  /**
+   * Shown in place of the list when there are no options.
+   *
+   * An empty dropdown is a dead end: the user opens it, finds nothing, and
+   * has no idea the fix is on another screen. This puts the fix where they
+   * are already looking.
+   */
+  emptyAction?: { label: string; onSelect: () => void };
 }
 
 export function Select({
@@ -45,6 +53,7 @@ export function Select({
   mobile,
   className,
   name,
+  emptyAction,
 }: SelectProps) {
   const id = useId();
 
@@ -92,6 +101,22 @@ export function Select({
             )}
           >
             <RadixSelect.Viewport>
+              {options.length === 0 && emptyAction && (
+                <button
+                  type="button"
+                  onClick={emptyAction.onSelect}
+                  className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-green hover:bg-paper-raised"
+                >
+                  {emptyAction.label}
+                </button>
+              )}
+
+              {options.length === 0 && !emptyAction && (
+                <p className="px-2.5 py-2 text-sm text-ink-faint">
+                  Nothing to choose from yet
+                </p>
+              )}
+
               {options.map((option) => (
                 <RadixSelect.Item
                   key={option.value}

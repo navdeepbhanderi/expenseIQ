@@ -182,14 +182,22 @@ export interface Merchant {
 export interface RecurringRule {
   id: string;
   profileId: string;
+  /** What the user calls it — "Salary", "Rent". Null for detected rules. */
+  label: string | null;
   categoryId: string | null;
   accountId: string | null;
   amountMinor: number;
+  direction: Direction;
   cadence: string;
-  nextDueDate: string;
+  dayOfMonth: number | null;
+  /** True for "the last day, whatever it is". */
+  onMonthEnd: boolean;
+  nextDueDate: string | null;
   autoDebit: boolean;
-  confidence: number;
-  isActive: boolean;
+  /** Null for user-stated schedules — no model was involved. */
+  confidence: number | null;
+  confirmed: boolean;
+  enabled: boolean;
 }
 
 /**

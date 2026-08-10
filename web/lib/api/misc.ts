@@ -78,7 +78,9 @@ export function useCreateRecurring(profileId: string | null) {
     mutationFn: (body: {
       amountMinor: number;
       cadence: string;
-      dayOfMonth: number;
+      dayOfMonth?: number;
+      onMonthEnd?: boolean;
+      label?: string;
       direction?: "DEBIT" | "CREDIT";
       accountId?: string;
       categoryId?: string;
@@ -97,6 +99,30 @@ export function useGenerateDue(profileId: string | null) {
       api.post<{ generated: number; skipped: number }>(
         `/profiles/${profileId}/recurring/generate-due`,
       ),
+    onSuccess: () => invalidate(client, profileId),
+  });
+}
+
+/** Edits a rule — a salary that changed, a schedule that moved. */
+export function useUpdateRecurring(profileId: string | null) {
+  const client = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      ruleId,
+      patch,
+    }: {
+      ruleId: string;
+      patch: {
+        label?: string;
+        amountMinor?: number;
+        cadence?: string;
+        dayOfMonth?: number;
+        onMonthEnd?: boolean;
+        autoDebit?: boolean;
+        enabled?: boolean;
+      };
+    }) => api.patch(`/profiles/${profileId}/recurring/${ruleId}`, patch),
     onSuccess: () => invalidate(client, profileId),
   });
 }

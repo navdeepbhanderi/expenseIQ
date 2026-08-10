@@ -270,9 +270,15 @@ function clamp01(value: number): number {
  */
 export function nextOccurrence(
   cadence: Cadence,
-  dayOfMonth: number,
+  dayOfMonth: number | null,
   from: Date = new Date(),
+  /** "The last day, whatever it is" — 30 April, 28 or 29 February. */
+  onMonthEnd = false,
 ): Date {
+  // Month-end is its own intent, not "the 31st clamped". Asking for 31 in a
+  // 30-day month and asking for month-end give the same answer in April and
+  // different answers to the question "what did the user mean".
+  const day = onMonthEnd ? 31 : (dayOfMonth ?? 1);
   const monthStep =
     cadence === 'YEARLY'
       ? 12
@@ -290,7 +296,7 @@ export function nextOccurrence(
   const clampedThisMonth = clampToMonth(
     from.getUTCFullYear(),
     from.getUTCMonth(),
-    dayOfMonth,
+    day,
   );
 
   if (clampedThisMonth.getTime() >= startOfDay(from).getTime()) {
@@ -300,7 +306,7 @@ export function nextOccurrence(
   return clampToMonth(
     from.getUTCFullYear(),
     from.getUTCMonth() + monthStep,
-    dayOfMonth,
+    day,
   );
 }
 

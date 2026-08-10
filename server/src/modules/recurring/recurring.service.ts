@@ -194,9 +194,16 @@ export class RecurringService {
         categoryId: dto.categoryId ?? null,
         amountMinor: BigInt(dto.amountMinor),
         direction: dto.direction ?? Direction.DEBIT,
+        label: dto.label ?? null,
         cadence: dto.cadence,
-        dayOfMonth: dto.dayOfMonth,
-        nextDueDate: nextOccurrence(dto.cadence, dto.dayOfMonth),
+        dayOfMonth: dto.onMonthEnd ? null : (dto.dayOfMonth ?? 1),
+        onMonthEnd: dto.onMonthEnd ?? false,
+        nextDueDate: nextOccurrence(
+          dto.cadence,
+          dto.dayOfMonth ?? null,
+          new Date(),
+          dto.onMonthEnd ?? false,
+        ),
         autoDebit: dto.autoDebit ?? false,
         confidence: null,
         // Stated by the user, so it is confirmed by definition — it never
@@ -221,7 +228,29 @@ export class RecurringService {
     ruleId: string,
     dto: UpdateRecurringDto,
   ): Promise<RecurringRule> {
-    await this.findOwned(profileId, ruleId);
+    const existing = await this.findOwned(profileId, ruleId);
+
+    /*
+     * Changing the day has to move the next due date with it.
+     *
+     * Without this, editing a salary from the 1st to the 5th leaves it still
+     * scheduled for the 1st until the following cycle — the user changed the
+     * thing they can see and the thing that matters stayed put.
+     */
+    const scheduleMoved =
+      dto.dayOfMonth !== undefined ||
+      dto.onMonthEnd !== undefined ||
+      dto.cadence !== undefined;
+
+    const recomputed =
+      scheduleMoved && dto.nextDueDate === undefined
+        ? nextOccurrence(
+            dto.cadence ?? existing.cadence,
+            dto.dayOfMonth ?? existing.dayOfMonth,
+            new Date(),
+            dto.onMonthEnd ?? existing.onMonthEnd,
+          )
+        : undefined;
 
     return this.prisma.recurringRule.update({
       where: { id: ruleId },
@@ -235,6 +264,12 @@ export class RecurringService {
           : {}),
         ...(dto.autoDebit !== undefined ? { autoDebit: dto.autoDebit } : {}),
         ...(dto.enabled !== undefined ? { enabled: dto.enabled } : {}),
+        ...(dto.label !== undefined ? { label: dto.label } : {}),
+        ...(dto.dayOfMonth !== undefined
+          ? { dayOfMonth: dto.onMonthEnd ? null : dto.dayOfMonth }
+          : {}),
+        ...(dto.onMonthEnd !== undefined ? { onMonthEnd: dto.onMonthEnd } : {}),
+        ...(recomputed ? { nextDueDate: recomputed } : {}),
       },
     });
   }

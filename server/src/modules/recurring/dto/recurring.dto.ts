@@ -50,18 +50,30 @@ export class CreateRecurringDto {
   @IsEnum(Cadence)
   cadence!: Cadence;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: 1,
     minimum: 1,
     maximum: 31,
     description:
-      'Day of month. Clamped to the last day in shorter months, so 31 still ' +
-      'fires in February.',
+      'Day of month. Clamped to the last day in shorter months. Omit it and ' +
+      'set onMonthEnd instead for "the last day, whatever it is".',
   })
+  @IsOptional()
   @IsInt()
   @Min(1)
   @Max(31)
-  dayOfMonth!: number;
+  dayOfMonth?: number;
+
+  @ApiPropertyOptional({
+    default: false,
+    description:
+      'Fires on the last day of the month — the 30th in April, the 28th or ' +
+      '29th in February. A distinct intent from "the 31st", which only ' +
+      'coincides with it in long months.',
+  })
+  @IsOptional()
+  @IsBoolean()
+  onMonthEnd?: boolean;
 
   @ApiPropertyOptional({
     enum: Direction,
@@ -95,6 +107,24 @@ export class CreateRecurringDto {
 }
 
 export class UpdateRecurringDto {
+  @ApiPropertyOptional({ example: 'Salary' })
+  @IsOptional()
+  @IsString()
+  @Length(1, 120)
+  label?: string;
+
+  @ApiPropertyOptional({ example: 1, minimum: 1, maximum: 31 })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(31)
+  dayOfMonth?: number;
+
+  @ApiPropertyOptional({ default: false })
+  @IsOptional()
+  @IsBoolean()
+  onMonthEnd?: boolean;
+
   @ApiPropertyOptional({ description: 'Paise' })
   @IsOptional()
   @IsInt()
