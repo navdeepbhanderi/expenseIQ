@@ -12,6 +12,7 @@ import {
   GoogleButton,
   OrDivider,
 } from "@/components/auth/auth-shell";
+import { RedirectIfSignedIn } from "@/components/auth/redirect-if-signed-in";
 import { PasswordMeter } from "@/components/auth/password-meter";
 import { api, ApiError } from "@/lib/api/client";
 import { checkPassword } from "@/lib/password";
@@ -73,89 +74,95 @@ export default function SignupPage() {
   }
 
   return (
-    <AuthShell
-      title="Start your ledger"
-      subtitle="Free for personal use. No card, no bank login."
-      footer={
-        <>
-          Already have an account?{" "}
-          <Link href="/login" className="font-medium text-green hover:underline">
-            Log in
-          </Link>
-        </>
-      }
-    >
-      <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
-        {error && <Banner tone="error">{error}</Banner>}
+    <>
+      <RedirectIfSignedIn />
+      <AuthShell
+        title="Start your ledger"
+        subtitle="Free for personal use. No card, no bank login."
+        footer={
+          <>
+            Already have an account?{" "}
+            <Link
+              href="/login"
+              className="font-medium text-green hover:underline"
+            >
+              Log in
+            </Link>
+          </>
+        }
+      >
+        <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
+          {error && <Banner tone="error">{error}</Banner>}
 
-        <Input
-          label="Your name"
-          placeholder="Aarav Sharma"
-          autoComplete="name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          // Optional, and the label says so rather than a lone asterisk
-          // elsewhere meaning "everything else is required".
-          hint="Optional — used to greet you"
-          className="hidden sm:block"
-        />
-
-        <Input
-          label="Email"
-          type="email"
-          inputMode="email"
-          placeholder="aarav@gmail.com"
-          autoComplete="email"
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          error={
-            attempted && email.trim() === "" ? "Enter your email" : undefined
-          }
-        />
-
-        <div>
-          <PasswordInput
-            placeholder="••••••••••"
-            autoComplete="new-password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+          <Input
+            label="Your name"
+            placeholder="Aarav Sharma"
+            autoComplete="name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            // Optional, and the label says so rather than a lone asterisk
+            // elsewhere meaning "everything else is required".
+            hint="Optional — used to greet you"
+            className="hidden sm:block"
           />
-          <PasswordMeter password={password} className="mt-2.5" />
-        </div>
 
-        <Checkbox
-          checked={agreed}
-          onCheckedChange={setAgreed}
-          className={cn(
-            "items-start",
-            attempted && !agreed && "[&_label]:text-spend",
-          )}
-          label={
-            <span className="text-[13px] leading-relaxed">
-              I agree to the{" "}
-              <Link href="/terms" className="text-green hover:underline">
-                terms
-              </Link>{" "}
-              and privacy policy. ExpenseIQ never asks for net-banking
-              credentials.
-            </span>
-          }
-        />
+          <Input
+            label="Email"
+            type="email"
+            inputMode="email"
+            placeholder="aarav@gmail.com"
+            autoComplete="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            error={
+              attempted && email.trim() === "" ? "Enter your email" : undefined
+            }
+          />
 
-        <Button
-          type="submit"
-          className="mt-1 h-11 w-full"
-          isLoading={submitting}
-          disabled={attempted && !canSubmit}
-        >
-          Create account
-        </Button>
-      </form>
+          <div>
+            <PasswordInput
+              placeholder="••••••••••"
+              autoComplete="new-password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <PasswordMeter password={password} className="mt-2.5" />
+          </div>
 
-      <OrDivider />
-      <GoogleButton label="Continue with Google" />
-    </AuthShell>
+          <Checkbox
+            checked={agreed}
+            onCheckedChange={setAgreed}
+            className={cn(
+              "items-start",
+              attempted && !agreed && "[&_label]:text-spend",
+            )}
+            label={
+              <span className="text-[13px] leading-relaxed">
+                I agree to the{" "}
+                <Link href="/terms" className="text-green hover:underline">
+                  terms
+                </Link>{" "}
+                and privacy policy. ExpenseIQ never asks for net-banking
+                credentials.
+              </span>
+            }
+          />
+
+          <Button
+            type="submit"
+            className="mt-1 h-11 w-full"
+            isLoading={submitting}
+            disabled={attempted && !canSubmit}
+          >
+            Create account
+          </Button>
+        </form>
+
+        <OrDivider />
+        <GoogleButton label="Continue with Google" />
+      </AuthShell>
+    </>
   );
 }

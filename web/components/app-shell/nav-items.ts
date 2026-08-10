@@ -4,7 +4,9 @@ import {
   ListChecks,
   PieChart,
   Receipt,
+  RefreshCw,
   Settings,
+  Users,
   type LucideIcon,
 } from "lucide-react";
 
@@ -16,13 +18,22 @@ export interface NavItem {
   badge?: "review";
 }
 
-/** Design 2a's sidebar, in its order. */
+/**
+ * The sidebar — design 2a's six, plus Recurring and Family.
+ *
+ * The design predates both pages existing as destinations, and burying them
+ * behind Settings made them undiscoverable on desktop: a feature reachable
+ * only by someone who already knows it is there is a feature nobody uses.
+ * Mobile keeps four tabs and reaches these through Menu.
+ */
 export const NAV_ITEMS: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutGrid },
   { href: "/review", label: "Review", icon: ListChecks, badge: "review" },
   { href: "/transactions", label: "Transactions", icon: Receipt },
   { href: "/accounts", label: "Accounts", icon: CreditCard },
+  { href: "/recurring", label: "Recurring", icon: RefreshCw },
   { href: "/reports", label: "Reports", icon: PieChart },
+  { href: "/family", label: "Family", icon: Users },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 

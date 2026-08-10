@@ -15,7 +15,8 @@ import {
 import { Amount, CategoryMark, Delta, Eyebrow } from "@/components/ui/display";
 import { Button } from "@/components/ui/button";
 import { Segmented } from "@/components/ui/controls";
-import { Progress, Skeleton } from "@/components/ui/feedback";
+import { Progress } from "@/components/ui/feedback";
+import { ReportsSkeleton } from "@/components/ui/skeletons";
 import { Modal } from "@/components/ui/overlay";
 import { AmountInput } from "@/components/ui/input";
 import { useToast } from "@/components/ui/toast";
@@ -37,15 +38,7 @@ export default function ReportsPage() {
 
   const [editingBudget, setEditingBudget] = useState(false);
 
-  if (summary.isPending) {
-    return (
-      <div className="flex flex-col gap-4 p-4 sm:p-6">
-        <Skeleton className="h-8 w-40" />
-        <Skeleton className="h-32" />
-        <Skeleton className="h-56" />
-      </div>
-    );
-  }
+  if (summary.isPending) return <ReportsSkeleton />;
 
   return (
     <div className="flex flex-col gap-5 p-4 sm:p-6">

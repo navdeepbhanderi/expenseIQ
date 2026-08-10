@@ -8,7 +8,9 @@ import { useAccount, usePrepaySimulation } from "@/lib/api/accounts";
 import { Amount, Eyebrow } from "@/components/ui/display";
 import { Button } from "@/components/ui/button";
 import { AmountInput } from "@/components/ui/input";
-import { EmptyState, Pill, Progress, Skeleton } from "@/components/ui/feedback";
+import { EmptyState, Pill, Progress } from "@/components/ui/feedback";
+import { AccountDetailSkeleton } from "@/components/ui/skeletons";
+import { EditAccount } from "@/components/accounts/edit-account";
 import { formatCompact, formatMinor } from "@/lib/money";
 import type { CardPosition, LoanPosition } from "@/lib/api/types";
 
@@ -30,14 +32,7 @@ export default function AccountDetailPage({
   const { activeId } = useProfile();
   const { data, isPending, isError } = useAccount(activeId, accountId);
 
-  if (isPending) {
-    return (
-      <div className="flex flex-col gap-4 p-4 sm:p-6">
-        <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-40" />
-      </div>
-    );
-  }
+  if (isPending) return <AccountDetailSkeleton />;
 
   if (isError || !data) {
     return (
@@ -53,23 +48,27 @@ export default function AccountDetailPage({
 
   return (
     <div className="flex flex-col gap-5 p-4 sm:p-6">
-      <div>
-        <Link
-          href="/accounts"
-          className="inline-flex items-center gap-1.5 text-[13px] text-ink-muted hover:text-ink"
-        >
-          <ArrowLeft className="size-3.5" aria-hidden="true" />
-          Accounts
-        </Link>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <Link
+            href="/accounts"
+            className="inline-flex items-center gap-1.5 text-[13px] text-ink-muted hover:text-ink"
+          >
+            <ArrowLeft className="size-3.5" aria-hidden="true" />
+            Accounts
+          </Link>
 
-        <h1 className="mt-2 flex flex-wrap items-center gap-2.5 font-display text-2xl text-ink sm:text-[27px]">
-          {account.name}
-          {account.autoDebit && <Pill tone="attention">Auto-debit</Pill>}
-        </h1>
-        <p className="mt-0.5 text-sm text-ink-muted">
-          {account.issuer ? `${account.issuer} · ` : ""}
-          {account.last4 ? `····${account.last4}` : account.type}
-        </p>
+          <h1 className="mt-2 flex flex-wrap items-center gap-2.5 font-display text-2xl text-ink sm:text-[27px]">
+            {account.name}
+            {account.autoDebit && <Pill tone="attention">Auto-debit</Pill>}
+          </h1>
+          <p className="mt-0.5 text-sm text-ink-muted">
+            {account.issuer ? `${account.issuer} · ` : ""}
+            {account.last4 ? `····${account.last4}` : account.type}
+          </p>
+        </div>
+
+        <EditAccount account={account} />
       </div>
 
       {card && <CardPanel card={card} />}

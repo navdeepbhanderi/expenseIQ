@@ -117,6 +117,16 @@ export class GoogleAuthController {
   }
 
   private setRefreshCookie(response: Response, tokens: TokenPair): void {
+    // Mirrors auth.controller.ts — a readable hint that a session exists.
+    response.cookie('eiq_session', '1', {
+      httpOnly: false,
+      secure:
+        this.config.get<AppConfig['isProduction']>('isProduction') ?? false,
+      sameSite: 'lax',
+      expires: tokens.refreshExpiresAt,
+      path: '/',
+    });
+
     response.cookie(REFRESH_COOKIE, tokens.refreshToken, {
       httpOnly: true,
       secure:

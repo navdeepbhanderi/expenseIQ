@@ -250,9 +250,16 @@ export function Tooltip({
 
 /* --------------------------------------------------------- Skeleton */
 
-export function Skeleton({ className }: { className?: string }) {
+export function Skeleton({
+  className,
+  style,
+}: {
+  className?: string;
+  style?: React.CSSProperties;
+}) {
   return (
     <div
+      style={style}
       // Hidden from assistive tech: a screen reader announcing a shimmering
       // grey box is noise. The live region that replaces it does the telling.
       aria-hidden="true"

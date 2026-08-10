@@ -3,7 +3,8 @@
 import { useProfile } from "@/components/providers/profile-provider";
 import { useMarkRead, useNotificationList } from "@/lib/api/misc";
 import { Button } from "@/components/ui/button";
-import { EmptyState, Pill, Skeleton } from "@/components/ui/feedback";
+import { EmptyState, Pill } from "@/components/ui/feedback";
+import { ListSkeleton } from "@/components/ui/skeletons";
 import { cn } from "@/lib/cn";
 
 /** Notifications — the banners design 6e describes, as a list. */
@@ -14,15 +15,7 @@ export default function NotificationsPage() {
 
   const unread = (data ?? []).filter((n) => !n.readAt).length;
 
-  if (isPending) {
-    return (
-      <div className="flex flex-col gap-3 p-4 sm:p-6">
-        <Skeleton className="h-8 w-40" />
-        <Skeleton className="h-16" />
-        <Skeleton className="h-16" />
-      </div>
-    );
-  }
+  if (isPending) return <ListSkeleton rows={5} />;
 
   return (
     <div className="flex flex-col gap-4 p-4 sm:p-6">

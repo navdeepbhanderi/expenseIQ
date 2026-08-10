@@ -13,7 +13,8 @@ import {
 import { Amount, CategoryMark, Eyebrow } from "@/components/ui/display";
 import { Button, IconButton } from "@/components/ui/button";
 import { Checkbox, Segmented } from "@/components/ui/controls";
-import { EmptyState, Pill, Skeleton } from "@/components/ui/feedback";
+import { EmptyState, Pill } from "@/components/ui/feedback";
+import { RowSkeleton } from "@/components/ui/skeletons";
 import { ConfirmDialog, Sheet } from "@/components/ui/overlay";
 import { useToast } from "@/components/ui/toast";
 import { formatMinor } from "@/lib/money";
@@ -236,9 +237,12 @@ export default function TransactionsPage() {
           )}
 
           {query.isPending ? (
-            <div className="flex flex-col gap-2">
-              {[0, 1, 2, 3, 4].map((i) => (
-                <Skeleton key={i} className="h-14" />
+            // The filter sidebar is already rendered around this, so only the
+            // rows need standing in for — a whole-page skeleton would draw a
+            // second set of filters over the real ones.
+            <div className="overflow-hidden rounded-[var(--radius-card)] border border-line-strong bg-paper px-4">
+              {[0, 1, 2, 3, 4, 5].map((i) => (
+                <RowSkeleton key={i} />
               ))}
             </div>
           ) : items.length === 0 ? (

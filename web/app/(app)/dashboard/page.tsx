@@ -6,7 +6,8 @@ import { useProfile } from "@/components/providers/profile-provider";
 import { useDashboard } from "@/lib/api/hooks";
 import { Amount, CategoryMark, Delta, Eyebrow } from "@/components/ui/display";
 import { Button } from "@/components/ui/button";
-import { Progress, Skeleton, EmptyState } from "@/components/ui/feedback";
+import { Progress, EmptyState } from "@/components/ui/feedback";
+import { DashboardSkeleton } from "@/components/ui/skeletons";
 import { formatCompact, formatMinor, percentOf } from "@/lib/money";
 import { cn } from "@/lib/cn";
 import type { DashboardSummary, UpcomingDue } from "@/lib/api/types";
@@ -445,27 +446,5 @@ function RecentTransactions({ data }: { data: DashboardSummary }) {
         ))}
       </ul>
     </section>
-  );
-}
-
-/* ------------------------------------------------------------- loading */
-
-function DashboardSkeleton() {
-  return (
-    <div className="flex flex-col gap-5 p-4 sm:p-6">
-      <div className="flex flex-col gap-2">
-        <Skeleton className="h-7 w-56" />
-        <Skeleton className="h-4 w-72" />
-      </div>
-      <div className="grid gap-3 lg:grid-cols-3">
-        <Skeleton className="h-[74px]" />
-        <Skeleton className="h-[74px]" />
-        <Skeleton className="h-[74px]" />
-      </div>
-      <div className="grid gap-5 lg:grid-cols-[1.4fr_1fr]">
-        <Skeleton className="h-56" />
-        <Skeleton className="h-56" />
-      </div>
-    </div>
   );
 }

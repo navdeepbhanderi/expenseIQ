@@ -19,7 +19,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AmountInput } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
-import { Pill, Progress, Skeleton } from "@/components/ui/feedback";
+import { Pill, Progress } from "@/components/ui/feedback";
+import { FamilySkeleton } from "@/components/ui/skeletons";
 import { Modal } from "@/components/ui/overlay";
 import { useToast } from "@/components/ui/toast";
 import { ApiError } from "@/lib/api/client";
@@ -46,14 +47,7 @@ export default function FamilyPage() {
 
   const isChild = active?.kind === "CHILD";
 
-  if (members.isPending) {
-    return (
-      <div className="flex flex-col gap-4 p-4 sm:p-6">
-        <Skeleton className="h-8 w-40" />
-        <Skeleton className="h-32" />
-      </div>
-    );
-  }
+  if (members.isPending) return <FamilySkeleton />;
 
   return (
     <div className="flex flex-col gap-5 p-4 sm:p-6">

@@ -11,7 +11,8 @@ import {
   type ReviewQueueItem,
 } from "@/lib/api/nlu";
 import { Button } from "@/components/ui/button";
-import { EmptyState, Skeleton } from "@/components/ui/feedback";
+import { EmptyState } from "@/components/ui/feedback";
+import { ReviewSkeleton } from "@/components/ui/skeletons";
 import { Eyebrow } from "@/components/ui/display";
 import { useToast } from "@/components/ui/toast";
 import { CandidateCard, HeardLine } from "@/components/capture/candidate-card";
@@ -100,15 +101,7 @@ export default function ReviewPage() {
     }
   }
 
-  if (isPending) {
-    return (
-      <div className="flex flex-col gap-4 p-4 sm:p-6">
-        <Skeleton className="h-7 w-40" />
-        <Skeleton className="h-40" />
-        <Skeleton className="h-40" />
-      </div>
-    );
-  }
+  if (isPending) return <ReviewSkeleton />;
 
   if (items.length === 0) {
     return (

@@ -1,17 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { Bell, Moon, Plus, Search, Sun } from "lucide-react";
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
+import { Bell, LogOut, Moon, Plus, Search, Settings, Sun, User } from "lucide-react";
 import { Button, IconButton } from "@/components/ui/button";
 import { Logo } from "@/components/brand/logo";
 import { ProfileSwitcher } from "./profile-switcher";
 import { useTheme } from "@/lib/theme";
 import { useProfile } from "@/components/providers/profile-provider";
+import { useAuth } from "@/components/providers/auth-provider";
 import { useUnreadCount } from "@/lib/api/hooks";
 
 /** Top bar — design 2a's 62px header. */
 export function Topbar({ onCapture }: { onCapture: () => void }) {
   const { theme, toggle } = useTheme();
+  const { user, logout } = useAuth();
   const { activeId } = useProfile();
   const unread = useUnreadCount(activeId);
   const unreadCount = unread.data?.count ?? 0;
@@ -79,6 +82,54 @@ export function Topbar({ onCapture }: { onCapture: () => void }) {
         <Plus className="size-4" aria-hidden="true" />
         Add expense
       </Button>
+
+      {/*
+       * Signing out was reachable only from deep inside Settings, which is
+       * where people look last. It belongs on every screen.
+       */}
+      <DropdownMenu.Root>
+        <DropdownMenu.Trigger
+          aria-label="Your account"
+          className="flex size-9 shrink-0 items-center justify-center rounded-full border border-line bg-paper-sunken text-ink-muted transition-colors hover:border-line-strong hover:text-ink"
+        >
+          <User className="size-4" aria-hidden="true" />
+        </DropdownMenu.Trigger>
+
+        <DropdownMenu.Portal>
+          <DropdownMenu.Content
+            align="end"
+            sideOffset={6}
+            className="z-50 w-56 rounded-xl border border-line bg-paper p-1.5 shadow-[var(--shadow-popover)]"
+          >
+            <div className="px-2.5 py-2">
+              <p className="truncate text-sm font-medium text-ink">
+                {user?.displayName ?? "Signed in"}
+              </p>
+              <p className="truncate text-xs text-ink-faint">{user?.email}</p>
+            </div>
+
+            <DropdownMenu.Separator className="my-1 h-px bg-line-soft" />
+
+            <DropdownMenu.Item asChild>
+              <Link
+                href="/settings"
+                className="flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-ink-soft outline-none data-[highlighted]:bg-paper-raised"
+              >
+                <Settings className="size-4" aria-hidden="true" />
+                Settings
+              </Link>
+            </DropdownMenu.Item>
+
+            <DropdownMenu.Item
+              onSelect={() => void logout()}
+              className="flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-spend outline-none data-[highlighted]:bg-spend/10"
+            >
+              <LogOut className="size-4" aria-hidden="true" />
+              Sign out
+            </DropdownMenu.Item>
+          </DropdownMenu.Content>
+        </DropdownMenu.Portal>
+      </DropdownMenu.Root>
     </header>
   );
 }

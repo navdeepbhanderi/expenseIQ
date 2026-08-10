@@ -12,6 +12,7 @@ import {
   GoogleButton,
   OrDivider,
 } from "@/components/auth/auth-shell";
+import { RedirectIfSignedIn } from "@/components/auth/redirect-if-signed-in";
 import { useAuth } from "@/components/providers/auth-provider";
 import { ApiError } from "@/lib/api/client";
 
@@ -81,86 +82,93 @@ function Login() {
   }
 
   return (
-    <AuthShell
-      title="Welcome back"
-      subtitle="Pick up where your ledger left off."
-      footer={
-        <>
-          New here?{" "}
-          <Link
-            href="/signup"
-            className="font-medium text-green hover:underline"
-          >
-            Create an account
-          </Link>
-        </>
-      }
-    >
-      <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
-        {error && (
-          <Banner tone="error">
-            {error}
-            {failures >= NUDGE_AFTER && triesLeft > 0 && (
-              <>
-                {" "}
-                <Link
-                  href={`/forgot-password?email=${encodeURIComponent(email)}`}
-                  className="font-medium underline"
-                >
-                  Reset your password?
-                </Link>
-              </>
-            )}
-          </Banner>
-        )}
-
-        <Input
-          label="Email"
-          type="email"
-          inputMode="email"
-          placeholder="aarav@gmail.com"
-          autoComplete="email"
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-
-        <div>
-          <PasswordInput
-            placeholder="••••••••"
-            autoComplete="current-password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <div className="mt-1.5 text-right">
+    <>
+      <RedirectIfSignedIn />
+      <AuthShell
+        title="Welcome back"
+        subtitle="Pick up where your ledger left off."
+        footer={
+          <>
+            New here?{" "}
             <Link
-              href={`/forgot-password?email=${encodeURIComponent(email)}`}
-              className="text-[13px] text-green hover:underline"
+              href="/signup"
+              className="font-medium text-green hover:underline"
             >
-              Forgot password?
+              Create an account
             </Link>
+          </>
+        }
+      >
+        <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
+          {error && (
+            <Banner tone="error">
+              {error}
+              {failures >= NUDGE_AFTER && triesLeft > 0 && (
+                <>
+                  {" "}
+                  <Link
+                    href={`/forgot-password?email=${encodeURIComponent(email)}`}
+                    className="font-medium underline"
+                  >
+                    Reset your password?
+                  </Link>
+                </>
+              )}
+            </Banner>
+          )}
+
+          <Input
+            label="Email"
+            type="email"
+            inputMode="email"
+            placeholder="aarav@gmail.com"
+            autoComplete="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+
+          <div>
+            <PasswordInput
+              placeholder="••••••••"
+              autoComplete="current-password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <div className="mt-1.5 text-right">
+              <Link
+                href={`/forgot-password?email=${encodeURIComponent(email)}`}
+                className="text-[13px] text-green hover:underline"
+              >
+                Forgot password?
+              </Link>
+            </div>
           </div>
-        </div>
 
-        <Checkbox
-          checked={remember}
-          onCheckedChange={setRemember}
-          label={
-            <span className="text-[13px]">
-              Keep me signed in on this device
-            </span>
-          }
-        />
+          <Checkbox
+            checked={remember}
+            onCheckedChange={setRemember}
+            label={
+              <span className="text-[13px]">
+                Keep me signed in on this device
+              </span>
+            }
+          />
 
-        <Button type="submit" className="mt-1 h-11 w-full" isLoading={submitting}>
-          Log in
-        </Button>
-      </form>
+          <Button
+            type="submit"
+            className="mt-1 h-11 w-full"
+            isLoading={submitting}
+          >
+            Log in
+          </Button>
+        </form>
 
-      <OrDivider />
-      <GoogleButton label="Continue with Google" />
-    </AuthShell>
+        <OrDivider />
+        <GoogleButton label="Continue with Google" />
+      </AuthShell>
+    </>
   );
 }
 

@@ -6,6 +6,7 @@ import { Menu, Moon, Sun, X } from "lucide-react";
 import { Button, IconButton } from "@/components/ui/button";
 import { Logo } from "@/components/brand/logo";
 import { useTheme } from "@/lib/theme";
+import { useHasSession } from "@/lib/session-hint";
 import { cn } from "@/lib/cn";
 
 /** Design 8a's nav. */
@@ -20,6 +21,7 @@ const LINKS = [
 export function SiteHeader() {
   const { theme, toggle } = useTheme();
   const [open, setOpen] = useState(false);
+  const signedIn = useHasSession();
 
   return (
     <header className="sticky top-0 z-30 border-b border-line-soft bg-paper/85 backdrop-blur-md">
@@ -55,17 +57,27 @@ export function SiteHeader() {
             )}
           </IconButton>
 
-          <Button
-            asChild
-            variant="ghost"
-            size="sm"
-            className="hidden sm:inline-flex"
-          >
-            <Link href="/login">Log in</Link>
-          </Button>
-          <Button asChild size="sm">
-            <Link href="/signup">Start free</Link>
-          </Button>
+          {/* Offering "Log in" to someone already signed in is the app not
+              knowing who it is talking to. */}
+          {signedIn ? (
+            <Button asChild size="sm">
+              <Link href="/dashboard">Go to your ledger</Link>
+            </Button>
+          ) : (
+            <>
+              <Button
+                asChild
+                variant="ghost"
+                size="sm"
+                className="hidden sm:inline-flex"
+              >
+                <Link href="/login">Log in</Link>
+              </Button>
+              <Button asChild size="sm">
+                <Link href="/signup">Start free</Link>
+              </Button>
+            </>
+          )}
 
           <IconButton
             aria-label={open ? "Close menu" : "Open menu"}
@@ -100,13 +112,15 @@ export function SiteHeader() {
               {link.label}
             </Link>
           ))}
-          <Link
-            href="/login"
-            onClick={() => setOpen(false)}
-            className="rounded-lg px-3 py-2.5 text-sm text-ink-soft hover:bg-paper-raised sm:hidden"
-          >
-            Log in
-          </Link>
+          {!signedIn && (
+            <Link
+              href="/login"
+              onClick={() => setOpen(false)}
+              className="rounded-lg px-3 py-2.5 text-sm text-ink-soft hover:bg-paper-raised sm:hidden"
+            >
+              Log in
+            </Link>
+          )}
         </nav>
       </div>
     </header>

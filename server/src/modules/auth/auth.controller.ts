@@ -36,6 +36,18 @@ import type { TokenPair } from './token.service';
 const REFRESH_COOKIE = 'eiq_refresh';
 
 /**
+ * A readable hint that a session exists — deliberately NOT the session.
+ *
+ * The refresh token is httpOnly, so the marketing pages (which have no auth
+ * context, by design, to stay static) cannot tell a signed-in visitor from a
+ * stranger and show everyone "Log in". This carries no identity, no token and
+ * no claim the server trusts: it exists purely so the UI can offer the right
+ * button. Every actual authorisation decision still rests on the httpOnly
+ * cookie and the access token.
+ */
+const SESSION_HINT_COOKIE = 'eiq_session';
+
+/**
  * Auth endpoints carry a much tighter rate limit than the global default.
  *
  * These are the routes worth brute-forcing — password guessing on login,
@@ -209,6 +221,16 @@ export class AuthController {
   }
 
   private setRefreshCookie(response: Response, tokens: TokenPair): void {
+    // Readable by the client on purpose — see SESSION_HINT_COOKIE.
+    response.cookie(SESSION_HINT_COOKIE, '1', {
+      httpOnly: false,
+      secure:
+        this.config.get<AppConfig['isProduction']>('isProduction') ?? false,
+      sameSite: 'lax',
+      expires: tokens.refreshExpiresAt,
+      path: '/',
+    });
+
     response.cookie(REFRESH_COOKIE, tokens.refreshToken, {
       httpOnly: true,
       secure:
@@ -223,5 +245,8 @@ export class AuthController {
 
   private clearRefreshCookie(response: Response): void {
     response.clearCookie(REFRESH_COOKIE, { path: '/api/v1/auth' });
+    // Cleared together, or the marketing pages keep offering "Dashboard" to
+    // someone who has just signed out.
+    response.clearCookie(SESSION_HINT_COOKIE, { path: '/' });
   }
 }

@@ -7,7 +7,8 @@ import { useProfile } from "@/components/providers/profile-provider";
 import { useAccounts, useCreateAccount } from "@/lib/api/accounts";
 import { Amount, Eyebrow } from "@/components/ui/display";
 import { Button } from "@/components/ui/button";
-import { EmptyState, Pill, Progress, Skeleton } from "@/components/ui/feedback";
+import { EmptyState, Pill, Progress } from "@/components/ui/feedback";
+import { AccountsSkeleton } from "@/components/ui/skeletons";
 import { Modal } from "@/components/ui/overlay";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
@@ -34,15 +35,7 @@ export default function AccountsPage() {
   // option here saves them hitting a 403, but the server is what enforces it.
   const isChild = active?.kind === "CHILD";
 
-  if (isPending) {
-    return (
-      <div className="flex flex-col gap-3 p-4 sm:p-6">
-        <Skeleton className="h-8 w-40" />
-        <Skeleton className="h-24" />
-        <Skeleton className="h-24" />
-      </div>
-    );
-  }
+  if (isPending) return <AccountsSkeleton />;
 
   const grouped = groupByType(accounts ?? []);
 

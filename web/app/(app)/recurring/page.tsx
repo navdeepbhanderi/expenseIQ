@@ -9,7 +9,8 @@ import {
 } from "@/lib/api/misc";
 import { Amount, Eyebrow } from "@/components/ui/display";
 import { Button } from "@/components/ui/button";
-import { EmptyState, Pill, Skeleton } from "@/components/ui/feedback";
+import { EmptyState, Pill } from "@/components/ui/feedback";
+import { ListSkeleton } from "@/components/ui/skeletons";
 import { useToast } from "@/components/ui/toast";
 import { formatMinor } from "@/lib/money";
 
@@ -31,14 +32,7 @@ export default function RecurringPage() {
 
   const suggestions = (detected.data ?? []).filter((s) => !s.alreadyConfirmed);
 
-  if (rules.isPending) {
-    return (
-      <div className="flex flex-col gap-3 p-4 sm:p-6">
-        <Skeleton className="h-8 w-40" />
-        <Skeleton className="h-24" />
-      </div>
-    );
-  }
+  if (rules.isPending) return <ListSkeleton rows={4} />;
 
   return (
     <div className="flex flex-col gap-5 p-4 sm:p-6">
