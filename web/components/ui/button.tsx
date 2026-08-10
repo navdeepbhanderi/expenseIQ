@@ -92,10 +92,22 @@ export function Button({
       )}
       {...props}
     >
-      {isLoading && (
-        <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+      {/*
+       * With asChild, Slot must receive exactly one element child — even a
+       * `false` from a short-circuit counts as a second one and throws. A
+       * link cannot be "loading" anyway, so the spinner is simply not part
+       * of that branch.
+       */}
+      {asChild ? (
+        children
+      ) : (
+        <>
+          {isLoading && (
+            <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+          )}
+          {children}
+        </>
       )}
-      {children}
     </Comp>
   );
 }

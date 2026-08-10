@@ -26,6 +26,21 @@ describe("Button", () => {
     expect(onClick).not.toHaveBeenCalled();
     expect(screen.getByRole("button")).toHaveAttribute("aria-busy", "true");
   });
+
+  it("renders as its child when asChild, without a stray spinner node", () => {
+    // Regression: Slot accepts exactly one element child, and the
+    // `{isLoading && ...}` short-circuit counted as a second one — which
+    // only surfaced as a prerender crash at build time, not in dev.
+    render(
+      <Button asChild>
+        <a href="/signup">Start tracking free</a>
+      </Button>,
+    );
+
+    const link = screen.getByRole("link", { name: "Start tracking free" });
+    expect(link).toHaveAttribute("href", "/signup");
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+  });
 });
 
 describe("AmountInput", () => {
