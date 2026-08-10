@@ -25,6 +25,7 @@ import { cn } from "@/lib/cn";
 /** Reports and budgets — design 3e's norms plus the 6f period switcher. */
 export default function ReportsPage() {
   const { activeId } = useProfile();
+  const { data: categories = [] } = useCategories(activeId);
   const [period, setPeriod] = useState<PeriodKind>("month");
   const month = new Date().toISOString().slice(0, 7);
 
@@ -159,39 +160,53 @@ export default function ReportsPage() {
           </p>
         ) : (
           <ul className="mt-3.5 flex flex-col gap-3.5">
-            {norms.data!.map((norm) => (
-              <li key={norm.categoryId} className="flex items-center gap-3">
-                <CategoryMark monogram={norm.monogram} tint={norm.tint} />
+            {norms.data!.map((norm) => {
+              const category = categories.find((c) => c.id === norm.categoryId);
 
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-baseline justify-between gap-3 text-[13px]">
-                    <span className="truncate text-ink-soft">{norm.name}</span>
-                    <span className="text-ink-muted">
-                      {Math.round(norm.percentOfUsual)}% of your usual{" "}
-                      {formatMinor(norm.usual.amountMinor)}
-                    </span>
-                  </div>
-
-                  <Progress
-                    className="mt-1.5"
-                    value={norm.percentOfUsual}
-                    max={150}
-                  />
-
-                  {/*
-                   * A baseline from one or two months is an average of noise.
-                   * Saying so is more useful than quietly presenting it as a
-                   * habit the user does not have.
-                   */}
-                  {!norm.isReliable && (
-                    <p className="mt-1 text-[11px] text-ink-faint">
-                      Based on {norm.monthsObserved} month
-                      {norm.monthsObserved === 1 ? "" : "s"} — still settling
-                    </p>
+              return (
+                <li key={norm.categoryId} className="flex items-center gap-3">
+                  {category ? (
+                    <CategoryMark
+                      monogram={category.monogram}
+                      tint={category.tint}
+                    />
+                  ) : (
+                    <span className="size-[26px] shrink-0 rounded-lg bg-paper-raised" />
                   )}
-                </div>
-              </li>
-            ))}
+
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-baseline justify-between gap-3 text-[13px]">
+                      <span className="truncate text-ink-soft">
+                        {norm.categoryName}
+                      </span>
+                      <span className="text-ink-muted">
+                        {norm.percentOfUsual === null
+                          ? `No usual yet · ${formatMinor(norm.currentMonth.amountMinor)}`
+                          : `${Math.round(norm.percentOfUsual)}% of your usual ${formatMinor(norm.usual.amountMinor)}`}
+                      </span>
+                    </div>
+
+                    <Progress
+                      className="mt-1.5"
+                      value={norm.percentOfUsual ?? 0}
+                      max={150}
+                    />
+
+                    {/*
+                     * A baseline from one or two months is an average of
+                     * noise. Saying so is more useful than quietly presenting
+                     * it as a habit the user does not have.
+                     */}
+                    {!norm.isReliable && (
+                      <p className="mt-1 text-[11px] text-ink-faint">
+                        Based on {norm.sampleMonths} month
+                        {norm.sampleMonths === 1 ? "" : "s"} — still settling
+                      </p>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         )}
       </section>
@@ -211,23 +226,37 @@ export default function ReportsPage() {
         <section className="rounded-[--radius-card] border border-line-strong bg-paper p-5">
           <Eyebrow>Versus {comparison.data!.previous.label}</Eyebrow>
           <ul className="mt-3 flex flex-col gap-2.5">
-            {comparison.data!.byCategory.slice(0, 8).map((row) => (
-              <li
-                key={row.categoryId ?? row.name}
-                className="flex items-center gap-3"
-              >
-                <CategoryMark monogram={row.monogram} tint={row.tint} size="sm" />
-                <span className="min-w-0 flex-1 truncate text-[13px] text-ink-soft">
-                  {row.name}
-                </span>
-                <Amount value={row.comparison.current} size="sm" />
-                <Delta
-                  comparison={row.comparison}
-                  periodLabel=""
-                  className="w-24 justify-end"
-                />
-              </li>
-            ))}
+            {comparison.data!.byCategory.slice(0, 8).map((row) => {
+              // The comparison carries no monogram or tint, so the mark comes
+              // from the categories list the page already has.
+              const category = categories.find((c) => c.id === row.categoryId);
+
+              return (
+                <li
+                  key={row.categoryId ?? row.name}
+                  className="flex items-center gap-3"
+                >
+                  {category ? (
+                    <CategoryMark
+                      monogram={category.monogram}
+                      tint={category.tint}
+                      size="sm"
+                    />
+                  ) : (
+                    <span className="size-6 shrink-0 rounded-lg bg-paper-raised" />
+                  )}
+
+                  <span className="min-w-0 flex-1 truncate text-[13px] text-ink-soft">
+                    {row.name}
+                  </span>
+
+                  {/* The row IS the comparison — current/previous/delta live
+                      on it directly, not under a nested key. */}
+                  <Amount value={row.current} size="sm" />
+                  <Delta comparison={row} periodLabel="" className="w-24 justify-end" />
+                </li>
+              );
+            })}
           </ul>
         </section>
       )}

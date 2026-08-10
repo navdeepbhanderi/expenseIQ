@@ -22,7 +22,27 @@ export interface ReportSummary {
   transactionCount: number;
   averagePerDay: Money;
   topCategories: CategorySlice[];
-  largestTransaction: { amountMinor: number; note: string | null } | null;
+  largestTransaction: {
+    id: string;
+    amount: Money;
+    merchant: string | null;
+    category: string | null;
+    date: string;
+  } | null;
+}
+
+/**
+ * One category's movement between periods.
+ *
+ * Flat, not nested under a `comparison` key, and it carries no monogram or
+ * tint — those come from the categories list. Verified against
+ * reports.service.ts's CategoryComparison rather than assumed: the sample
+ * response used to shape these types had an empty byCategory array, so the
+ * item shape was invisible in it.
+ */
+export interface CategoryComparison extends Comparison {
+  categoryId: string | null;
+  name: string;
 }
 
 export interface ComparisonReport {
@@ -30,26 +50,25 @@ export interface ComparisonReport {
   previous: Omit<Period, "kind">;
   spend: Comparison;
   income: Comparison;
-  byCategory: {
-    categoryId: string | null;
-    name: string;
-    monogram: string;
-    tint: string;
-    comparison: Comparison;
-  }[];
+  /** Biggest movers first — including categories that vanished this period. */
+  byCategory: CategoryComparison[];
 }
 
-/** Design 3e's "74% of your usual ₹25,000 on groceries". */
+/**
+ * Design 3e's "74% of your usual ₹25,000 on groceries".
+ *
+ * Field names follow the server's CategoryNormLine exactly — `categoryName`,
+ * `currentMonth`, `sampleMonths` — and there is no monogram or tint here.
+ * `percentOfUsual` is nullable: a category with no history has no "usual" to
+ * be a percentage of.
+ */
 export interface CategoryNorm {
   categoryId: string;
-  name: string;
-  monogram: string;
-  tint: string;
+  categoryName: string;
   usual: Money;
-  current: Money;
-  percentOfUsual: number;
-  /** How many months of history back the baseline. */
-  monthsObserved: number;
+  currentMonth: Money;
+  percentOfUsual: number | null;
+  sampleMonths: number;
   isReliable: boolean;
 }
 
@@ -59,26 +78,25 @@ export interface TrendPoint {
   income: Money;
 }
 
+export interface BudgetStatusLine {
+  budget: Money;
+  spent: Money;
+  remaining: Money;
+  percentUsed: number;
+  isOver: boolean;
+}
+
+/** Category budgets nest their figures under `status`. */
+export interface BudgetLine {
+  categoryId: string | null;
+  categoryName: string;
+  status: BudgetStatusLine;
+}
+
 export interface BudgetOverview {
   month: string;
-  overall: {
-    budget: Money;
-    spent: Money;
-    remaining: Money;
-    percentUsed: number;
-    isOver: boolean;
-  } | null;
-  categories: {
-    categoryId: string;
-    name: string;
-    monogram: string;
-    tint: string;
-    budget: Money;
-    spent: Money;
-    remaining: Money;
-    percentUsed: number;
-    isOver: boolean;
-  }[];
+  overall: BudgetStatusLine | null;
+  categories: BudgetLine[];
 }
 
 export const reportKeys = {
