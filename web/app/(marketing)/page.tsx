@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import {
   Calendar,
-  Check,
   CreditCard,
   Download,
   FileText,
@@ -15,15 +14,13 @@ import {
   Receipt,
   RefreshCw,
   ShieldCheck,
-  Split,
   Sparkles,
+  Split,
   Users,
   UsersRound,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, Eyebrow } from "@/components/ui/display";
 import { Pill } from "@/components/ui/feedback";
-import { Avatar } from "@/components/ui/display";
 import { ParseDemo } from "@/components/marketing/parse-demo";
 
 export const metadata: Metadata = {
@@ -35,63 +32,63 @@ export const metadata: Metadata = {
 /*
  * Landing page — design 8a (web) and 8b (mobile).
  *
- * Everything the design specifies is here. Where a claim describes something
- * the product cannot do yet it carries a `Soon` pill, and two claims were
- * corrected outright rather than tagged:
+ * Two structural things the design does that are easy to miss and change the
+ * whole feel:
  *
- *   - "Data stays in India" is a deployment claim, and nothing is deployed.
- *   - The badge named Marathi and Tamil; the backend was verified in Hindi,
- *     Gujarati and Hinglish. The model handles more, but the badge should
- *     name what was actually tested.
+ *   1. The features band and the closing CTA are DARK in both themes. They are
+ *      a compositional device — an ink band breaking up warm paper — not a
+ *      theme response. Hence literal Night Ledger colours rather than tokens.
+ *   2. The hero sits on sunken paper, not paper, so the demo card floats
+ *      *above* its surroundings rather than merging with them.
  *
- * A landing page is a promise made before anyone can check it, which is
- * exactly why it should not overstate.
+ * Claims: anything the API cannot do yet carries a `Soon` pill. Two further
+ * claims were corrected rather than tagged — see the trust row and the badge.
  */
 
 const FEATURES = [
   {
     icon: Mic,
     title: "Speak it in your language",
-    body: "Hindi, Gujarati, Hinglish, English — or all of them in one sentence. “petrol bharwaya 1200” is understood as written; nothing is translated back at you.",
+    body: "Hindi, Gujarati, Hinglish — or all of them in one sentence.",
   },
   {
     icon: Layers,
     title: "One sentence, several expenses",
-    body: "“groceries 300, uber 640, and bijli ka bill 2400” becomes three separate entries, each with its own category and date.",
+    body: "“groceries 300, uber 640, bijli ka bill 2400” becomes three entries.",
   },
   {
     icon: ShieldCheck,
     title: "Nothing enters unconfirmed",
-    body: "Every parsed entry waits in a review queue with its confidence shown. Clear ones confirm in a tap; uncertain ones say exactly which field they are unsure about.",
+    body: "A review queue with plain-language confidence on every entry.",
   },
   {
     icon: CreditCard,
     title: "Cards and loans, done properly",
-    body: "Statement and due dates that clamp correctly in February, minimum due, utilisation, EMI schedules, and a prepayment simulator that shows what a lump sum actually saves.",
+    body: "Statement dates, minimum due, utilisation, EMI schedules, prepay maths.",
   },
   {
     icon: PiggyBank,
     title: "Budgets that know your habits",
-    body: "Per-category budgets, month-over-month comparison, and a rolling baseline — “74% of your usual ₹25,000 on groceries” — instead of a number with no context.",
+    body: "“74% of your usual ₹25,000 on groceries” — context, not a bare number.",
   },
   {
     icon: Users,
     title: "Family without surveillance",
-    body: "Shared profiles, per-child spend limits, allowances and savings goals. Limits nudge and inform; they never block an entry, because an unrecorded expense is worse than a visible one.",
+    body: "Shared profiles, kid limits, allowances. Limits nudge, never block.",
   },
   {
     icon: Receipt,
     title: "Scan the bill",
-    body: "Photograph a receipt or drop in a PDF. The total, merchant and date land in the same review queue as everything else.",
+    body: "Photograph a receipt or drop a PDF; it lands in the same queue.",
   },
   {
     icon: RefreshCw,
     title: "Recurring, noticed for you",
-    body: "Rent, EMIs and subscriptions are detected from your own history and suggested before they become rules. Auto-debits are flagged so a due date is never a surprise.",
+    body: "Rent, EMIs and subscriptions detected from your own history.",
   },
 ];
 
-/** `soon: true` means the API genuinely cannot do this yet. */
+/** `soon` means the API genuinely cannot do this yet. */
 const EXTRAS = [
   {
     icon: Mail,
@@ -120,7 +117,7 @@ const EXTRAS = [
   {
     icon: Download,
     title: "Export & tax-ready",
-    body: "CSV today. Excel and an FY PDF your CA will accept are coming.",
+    body: "CSV today; Excel and an FY PDF your CA will accept are coming.",
   },
   {
     icon: Moon,
@@ -166,8 +163,10 @@ const PLANS = [
   {
     name: "Personal",
     price: "Free",
-    cadence: "forever, one profile",
+    cadence: null,
+    note: "forever, one profile",
     cta: "Start free",
+    featured: false,
     features: [
       { label: "Unlimited voice & text entries" },
       { label: "All accounts, cards and loans" },
@@ -178,9 +177,11 @@ const PLANS = [
   {
     name: "Family",
     price: "₹99",
-    cadence: "/month · up to 6 profiles",
-    highlight: "Most chosen",
+    cadence: "/month",
+    note: "up to 6 profiles",
+    badge: "Most chosen",
     cta: "Start free",
+    featured: true,
     features: [
       { label: "Everything in Personal" },
       { label: "Shared household ledger" },
@@ -191,8 +192,10 @@ const PLANS = [
   {
     name: "Pro",
     price: "₹249",
-    cadence: "/month · freelancers & small business",
+    cadence: "/month",
+    note: "freelancers & small business",
     cta: "Start free",
+    featured: false,
     features: [
       { label: "Everything in Family" },
       { label: "Business vs personal ledgers", soon: true },
@@ -202,56 +205,72 @@ const PLANS = [
   },
 ];
 
+/** Ink band. Fixed Night Ledger colours — a device, not a theme response. */
+const DARK = "bg-[#17140F]";
+
 export default function LandingPage() {
   return (
     <>
       {/* ------------------------------------------------------------ hero */}
-      <section className="border-b border-line-soft bg-paper">
-        <div className="mx-auto max-w-6xl px-5 py-14 sm:px-8 sm:py-20">
-          <div className="grid items-center gap-12 lg:grid-cols-[1.05fr_1fr] lg:gap-16">
+      <section className="border-b border-line-soft bg-paper-sunken">
+        <div className="mx-auto max-w-6xl px-5 py-14 sm:px-8 sm:py-20 lg:py-[88px]">
+          <div className="grid items-center gap-14 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
             <div>
-              <span className="inline-flex items-center gap-2 rounded-full border border-green/25 bg-green-soft px-3 py-1.5 text-[13px] font-medium text-green-hover">
-                <Sparkles className="size-3.5" aria-hidden="true" />
-                Understands Hindi, Gujarati &amp; Hinglish
+              {/*
+               * Marigold, not green. The design uses attention here because
+               * this is new news, and the whole palette reserves marigold for
+               * the thing worth your eye.
+               */}
+              <span className="inline-flex items-center gap-2 rounded-full border border-attention-line bg-attention-soft px-[15px] py-[7px]">
+                <span
+                  aria-hidden="true"
+                  className="size-[7px] rounded-full bg-attention"
+                />
+                <span className="text-[13px] font-semibold text-attention-ink">
+                  Understands Hindi, Gujarati &amp; Hinglish
+                </span>
               </span>
 
-              <h1 className="mt-5 font-display text-[40px] font-medium leading-[1.06] text-ink sm:text-[58px]">
+              <h1 className="mt-6 font-display text-[44px] font-normal leading-[1.02] text-ink sm:text-[60px] lg:text-[76px]">
                 Just say what you spent.
               </h1>
 
-              <p className="mt-5 max-w-xl text-[17px] leading-relaxed text-ink-muted">
-                ExpenseIQ turns{" "}
-                <span className="text-ink">
-                  &ldquo;300 रुपये किराने पे खर्च किए&rdquo;
-                </span>{" "}
-                into a proper ledger entry — categorised, tied to the right
-                account, and always shown to you before it&rsquo;s saved.
+              <p className="mt-5 max-w-[560px] text-[17px] leading-[1.6] text-ink-muted sm:text-xl">
+                ExpenseIQ turns &ldquo;
+                <span className="text-ink">300 रुपये किराने पे खर्च किए</span>
+                &rdquo; into a proper ledger entry — categorised, tied to the
+                right account, and always shown to you before it&rsquo;s saved.
               </p>
 
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Button asChild className="h-12 px-6 text-base">
+              <div className="mt-8 flex flex-col gap-3.5 sm:flex-row">
+                <Button
+                  asChild
+                  className="h-auto rounded-[14px] px-[26px] py-4 text-base"
+                >
                   <Link href="/signup">Start free — 2 minutes</Link>
                 </Button>
                 <Button
                   asChild
                   variant="secondary"
-                  className="h-12 px-6 text-base"
+                  className="h-auto rounded-[14px] px-[26px] py-4 text-base"
                 >
                   <Link href="#how">See how it reads</Link>
                 </Button>
               </div>
 
-              <ul className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-[13px] text-ink-muted">
+              <ul className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-ink-muted sm:gap-x-[22px]">
                 {[
                   "No bank credentials",
                   "Your data is never sold",
                   "Free for personal use",
-                ].map((item) => (
-                  <li key={item} className="flex items-center gap-1.5">
-                    <Check
-                      className="size-3.5 text-green"
-                      aria-hidden="true"
-                    />
+                ].map((item, i) => (
+                  <li key={item} className="flex items-center gap-4">
+                    {i > 0 && (
+                      <span
+                        aria-hidden="true"
+                        className="hidden size-1 rounded-full bg-line sm:block"
+                      />
+                    )}
                     {item}
                   </li>
                 ))}
@@ -266,85 +285,92 @@ export default function LandingPage() {
       </section>
 
       {/* ------------------------------------------------------ how it works */}
-      <section id="how" className="border-b border-line-soft bg-paper-sunken">
-        <div className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
-          <div className="max-w-2xl">
-            <Eyebrow>How it works</Eyebrow>
-            <h2 className="mt-3 font-display text-3xl font-medium text-ink sm:text-[38px]">
-              Three steps, four seconds
-            </h2>
-          </div>
+      <section id="how" className="border-b border-line-soft bg-paper">
+        <div className="mx-auto max-w-6xl px-5 py-14 sm:px-8">
+          <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-ink-faint">
+            Three steps, four seconds
+          </p>
 
-          <ol className="mt-10 grid gap-5 md:grid-cols-3">
+          <ol className="mt-6 grid gap-5 md:grid-cols-3 lg:gap-6">
             {STEPS.map(({ step, title, body }) => (
-              <li key={step}>
-                <Card className="h-full p-6">
-                  <span className="font-mono text-sm font-semibold text-green">
-                    {step}
-                  </span>
-                  <h3 className="mt-3 font-display text-xl font-medium text-ink">
-                    {title}
-                  </h3>
-                  <p className="mt-2 text-sm leading-relaxed text-ink-muted">
-                    {body}
-                  </p>
-                </Card>
+              <li
+                key={step}
+                className="rounded-[18px] border border-line-strong bg-field p-6 sm:p-7"
+              >
+                <span className="font-display text-[32px] leading-none text-green">
+                  {step}
+                </span>
+                <h3 className="mt-2.5 text-[19px] font-semibold text-ink">
+                  {title}
+                </h3>
+                <p className="mt-2 text-[15px] leading-[1.6] text-ink-muted">
+                  {body}
+                </p>
               </li>
             ))}
           </ol>
         </div>
       </section>
 
-      {/* -------------------------------------------------------- features */}
-      <section id="features" className="bg-paper">
-        <div className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
-          <div className="max-w-2xl">
-            <Eyebrow>What it does</Eyebrow>
-            <h2 className="mt-3 font-display text-3xl font-medium text-ink sm:text-[38px]">
-              Built for the money you actually have
-            </h2>
-            <p className="mt-3 text-[17px] leading-relaxed text-ink-muted">
-              Credit card cycles, home loans, shared family spending, the
-              subscription you forgot about. Not a spreadsheet with a nicer
-              font.
-            </p>
-          </div>
+      {/* --------------------------------------------- features (dark band) */}
+      <section id="features" className={DARK}>
+        <div className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-[72px]">
+          <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-[#7B736A]">
+            What it does
+          </p>
+          <h2 className="mt-3.5 font-display text-[34px] font-normal leading-[1.08] text-[#F5F0E8] sm:text-[52px]">
+            Built for the money you actually have
+          </h2>
+          <p className="mt-3 max-w-[680px] text-[17px] leading-[1.6] text-[#9A9188] sm:text-lg">
+            Credit card cycles, home loans, shared family spending, the
+            subscription you forgot about. Not a spreadsheet with a nicer font.
+          </p>
 
-          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-[18px]">
             {FEATURES.map(({ icon: Icon, title, body }) => (
-              <Card key={title} className="flex flex-col gap-3 p-5">
-                <span className="flex size-10 items-center justify-center rounded-[--radius-control] bg-green-soft text-green">
+              <div
+                key={title}
+                className="rounded-[18px] border border-[#2C2823] bg-[#1D1A17] p-6"
+              >
+                <span className="flex size-10 items-center justify-center rounded-xl bg-[#5CBFA3]/12 text-[#5CBFA3]">
                   <Icon className="size-[18px]" aria-hidden="true" />
                 </span>
-                <h3 className="text-[15px] font-semibold text-ink">{title}</h3>
-                <p className="text-[13px] leading-relaxed text-ink-muted">
+                <h3 className="mt-4 text-[17px] font-semibold text-[#F5F0E8]">
+                  {title}
+                </h3>
+                <p className="mt-2 text-[15px] leading-[1.6] text-[#9A9188]">
                   {body}
                 </p>
-              </Card>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
       {/* ---------------------------------------------------------- extras */}
-      <section className="border-y border-line-soft bg-paper-sunken">
-        <div className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
+      <section className="border-b border-line-soft bg-paper">
+        <div className="mx-auto max-w-6xl px-5 py-14 sm:px-8 sm:py-16">
           <div className="flex flex-wrap items-end justify-between gap-3">
-            <div className="max-w-2xl">
-              <Eyebrow>And the rest of it</Eyebrow>
-              <h2 className="mt-3 font-display text-3xl font-medium text-ink sm:text-[38px]">
+            <div>
+              <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-ink-faint">
+                And the rest of it
+              </p>
+              <h2 className="mt-3 font-display text-[30px] font-normal text-ink sm:text-[38px]">
                 Everything else you&rsquo;d expect
               </h2>
             </div>
-            <p className="text-[13px] text-ink-faint">
+            <p className="flex items-center gap-2 text-[13px] text-ink-faint">
               Items marked <Pill tone="soon">Soon</Pill> are in development.
             </p>
           </div>
 
-          <div className="mt-9 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {EXTRAS.map(({ icon: Icon, title, body, soon }) => (
-              <Card key={title} className="flex gap-3.5 p-4">
-                <span className="flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-paper-raised text-ink-muted">
+              <div
+                key={title}
+                className="flex gap-3.5 rounded-[18px] border border-line-strong bg-field p-4"
+              >
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-paper text-ink-muted">
                   <Icon className="size-4" aria-hidden="true" />
                 </span>
                 <div>
@@ -356,37 +382,39 @@ export default function LandingPage() {
                     {body}
                   </p>
                 </div>
-              </Card>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* -------------------------------------------------------- families */}
-      <section id="families" className="bg-paper">
-        <div className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
-          <div className="grid gap-10 lg:grid-cols-2 lg:gap-16">
+      {/* ------------------------------------------------ families + quote */}
+      <section id="families" className="border-b border-line-soft bg-paper">
+        <div className="mx-auto max-w-6xl px-5 py-14 sm:px-8 sm:py-16">
+          <div className="grid gap-10 lg:grid-cols-2 lg:gap-14">
             <div>
-              <Eyebrow>Families</Eyebrow>
-              <h2 className="mt-3 font-display text-3xl font-medium text-ink sm:text-[38px]">
+              <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-ink-faint">
+                Families
+              </p>
+              <h2 className="mt-3 font-display text-[30px] font-normal leading-tight text-ink sm:text-[38px]">
                 One household, separate ledgers
               </h2>
-              <p className="mt-4 text-[17px] leading-relaxed text-ink-muted">
+              <p className="mt-4 text-[17px] leading-[1.6] text-ink-muted">
                 A shared profile for the household, a personal one for you, and
                 a limited one for each child. Everyone adds to the same picture
                 without everyone seeing every line.
               </p>
 
-              <ul className="mt-6 flex flex-col gap-3">
+              <ul className="mt-6 flex flex-col gap-2.5 text-[15px] text-ink-soft">
                 {[
                   "Kid profiles see their own allowance and goals, not the family's card balances.",
                   "Spend limits nudge at 80% and flag the owner when crossed — they never block an entry.",
-                  "Credit products and automated inboxes are refused on a child profile by the server, not just hidden.",
+                  "Credit products are refused on a child profile by the server, not just hidden.",
                 ].map((line) => (
-                  <li key={line} className="flex gap-2.5 text-sm text-ink-soft">
-                    <Check
-                      className="mt-0.5 size-4 shrink-0 text-green"
+                  <li key={line} className="flex gap-2.5">
+                    <span
                       aria-hidden="true"
+                      className="mt-[9px] size-1 shrink-0 rounded-full bg-green"
                     />
                     {line}
                   </li>
@@ -395,36 +423,46 @@ export default function LandingPage() {
             </div>
 
             <figure className="flex flex-col justify-center">
-              <Card className="p-6">
-                <blockquote className="font-display text-xl leading-relaxed text-ink sm:text-2xl">
+              <div className="rounded-[18px] border border-line-strong bg-paper p-6 sm:p-7">
+                <blockquote className="font-display text-[22px] leading-[1.45] text-ink sm:text-[25px]">
                   &ldquo;I stopped tracking three apps ago. This one I talk to
                   while walking out of the shop.&rdquo;
                 </blockquote>
-                <figcaption className="mt-5 flex items-center gap-3">
-                  <Avatar initials="MN" color="#B5442F" />
+                <figcaption className="mt-[18px] flex items-center gap-3">
+                  <span
+                    aria-hidden="true"
+                    className="flex size-[38px] items-center justify-center rounded-full bg-spend text-sm font-semibold text-paper"
+                  >
+                    MN
+                  </span>
                   <div>
-                    <p className="text-sm font-semibold text-ink">Meera N.</p>
-                    <p className="text-xs text-ink-muted">
+                    <p className="text-[15px] text-ink">Meera N.</p>
+                    <p className="text-[13px] text-ink-faint">
                       Pune · family of four
                     </p>
                   </div>
                 </figcaption>
-              </Card>
+              </div>
             </figure>
           </div>
         </div>
       </section>
 
       {/* -------------------------------------------------------- security */}
-      <section id="security" className="border-y border-line-soft bg-paper-sunken">
-        <div className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
+      <section
+        id="security"
+        className="border-b border-line-soft bg-paper-sunken"
+      >
+        <div className="mx-auto max-w-6xl px-5 py-14 sm:px-8 sm:py-16">
           <div className="grid gap-8 lg:grid-cols-2 lg:gap-14">
             <div>
-              <Eyebrow>Security</Eyebrow>
-              <h2 className="mt-3 font-display text-3xl font-medium text-ink sm:text-[38px]">
+              <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-ink-faint">
+                Security
+              </p>
+              <h2 className="mt-3 font-display text-[30px] font-normal leading-tight text-ink sm:text-[38px]">
                 Nothing is saved until you say so
               </h2>
-              <p className="mt-4 text-[17px] leading-relaxed text-ink-muted">
+              <p className="mt-4 text-[17px] leading-[1.6] text-ink-muted">
                 Every parsed entry waits in a review queue with a plain-language
                 confidence read. We never ask for net-banking credentials,
                 integrations are opt-in with one toggle each, and you can export
@@ -440,7 +478,7 @@ export default function LandingPage() {
                 ],
                 [
                   "Read-only integrations",
-                  "Where an inbox or calendar is connected, it is read-only and opt-in — and raw email is never stored.",
+                  "Where an inbox or calendar is connected it is read-only and opt-in — raw email is never stored.",
                 ],
                 [
                   "Ten seconds to undo",
@@ -448,15 +486,18 @@ export default function LandingPage() {
                 ],
                 [
                   "Export or delete anytime",
-                  "Your ledger leaves as CSV whenever you want it, and deleting a profile shows exactly what goes with it.",
+                  "Your ledger leaves as CSV whenever you want, and deleting a profile shows what goes with it.",
                 ],
               ].map(([title, body]) => (
-                <Card key={title} className="p-5">
+                <div
+                  key={title}
+                  className="rounded-[18px] border border-line-strong bg-paper p-5"
+                >
                   <h3 className="text-sm font-semibold text-ink">{title}</h3>
                   <p className="mt-1.5 text-[13px] leading-relaxed text-ink-muted">
                     {body}
                   </p>
-                </Card>
+                </div>
               ))}
             </div>
           </div>
@@ -465,91 +506,106 @@ export default function LandingPage() {
 
       {/* --------------------------------------------------------- pricing */}
       <section id="pricing" className="bg-paper">
-        <div className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
-          <div className="max-w-2xl">
-            <Eyebrow>Pricing</Eyebrow>
-            <h2 className="mt-3 font-display text-3xl font-medium text-ink sm:text-[38px]">
-              Free for one person. ₹99 for the household.
-            </h2>
-            <p className="mt-3 text-[15px] leading-relaxed text-ink-muted">
-              Paid plans aren&rsquo;t live yet — every plan starts as a free
-              account, and nothing asks for a card.
-            </p>
-          </div>
+        <div className="mx-auto max-w-6xl px-5 py-14 sm:px-8 sm:py-16">
+          <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-ink-faint">
+            Pricing
+          </p>
+          <h2 className="mt-3 font-display text-[30px] font-normal leading-tight text-ink sm:text-[38px]">
+            Free for one person. ₹99 for the household.
+          </h2>
+          <p className="mt-3 text-[15px] text-ink-muted">
+            Paid plans aren&rsquo;t live yet — every plan starts as a free
+            account, and nothing asks for a card.
+          </p>
 
-          <div className="mt-10 grid gap-4 lg:grid-cols-3">
+          <div className="mt-7 grid gap-[18px] lg:grid-cols-3">
             {PLANS.map((plan) => (
-              <Card
+              <div
                 key={plan.name}
                 className={
-                  plan.highlight
-                    ? "relative flex flex-col border-green p-6 shadow-[var(--shadow-popover)]"
-                    : "relative flex flex-col p-6"
+                  plan.featured
+                    ? "flex flex-col rounded-[18px] border border-green bg-paper p-6 shadow-[0_20px_44px_-28px_rgba(31,111,92,0.6)] sm:p-7"
+                    : "flex flex-col rounded-[18px] border border-line-strong bg-field p-6 sm:p-7"
                 }
               >
-                {plan.highlight && (
-                  <span className="absolute -top-2.5 left-6 rounded-full bg-green px-2.5 py-0.5 text-[11px] font-semibold text-paper">
-                    {plan.highlight}
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-[17px] font-semibold text-ink">
+                    {plan.name}
                   </span>
-                )}
-
-                <h3 className="font-display text-xl font-medium text-ink">
-                  {plan.name}
-                </h3>
-
-                <div className="mt-3 flex items-baseline gap-1.5">
-                  <span className="font-display text-[40px] font-medium leading-none text-ink">
-                    {plan.price}
-                  </span>
-                  <span className="text-[13px] text-ink-muted">
-                    {plan.cadence}
-                  </span>
+                  {plan.badge && (
+                    <span className="rounded-full border border-green/25 bg-green-soft px-2.5 py-1 text-[11px] text-green-hover">
+                      {plan.badge}
+                    </span>
+                  )}
                 </div>
 
-                <ul className="mt-6 flex flex-1 flex-col gap-2.5">
+                <div className="mt-2 flex items-baseline gap-1.5">
+                  <span className="font-display text-[42px] leading-none text-ink">
+                    {plan.price}
+                  </span>
+                  {plan.cadence && (
+                    <span className="text-sm text-ink-faint">
+                      {plan.cadence}
+                    </span>
+                  )}
+                </div>
+                <p className="mt-1 text-sm text-ink-faint">{plan.note}</p>
+
+                {/*
+                 * Plain lines, no tick icons — the design lists them as text.
+                 * A column of ticks reads as a comparison table and invites
+                 * counting features rather than reading them.
+                 */}
+                <ul className="mt-[18px] flex flex-1 flex-col gap-2.5 text-[15px] text-ink-muted">
                   {plan.features.map((feature) => (
                     <li
                       key={feature.label}
-                      className="flex flex-wrap items-center gap-2 text-sm text-ink-soft"
+                      className="flex flex-wrap items-center gap-2"
                     >
-                      <Check
-                        className="size-4 shrink-0 text-green"
-                        aria-hidden="true"
-                      />
                       {feature.label}
-                      {feature.soon && <Pill tone="soon">Soon</Pill>}
+                      {"soon" in feature && feature.soon && (
+                        <Pill tone="soon">Soon</Pill>
+                      )}
                     </li>
                   ))}
                 </ul>
 
                 <Button
                   asChild
-                  variant={plan.highlight ? "primary" : "secondary"}
-                  className="mt-7 h-11 w-full"
+                  variant={plan.featured ? "primary" : "secondary"}
+                  className="mt-[22px] h-12 w-full rounded-[13px] text-[15px]"
                 >
                   <Link href="/signup">{plan.cta}</Link>
                 </Button>
-              </Card>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ------------------------------------------------------------- cta */}
-      <section className="border-t border-line-soft bg-paper-sunken">
-        <div className="mx-auto max-w-3xl px-5 py-16 text-center sm:px-8 sm:py-20">
-          <h2 className="font-display text-3xl font-medium leading-tight text-ink sm:text-[42px]">
-            Your first entry takes four seconds.
-          </h2>
-          <p className="mx-auto mt-4 max-w-xl text-[17px] leading-relaxed text-ink-muted">
-            Free for personal use. Create an account, add one card, and say what
-            you spent.
-          </p>
-          <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-            <Button asChild className="h-12 px-7 text-base">
+      {/* ------------------------------------------------- closing (dark) */}
+      <section className={DARK}>
+        <div className="mx-auto flex max-w-6xl flex-col gap-8 px-5 py-14 sm:px-8 sm:py-16 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <h2 className="font-display text-[32px] font-normal leading-tight text-[#F5F0E8] sm:text-[44px]">
+              Your first entry takes four seconds.
+            </h2>
+            <p className="mt-2 text-[17px] text-[#9A9188]">
+              Free for personal use. Family profiles from ₹99/month.
+            </p>
+          </div>
+
+          <div className="flex shrink-0 flex-col gap-3.5 sm:flex-row">
+            <Button
+              asChild
+              className="h-auto rounded-[14px] px-[26px] py-4 text-base"
+            >
               <Link href="/signup">Start free</Link>
             </Button>
-            <Button asChild variant="secondary" className="h-12 px-7 text-base">
+            <Button
+              asChild
+              className="h-auto rounded-[14px] border border-[#35302A] bg-transparent px-[26px] py-4 text-base text-[#F5F0E8] hover:bg-[#1D1A17]"
+            >
               <Link href="/login">I already have an account</Link>
             </Button>
           </div>

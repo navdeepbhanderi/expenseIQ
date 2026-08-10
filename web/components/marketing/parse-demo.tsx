@@ -1,26 +1,26 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Check, Mic } from "lucide-react";
 import { cn } from "@/lib/cn";
-import { Card, CategoryMark } from "@/components/ui/display";
-import { Chip } from "@/components/ui/controls";
-import { ConfidenceDots } from "@/components/ui/feedback";
-import { Button } from "@/components/ui/button";
+import { CategoryMark } from "@/components/ui/display";
 
 /**
- * The hero's animated proof — design 8a's "Heard just now" card.
+ * The hero's "Heard just now" card — design 8a.
  *
- * Built from the real primitives rather than a screenshot, so it cannot drift
- * from the product and renders correctly in Night Ledger.
+ * The design leads with the resolved amount at 56px Newsreader, not with the
+ * chips: the point being made is that a spoken sentence becomes a number you
+ * can check at a glance. The raw utterance sits above it in muted ink, as
+ * evidence rather than as the headline.
  *
- * The phrases are genuine multilingual inputs the backend was tested against
- * and parsed correctly in live testing — not marketing invention.
+ * The due tile is absolutely positioned so it overhangs the card's bottom
+ * corner. That overlap is what makes the pair read as one composition instead
+ * of two stacked boxes.
+ *
+ * Phrases are the real multilingual inputs the backend was tested against.
  */
 
 interface Sample {
   utterance: string;
-  language: string;
   amount: string;
   category: string;
   monogram: string;
@@ -32,7 +32,6 @@ interface Sample {
 const SAMPLES: Sample[] = [
   {
     utterance: "300 रुपये किराने पे खर्च किए",
-    language: "Hindi",
     amount: "₹300",
     category: "Groceries",
     monogram: "GR",
@@ -42,7 +41,6 @@ const SAMPLES: Sample[] = [
   },
   {
     utterance: "kal swiggy se 482 ka order kiya",
-    language: "Hinglish",
     amount: "₹482",
     category: "Eating out",
     monogram: "EA",
@@ -52,7 +50,6 @@ const SAMPLES: Sample[] = [
   },
   {
     utterance: "આજે પેટ્રોલ ૧૨૦૦ નું ભરાવ્યું",
-    language: "Gujarati",
     amount: "₹1,200",
     category: "Fuel",
     monogram: "FU",
@@ -62,134 +59,119 @@ const SAMPLES: Sample[] = [
   },
 ];
 
-type Stage = "listening" | "parsed";
+function Pip({ filled }: { filled: boolean }) {
+  return (
+    <span
+      className={cn(
+        "size-1.5 rounded-full",
+        filled ? "bg-income" : "bg-line",
+      )}
+    />
+  );
+}
 
 export function ParseDemo() {
   const [index, setIndex] = useState(0);
-  const [stage, setStage] = useState<Stage>("listening");
   const sample = SAMPLES[index]!;
 
   useEffect(() => {
-    // Listen, resolve, hold, advance. Long enough to read the Devanagari,
-    // short enough that nobody waits for it.
-    const toParsed = setTimeout(() => setStage("parsed"), 1400);
-    const toNext = setTimeout(() => {
-      setStage("listening");
-      setIndex((i) => (i + 1) % SAMPLES.length);
-    }, 5200);
-
-    return () => {
-      clearTimeout(toParsed);
-      clearTimeout(toNext);
-    };
+    const timer = setTimeout(
+      () => setIndex((i) => (i + 1) % SAMPLES.length),
+      4200,
+    );
+    return () => clearTimeout(timer);
   }, [index]);
 
   return (
-    <div className="flex w-full max-w-md flex-col gap-3">
-      <Card className="overflow-hidden shadow-[var(--shadow-popover)]">
-        <div className="flex items-center gap-3 border-b border-line-soft px-5 py-4">
-          <span
-            className={cn(
-              "flex size-9 shrink-0 items-center justify-center rounded-full transition-colors",
-              stage === "listening"
-                ? "bg-green text-paper"
-                : "bg-green-soft text-green",
-            )}
-          >
-            {stage === "listening" ? (
-              <Mic className="size-4" aria-hidden="true" />
-            ) : (
-              <Check className="size-4" aria-hidden="true" />
-            )}
+    <div className="relative w-full max-w-[440px]">
+      <div className="rounded-[20px] border border-line-strong bg-paper p-5 shadow-[0_30px_64px_-34px_rgba(60,45,25,0.7)] sm:p-6">
+        <div className="flex items-center justify-between">
+          <span className="font-mono text-[11px] uppercase tracking-[0.1em] text-ink-faint">
+            Heard just now
           </span>
-
-          <div className="min-w-0 flex-1">
-            <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-ink-faint">
-              {stage === "listening" ? "Listening" : "Heard just now"}
-            </p>
-            <p
-              key={sample.utterance}
-              className="animate-fade-in truncate text-[15px] text-ink"
-            >
-              &ldquo;{sample.utterance}&rdquo;
-            </p>
-          </div>
-
-          {stage === "listening" ? (
-            <span className="flex gap-1" aria-hidden="true">
-              {[0, 1, 2].map((i) => (
-                <span
-                  key={i}
-                  className="w-0.5 rounded-full bg-green"
-                  style={{
-                    height: [10, 16, 12][i],
-                    animation: `wave 900ms ${i * 140}ms ease-in-out infinite`,
-                  }}
-                />
+          <span className="flex items-center gap-1.5">
+            <span className="flex gap-[3px]" aria-hidden="true">
+              {[0, 1, 2, 3].map((i) => (
+                <Pip key={i} filled />
               ))}
             </span>
-          ) : (
-            <ConfidenceDots band="CLEAR" className="shrink-0" />
-          )}
+            <span className="text-xs text-ink-muted">Clear</span>
+          </span>
         </div>
 
-        <div
-          className="px-5 py-4"
-          // Screen readers get the resolved entry once, not every frame.
-          aria-live="polite"
-          aria-atomic="true"
-        >
-          {stage === "parsed" ? (
-            <div className="animate-slide-up">
-              <div className="flex flex-wrap gap-2">
-                <Chip tone="mono">{sample.amount}</Chip>
-                <Chip>
-                  <CategoryMark
-                    monogram={sample.monogram}
-                    tint={sample.tint}
-                    size="sm"
-                  />
-                  {sample.category}
-                </Chip>
-                <Chip>{sample.when}</Chip>
-                <Chip>{sample.account}</Chip>
-              </div>
+        <div key={sample.utterance} className="animate-fade-in">
+          <p className="mt-3.5 text-[17px] text-ink-faint sm:text-[18px]">
+            &ldquo;{sample.utterance}&rdquo;
+          </p>
 
-              <div className="mt-4 flex gap-2">
-                <Button size="sm" className="flex-1" tabIndex={-1}>
-                  Looks right
-                </Button>
-                <Button size="sm" variant="secondary" tabIndex={-1}>
-                  Edit
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <div className="flex flex-wrap gap-2" aria-hidden="true">
-              <span className="h-[34px] w-20 animate-pulse rounded-[--radius-chip] bg-line-soft" />
-              <span className="h-[34px] w-32 animate-pulse rounded-[--radius-chip] bg-line-soft" />
-              <span className="h-[34px] w-16 animate-pulse rounded-[--radius-chip] bg-line-soft" />
-            </div>
-          )}
+          {/* The figure is the point. Newsreader, big, unmissable. */}
+          <p
+            className="mt-1.5 font-display text-[44px] leading-none text-ink sm:text-[56px]"
+            // Announced as one settled result rather than per frame.
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            {sample.amount}
+          </p>
+
+          <div className="mt-3.5 flex flex-wrap gap-2">
+            <span className="flex items-center gap-[7px] rounded-xl border border-line-strong bg-paper-raised py-2.5 pl-2.5 pr-3 text-[15px] text-ink">
+              <CategoryMark
+                monogram={sample.monogram}
+                tint={sample.tint}
+                size="sm"
+              />
+              {sample.category}
+            </span>
+            <span className="rounded-xl border border-line-strong bg-paper-raised px-3 py-2.5 text-[15px] text-ink">
+              {sample.when}
+            </span>
+            <span className="rounded-xl border border-line-strong bg-paper-raised px-3 py-2.5 text-[15px] text-ink">
+              {sample.account}
+            </span>
+          </div>
         </div>
-      </Card>
+
+        {/*
+         * Decorative: this is a picture of the product, not the product. Real
+         * confirm controls live in the app, and a screen-reader user tabbing
+         * into a marketing illustration expecting to confirm an expense would
+         * be misled.
+         */}
+        <div className="mt-4.5 flex gap-2.5" aria-hidden="true">
+          <div className="flex-1 rounded-[13px] bg-green py-3.5 text-center text-base font-semibold text-paper">
+            Looks right
+          </div>
+          <div className="rounded-[13px] border border-line px-5 py-3.5 text-center text-base text-ink-soft">
+            Edit
+          </div>
+        </div>
+      </div>
 
       {/*
-       * The due tile from 8a. Marigold, because a due date is the app's other
-       * "needs your eye" — the same colour, used for the same reason.
+       * Overhangs the card's corner — the overlap is what makes these read as
+       * one composition. Tucked inside the card on the smallest screens, where
+       * a negative offset would push it off the viewport.
        */}
-      <Card className="flex items-center gap-3.5 border-attention-line bg-attention-soft p-4 shadow-[inset_3px_0_0_var(--attention)]">
-        <span className="flex size-10 flex-col items-center justify-center rounded-xl bg-attention font-mono leading-none text-[#3B2E14]">
-          <span className="text-sm font-semibold">12</span>
-          <span className="mt-0.5 text-[9px]">AUG</span>
+      <div
+        aria-hidden="true"
+        className={cn(
+          "mt-3 flex items-center gap-3 rounded-2xl border border-attention-line bg-attention-soft px-4 py-3.5",
+          "shadow-[0_20px_44px_-26px_rgba(60,45,25,0.8)]",
+          "sm:absolute sm:-bottom-7 sm:-right-4 sm:mt-0",
+        )}
+      >
+        <span className="flex size-9 flex-col items-center justify-center rounded-xl bg-attention font-mono leading-[1.05] text-white">
+          <span className="text-xs font-semibold">12</span>
+          <span className="text-[8px]">AUG</span>
         </span>
-        <div className="flex-1">
-          <p className="text-sm font-semibold text-attention-ink">
+        <div>
+          <p className="text-sm font-semibold text-ink">
             HDFC Card · ₹23,480
           </p>
-          <p className="mt-0.5 text-xs text-attention-ink/80">Due in 7 days</p>
+          <p className="text-[13px] text-attention-ink">Due in 7 days</p>
         </div>
-      </Card>
+      </div>
     </div>
   );
 }
