@@ -7,6 +7,7 @@ import type {
   ConfirmResult,
   NluCandidate,
   NluParseResult,
+  ReviewItemRow,
   Transaction,
 } from "./types";
 
@@ -22,13 +23,53 @@ export interface ReviewQueueItem extends NluCandidate {
   createdAt: string;
 }
 
+/**
+ * The queue returns raw rows with `parsed*` names — a different shape from the
+ * candidates POST /nlu/parse returns, even though both describe the same
+ * thing. Normalising here rather than in the page means one component renders
+ * both, and the difference stays at the API boundary where it belongs.
+ */
+function toCandidate(row: ReviewItemRow): ReviewQueueItem {
+  return {
+    reviewItemId: row.id,
+    amountMinor: row.parsedAmountMinor,
+    direction: row.parsedDirection,
+    categoryId: row.parsedCategoryId,
+    categoryName: null,
+    merchant: row.parsedMerchant,
+    date: row.parsedDate,
+    accountId: row.parsedAccountId,
+    accountName: null,
+    note: row.parsedNote,
+    confidence: row.confidence ?? 0,
+    // A row with no band was never parsed by a model — extraction failed and
+    // the raw text was kept. It needs a human, which is what NEEDS_FIELD says.
+    confidenceBand: row.confidenceBand ?? "NEEDS_FIELD",
+    missingFields: row.missingFields,
+    uncertainFields: [],
+    canOneTapConfirm:
+      row.confidenceBand === "CLEAR" && row.missingFields.length === 0,
+    suggestedAccounts: [],
+    status: row.status,
+    rawText: row.nluRequest?.rawInput ?? null,
+    createdAt: row.createdAt,
+  };
+}
+
 export function useReviewQueue(profileId: string | null) {
   return useQuery({
     queryKey: reviewKeys.queue(profileId ?? ""),
-    queryFn: () =>
-      api.get<{ items: ReviewQueueItem[] }>(
+    queryFn: async () => {
+      const raw = await api.get<{ items: ReviewItemRow[] } | ReviewItemRow[]>(
         `/profiles/${profileId}/review-queue`,
-      ),
+      );
+
+      // The endpoint has returned both a bare array and a wrapper at
+      // different times; accepting either keeps this from breaking on a
+      // shape the caller cannot control.
+      const rows = Array.isArray(raw) ? raw : raw.items;
+      return { items: rows.map(toCandidate) };
+    },
     enabled: Boolean(profileId),
   });
 }

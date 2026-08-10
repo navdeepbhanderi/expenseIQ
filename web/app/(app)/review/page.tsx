@@ -15,7 +15,7 @@ import { EmptyState, Skeleton } from "@/components/ui/feedback";
 import { Eyebrow } from "@/components/ui/display";
 import { useToast } from "@/components/ui/toast";
 import { CandidateCard, HeardLine } from "@/components/capture/candidate-card";
-import { formatMinor } from "@/lib/money";
+import { formatMinor, undoSecondsLeft } from "@/lib/money";
 import { ApiError } from "@/lib/api/client";
 
 /**
@@ -75,11 +75,21 @@ export default function ReviewPage() {
 
       const label = categories.find((c) => c.id === current.categoryId)?.name;
 
-      undoToast(
-        `Added ${formatMinor(result.transaction.amountMinor)}${label ? ` to ${label}` : ""}`,
-        () => void undo.mutateAsync(result.undo.token),
-        result.undo.expiresInSeconds,
-      );
+      // `undo` is null once the window has closed, so the toast only offers
+      // the action when there is genuinely something to redeem.
+      if (result.undo) {
+        const token = result.undo.token;
+        undoToast(
+          `Added ${formatMinor(result.transaction.amountMinor)}${label ? ` to ${label}` : ""}`,
+          () => void undo.mutateAsync(token),
+          undoSecondsLeft(result.undo.expiresAt),
+        );
+      } else {
+        toast({
+          title: `Added ${formatMinor(result.transaction.amountMinor)}${label ? ` to ${label}` : ""}`,
+          tone: "success",
+        });
+      }
     } catch (caught) {
       toast({
         title: "Couldn't confirm that",

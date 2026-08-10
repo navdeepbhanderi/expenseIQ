@@ -128,7 +128,7 @@ export default function ReportsPage() {
             </div>
             <Progress
               className="mt-2"
-              value={budgets.data.overall.percentUsed}
+              value={budgets.data.overall.usedPercent}
               label="Budget used"
             />
             <p

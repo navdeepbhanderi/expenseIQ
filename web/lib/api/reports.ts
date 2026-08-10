@@ -82,7 +82,9 @@ export interface BudgetStatusLine {
   budget: Money;
   spent: Money;
   remaining: Money;
-  percentUsed: number;
+  /** `usedPercent`, not `percentUsed` — the server's spelling. */
+  usedPercent: number;
+  isApproaching: boolean;
   isOver: boolean;
 }
 

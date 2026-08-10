@@ -11,7 +11,7 @@ import { useCategories } from "@/lib/api/hooks";
 import { useConfirm, useDiscard, useParse, useUndo } from "@/lib/api/nlu";
 import { useSpeech } from "@/lib/speech";
 import { ApiError } from "@/lib/api/client";
-import { formatMinor } from "@/lib/money";
+import { formatMinor, undoSecondsLeft } from "@/lib/money";
 import type { Account, NluCandidate } from "@/lib/api/types";
 import { CandidateCard, HeardLine } from "./candidate-card";
 
@@ -147,11 +147,21 @@ export function CaptureDock({ accounts }: { accounts: Account[] }) {
 
       const label = categories.find((c) => c.id === candidate.categoryId)?.name;
 
-      undoToast(
-        `Added ${formatMinor(result.transaction.amountMinor)}${label ? ` to ${label}` : ""}`,
-        () => void undo.mutateAsync(result.undo.token),
-        result.undo.expiresInSeconds,
-      );
+      // `undo` is null once the window has closed, so the toast only offers
+      // the action when there is genuinely something to redeem.
+      if (result.undo) {
+        const token = result.undo.token;
+        undoToast(
+          `Added ${formatMinor(result.transaction.amountMinor)}${label ? ` to ${label}` : ""}`,
+          () => void undo.mutateAsync(token),
+          undoSecondsLeft(result.undo.expiresAt),
+        );
+      } else {
+        toast({
+          title: `Added ${formatMinor(result.transaction.amountMinor)}${label ? ` to ${label}` : ""}`,
+          tone: "success",
+        });
+      }
     } catch (caught) {
       toast({
         title: "Couldn't add that",

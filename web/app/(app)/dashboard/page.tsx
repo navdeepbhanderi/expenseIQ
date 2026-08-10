@@ -244,8 +244,8 @@ function SpendCard({ data }: { data: DashboardSummary }) {
       {budget && (
         <Progress
           className="mt-4"
-          value={budget.percentUsed}
-          label={`${Math.round(budget.percentUsed)}% of budget used`}
+          value={budget.usedPercent}
+          label={`${Math.round(budget.usedPercent)}% of budget used`}
         />
       )}
     </section>

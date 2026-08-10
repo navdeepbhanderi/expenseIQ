@@ -150,3 +150,15 @@ export function percentOf(part: number, whole: number): number | null {
   if (whole === 0) return null;
   return (part / whole) * 100;
 }
+
+/**
+ * Seconds left on an undo token, derived from the server's `expiresAt`.
+ *
+ * The server sends an instant rather than a duration, and that is the safer
+ * contract: a slow response would otherwise hand the user a full ten seconds
+ * that the server has already started counting down. Floors at zero so a
+ * clock skew cannot produce a negative countdown.
+ */
+export function undoSecondsLeft(expiresAt: string): number {
+  return Math.max(0, Math.round((new Date(expiresAt).getTime() - Date.now()) / 1000));
+}

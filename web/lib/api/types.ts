@@ -241,11 +241,14 @@ export interface TransactionList {
 
 // ------------------------------------------------------------- dashboard
 
+/** Field names follow the server's domain/norms.ts exactly. */
 export interface BudgetStatus {
   budget: Money;
   spent: Money;
   remaining: Money;
-  percentUsed: number;
+  usedPercent: number;
+  /** Past 80% — the nudge threshold for child spend limits. */
+  isApproaching: boolean;
   isOver: boolean;
 }
 
@@ -344,11 +347,41 @@ export interface NluParseResult {
 
 export interface ConfirmResult {
   transaction: Transaction;
-  undo: {
-    token: string;
-    /** Seconds. The design shows a 10s window. */
-    expiresInSeconds: number;
-  };
+  /**
+   * Null once the window has closed. `expiresAt` is an instant, not a
+   * duration — the client derives the remaining seconds from it, so a slow
+   * response cannot hand out a full 10 seconds that the server will not
+   * honour.
+   */
+  undo: { token: string; expiresAt: string } | null;
+}
+
+/**
+ * The review queue returns raw rows with `parsed*` field names, not the
+ * candidate shape /nlu/parse returns. Transcribed from the Prisma model.
+ */
+export interface ReviewItemRow {
+  id: string;
+  profileId: string;
+  parsedAmountMinor: number | null;
+  parsedDirection: Direction;
+  parsedCategoryId: string | null;
+  parsedMerchant: string | null;
+  parsedAccountId: string | null;
+  parsedDate: string | null;
+  parsedNote: string | null;
+  confidence: number | null;
+  confidenceBand: ConfidenceBand | null;
+  missingFields: string[];
+  suggestedAccountIds: string[];
+  status: string;
+  source: TransactionSource;
+  createdAt: string;
+  nluRequest: {
+    rawInput: string | null;
+    inputMode: string | null;
+    detectedLanguage: string | null;
+  } | null;
 }
 
 // --------------------------------------------------------- notifications
