@@ -69,7 +69,7 @@ export function Modal({
           className={cn(
             "fixed left-1/2 top-1/2 z-50 flex max-h-[90dvh] w-[calc(100vw-2rem)] max-w-lg",
             "-translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden",
-            "rounded-[--radius-panel] border border-line bg-paper shadow-[var(--shadow-popover)]",
+            "rounded-[var(--radius-panel)] border border-line bg-paper shadow-[var(--shadow-popover)]",
             "data-[state=open]:animate-scale-in",
             className,
           )}
@@ -128,7 +128,7 @@ export function Sheet({
         <RadixDialog.Content
           className={cn(
             "fixed inset-x-0 bottom-0 z-50 flex max-h-[92dvh] flex-col overflow-hidden",
-            "rounded-t-[--radius-panel] border-t border-line bg-paper",
+            "rounded-t-[var(--radius-panel)] border-t border-line bg-paper",
             "shadow-[var(--shadow-popover)]",
             // Respects the home indicator on notched phones.
             "pb-[env(safe-area-inset-bottom)]",

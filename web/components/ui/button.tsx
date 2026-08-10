@@ -44,8 +44,8 @@ const variants: Record<ButtonVariant, string> = {
 
 const sizes: Record<ButtonSize, string> = {
   sm: "h-9 px-3 text-[13px] rounded-[10px] gap-1.5",
-  md: "h-10 px-4 text-sm rounded-[--radius-control] gap-2",
-  mobile: "h-[58px] px-5 text-[17px] rounded-[--radius-card] gap-2.5 w-full",
+  md: "h-10 px-4 text-sm rounded-[var(--radius-control)] gap-2",
+  mobile: "h-[58px] px-5 text-[17px] rounded-[var(--radius-card)] gap-2.5 w-full",
 };
 
 export interface ButtonProps
@@ -132,7 +132,7 @@ export function IconButton({
       className={cn(
         "inline-flex shrink-0 items-center justify-center transition-all",
         "disabled:pointer-events-none disabled:text-disabled-ink",
-        size === "sm" ? "size-9 rounded-[10px]" : "size-10 rounded-[--radius-control]",
+        size === "sm" ? "size-9 rounded-[10px]" : "size-10 rounded-[var(--radius-control)]",
         variants[variant],
         className,
       )}

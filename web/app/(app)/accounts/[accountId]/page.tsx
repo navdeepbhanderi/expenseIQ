@@ -82,7 +82,7 @@ export default function AccountDetailPage({
       )}
 
       {!card && !loan && (
-        <section className="rounded-[--radius-card] border border-line-strong bg-paper p-5">
+        <section className="rounded-[var(--radius-card)] border border-line-strong bg-paper p-5">
           <Eyebrow>Balance</Eyebrow>
           <p className="mt-1">
             <Amount
@@ -103,7 +103,7 @@ export default function AccountDetailPage({
 function CardPanel({ card }: { card: CardPosition }) {
   return (
     <>
-      <section className="rounded-[--radius-card] border border-line-strong bg-paper p-5">
+      <section className="rounded-[var(--radius-card)] border border-line-strong bg-paper p-5">
         <div className="flex flex-wrap items-start justify-between gap-5">
           <div>
             <Eyebrow>Outstanding</Eyebrow>
@@ -138,7 +138,7 @@ function CardPanel({ card }: { card: CardPosition }) {
         </p>
       </section>
 
-      <section className="rounded-[--radius-card] border border-attention-line bg-attention-soft p-5 shadow-[inset_3px_0_0_var(--attention)]">
+      <section className="rounded-[var(--radius-card)] border border-attention-line bg-attention-soft p-5 shadow-[inset_3px_0_0_var(--attention)]">
         <Eyebrow>This cycle</Eyebrow>
         <p className="mt-1.5 text-sm text-ink">
           Statement{" "}
@@ -175,7 +175,7 @@ function LoanPanel({
 
   return (
     <>
-      <section className="rounded-[--radius-card] border border-line-strong bg-paper p-5">
+      <section className="rounded-[var(--radius-card)] border border-line-strong bg-paper p-5">
         <div className="flex flex-wrap items-start justify-between gap-5">
           <div>
             <Eyebrow>Outstanding</Eyebrow>
@@ -231,7 +231,7 @@ function LoanPanel({
         </p>
       </section>
 
-      <section className="rounded-[--radius-card] border border-line-strong bg-paper p-5">
+      <section className="rounded-[var(--radius-card)] border border-line-strong bg-paper p-5">
         <Eyebrow>What would a prepayment save?</Eyebrow>
 
         <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-end">
@@ -252,7 +252,7 @@ function LoanPanel({
         </div>
 
         {simulate.data && (
-          <div className="mt-4 rounded-[--radius-control] border border-income/30 bg-income/10 p-4">
+          <div className="mt-4 rounded-[var(--radius-control)] border border-income/30 bg-income/10 p-4">
             <p className="text-sm text-ink">
               Paying{" "}
               <span className="font-semibold">

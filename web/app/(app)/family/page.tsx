@@ -69,7 +69,7 @@ export default function FamilyPage() {
 
       {/* ---- household roll-up ---- */}
       {household.data && household.data.members.length > 1 && (
-        <section className="rounded-[--radius-card] border border-line-strong bg-paper p-5">
+        <section className="rounded-[var(--radius-card)] border border-line-strong bg-paper p-5">
           <Eyebrow>The household this month</Eyebrow>
           <div className="mt-1 flex flex-wrap items-baseline gap-x-4 gap-y-1">
             <Amount value={household.data.householdSpent} size="lg" />
@@ -113,7 +113,7 @@ export default function FamilyPage() {
       )}
 
       {/* ---- members ---- */}
-      <section className="rounded-[--radius-card] border border-line-strong bg-paper p-5">
+      <section className="rounded-[var(--radius-card)] border border-line-strong bg-paper p-5">
         <Eyebrow>Who&rsquo;s on this profile</Eyebrow>
 
         <ul className="mt-3 flex flex-col gap-3">
@@ -148,7 +148,7 @@ export default function FamilyPage() {
 
       {/* ---- allowance (child profiles) ---- */}
       {allowance.data?.allowance && (
-        <section className="rounded-[--radius-card] border border-line-strong bg-paper p-5">
+        <section className="rounded-[var(--radius-card)] border border-line-strong bg-paper p-5">
           <Eyebrow>Allowance</Eyebrow>
           <div className="mt-1 flex flex-wrap items-baseline gap-x-3">
             <Amount value={allowance.data.remaining} size="lg" />
@@ -168,7 +168,7 @@ export default function FamilyPage() {
 
       {/* ---- spend limits ---- */}
       {limits.data?.overall && (
-        <section className="rounded-[--radius-card] border border-line-strong bg-paper p-5">
+        <section className="rounded-[var(--radius-card)] border border-line-strong bg-paper p-5">
           <Eyebrow>Spend limit</Eyebrow>
           <div className="mt-1 flex flex-wrap items-baseline gap-x-3">
             <Amount value={limits.data.overall.status.spent} size="lg" />
@@ -189,7 +189,7 @@ export default function FamilyPage() {
       )}
 
       {/* ---- goals ---- */}
-      <section className="rounded-[--radius-card] border border-line-strong bg-paper p-5">
+      <section className="rounded-[var(--radius-card)] border border-line-strong bg-paper p-5">
         <div className="flex items-center justify-between">
           <Eyebrow>Savings goals</Eyebrow>
           <Button variant="ghost" size="sm" onClick={() => setAddingGoal(true)}>

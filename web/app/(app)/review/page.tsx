@@ -145,7 +145,7 @@ export default function ReviewPage() {
           return (
             <li
               key={item.reviewItemId}
-              className="rounded-[--radius-card] border border-line-strong bg-paper p-4 sm:p-5"
+              className="rounded-[var(--radius-card)] border border-line-strong bg-paper p-4 sm:p-5"
             >
               {item.rawText && (
                 <HeardLine
@@ -173,7 +173,7 @@ export default function ReviewPage() {
               <div className="mt-4 flex flex-col gap-2 sm:flex-row">
                 <Button
                   size="mobile"
-                  className="sm:h-10 sm:w-auto sm:flex-1 sm:rounded-[--radius-control] sm:text-sm"
+                  className="sm:h-10 sm:w-auto sm:flex-1 sm:rounded-[var(--radius-control)] sm:text-sm"
                   onClick={() => void commit(item)}
                   isLoading={confirm.isPending}
                   disabled={current.amountMinor === null}
@@ -183,7 +183,7 @@ export default function ReviewPage() {
                 <Button
                   size="mobile"
                   variant="secondary"
-                  className="sm:h-10 sm:w-auto sm:rounded-[--radius-control] sm:text-sm"
+                  className="sm:h-10 sm:w-auto sm:rounded-[var(--radius-control)] sm:text-sm"
                   onClick={() => void discard.mutateAsync(item.reviewItemId)}
                 >
                   Discard

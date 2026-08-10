@@ -131,7 +131,7 @@ function DueTile({ due }: { due: UpcomingDue }) {
   const date = new Date(due.dueDate);
 
   return (
-    <div className="flex items-center gap-3.5 rounded-[--radius-card] border border-attention-line bg-attention-soft p-4 shadow-[inset_3px_0_0_var(--attention)]">
+    <div className="flex items-center gap-3.5 rounded-[var(--radius-card)] border border-attention-line bg-attention-soft p-4 shadow-[inset_3px_0_0_var(--attention)]">
       <span className="flex size-10 shrink-0 flex-col items-center justify-center rounded-xl bg-attention font-mono leading-[1.05] text-white">
         <span className="text-sm font-semibold">{date.getDate()}</span>
         <span className="text-[8px] uppercase">
@@ -157,7 +157,7 @@ function DueTile({ due }: { due: UpcomingDue }) {
 
 function ReviewTile({ count }: { count: number }) {
   return (
-    <div className="flex items-center gap-4 rounded-[--radius-card] border border-line-strong bg-paper p-4">
+    <div className="flex items-center gap-4 rounded-[var(--radius-card)] border border-line-strong bg-paper p-4">
       <div className="min-w-0 flex-1">
         <p className="flex items-baseline gap-1.5">
           <span className="font-display text-[28px] leading-none text-ink">
@@ -191,7 +191,7 @@ function SpendCard({ data }: { data: DashboardSummary }) {
   });
 
   return (
-    <section className="rounded-[--radius-card] border border-line-strong bg-paper p-5">
+    <section className="rounded-[var(--radius-card)] border border-line-strong bg-paper p-5">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <Eyebrow>Spent in {month}</Eyebrow>
@@ -268,7 +268,7 @@ function CategoryBreakdown({ data }: { data: DashboardSummary }) {
   );
 
   return (
-    <section className="rounded-[--radius-card] border border-line-strong bg-paper p-5">
+    <section className="rounded-[var(--radius-card)] border border-line-strong bg-paper p-5">
       <Eyebrow>Where it went</Eyebrow>
 
       <ul className="mt-3.5 flex flex-col gap-3">
@@ -309,7 +309,7 @@ function NetWorthCard({ data }: { data: DashboardSummary }) {
   const { assets, liabilities, net } = data.netWorth;
 
   return (
-    <section className="rounded-[--radius-card] border border-line-strong bg-paper p-5">
+    <section className="rounded-[var(--radius-card)] border border-line-strong bg-paper p-5">
       <Eyebrow>Net worth</Eyebrow>
       <p
         className={cn(
@@ -350,7 +350,7 @@ function AccountsCard({ data }: { data: DashboardSummary }) {
   }
 
   return (
-    <section className="rounded-[--radius-card] border border-line-strong bg-paper p-5">
+    <section className="rounded-[var(--radius-card)] border border-line-strong bg-paper p-5">
       <div className="flex items-center justify-between">
         <Eyebrow>Accounts</Eyebrow>
         <Link
@@ -397,7 +397,7 @@ function RecentTransactions({ data }: { data: DashboardSummary }) {
   if (data.recentTransactions.length === 0) return null;
 
   return (
-    <section className="rounded-[--radius-card] border border-line-strong bg-paper p-5">
+    <section className="rounded-[var(--radius-card)] border border-line-strong bg-paper p-5">
       <div className="flex items-center justify-between">
         <Eyebrow>Recent</Eyebrow>
         <Link href="/transactions" className="text-xs text-green hover:underline">

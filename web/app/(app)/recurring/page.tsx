@@ -47,7 +47,7 @@ export default function RecurringPage() {
       </h1>
 
       {suggestions.length > 0 && (
-        <section className="rounded-[--radius-card] border border-attention-line bg-attention-soft p-5">
+        <section className="rounded-[var(--radius-card)] border border-attention-line bg-attention-soft p-5">
           <Eyebrow>Noticed in your history</Eyebrow>
           <p className="mt-1 text-[13px] text-attention-ink">
             These look regular. Confirm one and it will be expected each cycle.
@@ -57,7 +57,7 @@ export default function RecurringPage() {
             {suggestions.map((suggestion) => (
               <li
                 key={suggestion.signature}
-                className="flex flex-wrap items-center gap-3 rounded-[--radius-control] border border-line bg-paper p-3.5"
+                className="flex flex-wrap items-center gap-3 rounded-[var(--radius-control)] border border-line bg-paper p-3.5"
               >
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium text-ink">
@@ -104,7 +104,7 @@ export default function RecurringPage() {
         </section>
       )}
 
-      <section className="rounded-[--radius-card] border border-line-strong bg-paper p-5">
+      <section className="rounded-[var(--radius-card)] border border-line-strong bg-paper p-5">
         <Eyebrow>Your rules</Eyebrow>
 
         {(rules.data?.length ?? 0) === 0 ? (

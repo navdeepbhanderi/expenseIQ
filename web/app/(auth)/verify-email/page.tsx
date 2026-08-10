@@ -109,7 +109,7 @@ function VerifyEmail() {
     >
       <div className="flex flex-col gap-5">
         <div
-          className="flex items-center gap-3 rounded-[--radius-control] border border-line bg-field px-4 py-3.5"
+          className="flex items-center gap-3 rounded-[var(--radius-control)] border border-line bg-field px-4 py-3.5"
           aria-live="polite"
         >
           {expired ? (

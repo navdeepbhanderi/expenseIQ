@@ -64,7 +64,7 @@ function Verified() {
       subtitle="You're all set. Let's add your first account."
     >
       <div className="flex flex-col gap-5">
-        <div className="flex items-center gap-3 rounded-[--radius-control] border border-income/30 bg-income/10 px-4 py-3.5">
+        <div className="flex items-center gap-3 rounded-[var(--radius-control)] border border-income/30 bg-income/10 px-4 py-3.5">
           <CheckCircle2 className="size-5 shrink-0 text-income" aria-hidden="true" />
           <p className="text-sm text-ink-soft">
             Your address is confirmed. Nothing left to type.
@@ -73,7 +73,7 @@ function Verified() {
 
         <div className="flex flex-col gap-2.5">
           <Button asChild className="h-11 w-full">
-            <Link href="/accounts/new">Set up my accounts</Link>
+            <Link href="/accounts">Set up my accounts</Link>
           </Button>
           <Button asChild variant="ghost" className="h-11 w-full">
             <Link href="/dashboard">Skip for now</Link>

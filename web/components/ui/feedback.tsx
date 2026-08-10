@@ -55,7 +55,7 @@ export function Banner({
       // for a failed save means the user finds out at the worst moment.
       role={tone === "error" ? "alert" : "status"}
       className={cn(
-        "flex items-start gap-3 rounded-[--radius-control] border px-4 py-3",
+        "flex items-start gap-3 rounded-[var(--radius-control)] border px-4 py-3",
         wrap,
         className,
       )}
@@ -277,7 +277,7 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        "flex flex-col items-center gap-2 rounded-[--radius-card] border border-dashed border-line px-6 py-10 text-center",
+        "flex flex-col items-center gap-2 rounded-[var(--radius-card)] border border-dashed border-line px-6 py-10 text-center",
         className,
       )}
     >

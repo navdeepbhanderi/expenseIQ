@@ -75,7 +75,7 @@ export function GoogleButton({ label }: { label: string }) {
   return (
     <a
       href={`${base}/auth/google`}
-      className="flex h-11 w-full items-center justify-center gap-2.5 rounded-[--radius-control] border border-line bg-paper text-sm font-medium text-ink-soft transition-colors hover:bg-paper-raised"
+      className="flex h-11 w-full items-center justify-center gap-2.5 rounded-[var(--radius-control)] border border-line bg-paper text-sm font-medium text-ink-soft transition-colors hover:bg-paper-raised"
     >
       <svg className="size-4" viewBox="0 0 24 24" aria-hidden="true">
         <path

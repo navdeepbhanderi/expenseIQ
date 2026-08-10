@@ -60,7 +60,7 @@ function ForgotPassword() {
           </Link>
         }
       >
-        <div className="flex items-center gap-3 rounded-[--radius-control] border border-line bg-field px-4 py-3.5">
+        <div className="flex items-center gap-3 rounded-[var(--radius-control)] border border-line bg-field px-4 py-3.5">
           <MailCheck className="size-5 shrink-0 text-green" aria-hidden="true" />
           <p className="text-sm text-ink-soft">
             Nothing after a minute? Check spam, or try again below.

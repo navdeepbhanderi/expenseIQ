@@ -66,7 +66,7 @@ export function Select({
           id={id}
           aria-invalid={error ? true : undefined}
           className={cn(
-            "flex w-full items-center justify-between gap-2.5 rounded-[--radius-control]",
+            "flex w-full items-center justify-between gap-2.5 rounded-[var(--radius-control)]",
             "border border-line bg-field px-[13px] text-sm text-ink transition-colors",
             "hover:border-line-strong data-[placeholder]:text-ink-faint",
             "disabled:cursor-not-allowed disabled:bg-disabled disabled:text-disabled-ink",

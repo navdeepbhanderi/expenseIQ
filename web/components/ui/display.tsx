@@ -192,7 +192,7 @@ export function Card({
   return (
     <Comp
       className={cn(
-        "rounded-[--radius-card] border border-line-strong bg-paper",
+        "rounded-[var(--radius-card)] border border-line-strong bg-paper",
         className,
       )}
     >

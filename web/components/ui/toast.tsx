@@ -99,7 +99,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
               if (!open) dismiss(entry.id);
             }}
             className={cn(
-              "flex items-center gap-3 rounded-[--radius-control] border px-4 py-3",
+              "flex items-center gap-3 rounded-[var(--radius-control)] border px-4 py-3",
               "shadow-[var(--shadow-popover)] data-[state=open]:animate-slide-up",
               tones[entry.tone ?? "info"],
             )}

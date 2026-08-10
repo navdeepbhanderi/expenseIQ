@@ -116,7 +116,7 @@ function AccountCard({ account }: { account: Account }) {
     <li>
       <Link
         href={`/accounts/${account.id}`}
-        className="flex flex-col gap-3 rounded-[--radius-card] border border-line-strong bg-paper p-4 transition-colors hover:border-line"
+        className="flex flex-col gap-3 rounded-[var(--radius-card)] border border-line-strong bg-paper p-4 transition-colors hover:border-line"
       >
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">

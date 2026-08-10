@@ -113,13 +113,18 @@ export function ProfileSwitcher({ className }: { className?: string }) {
 
           <DropdownMenu.Separator className="my-1.5 h-px bg-line-soft" />
 
+          {/*
+           * Points at Family, where profiles are actually managed. A link to
+           * a "new profile" screen that does not exist is worse than one more
+           * click — a dead link teaches the user not to trust the menu.
+           */}
           <DropdownMenu.Item asChild>
             <Link
-              href="/settings/profiles/new"
+              href="/family"
               className="flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-ink-soft outline-none data-[highlighted]:bg-paper-raised"
             >
               <Plus className="size-4" aria-hidden="true" />
-              Add a profile
+              Manage profiles
             </Link>
           </DropdownMenu.Item>
         </DropdownMenu.Content>

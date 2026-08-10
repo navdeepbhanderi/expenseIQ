@@ -27,7 +27,7 @@ export default function MenuPage() {
         <ProfileSwitcher className="mt-2" />
       </div>
 
-      <nav className="overflow-hidden rounded-[--radius-card] border border-line-strong bg-paper">
+      <nav className="overflow-hidden rounded-[var(--radius-card)] border border-line-strong bg-paper">
         {[...items, { href: "/family", label: "Family", icon: items[0]!.icon },
           { href: "/recurring", label: "Recurring", icon: items[0]!.icon },
           { href: "/notifications", label: "Notifications", icon: items[0]!.icon }]

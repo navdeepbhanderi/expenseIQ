@@ -20,7 +20,7 @@ export default function SettingsPage() {
     <div className="flex flex-col gap-5 p-4 sm:p-6">
       <h1 className="font-display text-2xl text-ink sm:text-[27px]">Settings</h1>
 
-      <section className="rounded-[--radius-card] border border-line-strong bg-paper p-5">
+      <section className="rounded-[var(--radius-card)] border border-line-strong bg-paper p-5">
         <Eyebrow>Account</Eyebrow>
         <div className="mt-3 flex items-center gap-3">
           {active && (
@@ -39,7 +39,7 @@ export default function SettingsPage() {
         </p>
       </section>
 
-      <section className="rounded-[--radius-card] border border-line-strong bg-paper p-5">
+      <section className="rounded-[var(--radius-card)] border border-line-strong bg-paper p-5">
         <Eyebrow>Appearance</Eyebrow>
         <Toggle
           className="mt-3"
@@ -50,7 +50,7 @@ export default function SettingsPage() {
         />
       </section>
 
-      <section className="rounded-[--radius-card] border border-line-strong bg-paper p-5">
+      <section className="rounded-[var(--radius-card)] border border-line-strong bg-paper p-5">
         <Eyebrow>Integrations</Eyebrow>
         <ul className="mt-3 flex flex-col gap-3">
           {[
@@ -76,7 +76,7 @@ export default function SettingsPage() {
         </ul>
       </section>
 
-      <section className="overflow-hidden rounded-[--radius-card] border border-line-strong bg-paper">
+      <section className="overflow-hidden rounded-[var(--radius-card)] border border-line-strong bg-paper">
         {[
           ["Family & profiles", "/family"],
           ["Recurring rules", "/recurring"],

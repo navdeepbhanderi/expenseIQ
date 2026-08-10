@@ -47,7 +47,7 @@ export default function NotificationsPage() {
           appear here.
         </EmptyState>
       ) : (
-        <ul className="overflow-hidden rounded-[--radius-card] border border-line-strong bg-paper">
+        <ul className="overflow-hidden rounded-[var(--radius-card)] border border-line-strong bg-paper">
           {data!.map((notification) => (
             <li
               key={notification.id}

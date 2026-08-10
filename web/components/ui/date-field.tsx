@@ -84,7 +84,7 @@ export function DateField({
       <RadixPopover.Root open={open} onOpenChange={setOpen}>
         <RadixPopover.Trigger
           className={cn(
-            "flex w-full items-center gap-2.5 rounded-[--radius-control] border border-line bg-field px-[13px] text-left text-sm text-ink",
+            "flex w-full items-center gap-2.5 rounded-[var(--radius-control)] border border-line bg-field px-[13px] text-left text-sm text-ink",
             "transition-colors hover:border-line-strong",
             mobile ? "h-[52px] rounded-[14px] text-base" : "h-10",
           )}

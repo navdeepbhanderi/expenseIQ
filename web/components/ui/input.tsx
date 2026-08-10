@@ -7,7 +7,7 @@ import { formatMinor, parseAmountToMinor } from "@/lib/money";
 
 /** Shared field chrome — 40px, 11px radius, sunken field colour (design 6b). */
 const fieldBase =
-  "h-10 w-full rounded-[--radius-control] border border-line bg-field px-[13px] text-sm text-ink " +
+  "h-10 w-full rounded-[var(--radius-control)] border border-line bg-field px-[13px] text-sm text-ink " +
   "placeholder:text-ink-faint transition-colors " +
   "hover:border-line-strong " +
   "disabled:bg-disabled disabled:text-disabled-ink disabled:cursor-not-allowed " +

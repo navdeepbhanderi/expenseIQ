@@ -190,7 +190,7 @@ export function CaptureDock({ accounts }: { accounts: Account[] }) {
         "bg-gradient-to-b from-transparent to-canvas to-40%",
       )}
     >
-      <div className="mx-auto max-w-3xl rounded-[--radius-card] border border-line bg-paper shadow-[0_10px_26px_-18px_rgba(60,45,25,0.55)]">
+      <div className="mx-auto max-w-3xl rounded-[var(--radius-card)] border border-line bg-paper shadow-[0_10px_26px_-18px_rgba(60,45,25,0.55)]">
         {error && (
           <Banner tone="error" className="m-3 mb-0" onDismiss={() => setError(null)}>
             {error}

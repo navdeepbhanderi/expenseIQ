@@ -183,7 +183,7 @@ export default function TransactionsPage() {
           event.preventDefault();
           setFilters((c) => ({ ...c, q: search.trim() || undefined }));
         }}
-        className="flex items-center gap-2 rounded-[--radius-control] border border-line bg-field px-3.5"
+        className="flex items-center gap-2 rounded-[var(--radius-control)] border border-line bg-field px-3.5"
       >
         <Search className="size-4 shrink-0 text-ink-faint" aria-hidden="true" />
         <input
@@ -212,7 +212,7 @@ export default function TransactionsPage() {
 
         <div className="min-w-0 flex-1">
           {selected.length > 0 && (
-            <div className="mb-3 flex items-center justify-between gap-3 rounded-[--radius-control] border border-line bg-paper-raised px-4 py-2.5">
+            <div className="mb-3 flex items-center justify-between gap-3 rounded-[var(--radius-control)] border border-line bg-paper-raised px-4 py-2.5">
               <span className="text-sm text-ink">
                 {selected.length} selected
               </span>
@@ -249,7 +249,7 @@ export default function TransactionsPage() {
             </EmptyState>
           ) : (
             <>
-              <ul className="overflow-hidden rounded-[--radius-card] border border-line-strong bg-paper">
+              <ul className="overflow-hidden rounded-[var(--radius-card)] border border-line-strong bg-paper">
                 {items.map((transaction) => (
                   <Row
                     key={transaction.id}

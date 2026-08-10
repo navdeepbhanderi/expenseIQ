@@ -112,7 +112,7 @@ export function RadioCards({
           value={option.value}
           disabled={option.disabled}
           className={cn(
-            "group flex items-center gap-3 rounded-[--radius-control] border px-3.5 py-3 text-left transition-colors",
+            "group flex items-center gap-3 rounded-[var(--radius-control)] border px-3.5 py-3 text-left transition-colors",
             "border-line bg-paper hover:border-line-strong",
             "data-[state=checked]:border-green data-[state=checked]:bg-green-soft",
             "disabled:cursor-not-allowed disabled:opacity-60",
@@ -227,7 +227,7 @@ export function Segmented<T extends string>({
       role="radiogroup"
       aria-label={ariaLabel}
       className={cn(
-        "inline-flex gap-1 rounded-[--radius-control] border border-line-strong bg-paper-raised p-1",
+        "inline-flex gap-1 rounded-[var(--radius-control)] border border-line-strong bg-paper-raised p-1",
         className,
       )}
     >
@@ -282,7 +282,7 @@ export function Chip({
       onClick={onClick}
       aria-pressed={interactive ? selected : undefined}
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-[--radius-chip] border px-[11px] py-[7px] text-sm transition-colors",
+        "inline-flex items-center gap-1.5 rounded-[var(--radius-chip)] border px-[11px] py-[7px] text-sm transition-colors",
         tone === "attention"
           ? "border-dashed border-attention-line bg-attention-soft text-attention-ink"
           : selected

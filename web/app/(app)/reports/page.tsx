@@ -76,7 +76,7 @@ export default function ReportsPage() {
       {/* ---- headline ---- */}
       {summary.data && (
         <section className="grid gap-3 sm:grid-cols-3">
-          <div className="rounded-[--radius-card] border border-line-strong bg-paper p-5">
+          <div className="rounded-[var(--radius-card)] border border-line-strong bg-paper p-5">
             <Eyebrow>Spent</Eyebrow>
             <p className="mt-1">
               <Amount value={summary.data.spent} size="lg" />
@@ -90,7 +90,7 @@ export default function ReportsPage() {
             )}
           </div>
 
-          <div className="rounded-[--radius-card] border border-line-strong bg-paper p-5">
+          <div className="rounded-[var(--radius-card)] border border-line-strong bg-paper p-5">
             <Eyebrow>Received</Eyebrow>
             <p className="mt-1">
               <Amount value={summary.data.income} size="lg" />
@@ -100,7 +100,7 @@ export default function ReportsPage() {
             </p>
           </div>
 
-          <div className="rounded-[--radius-card] border border-line-strong bg-paper p-5">
+          <div className="rounded-[var(--radius-card)] border border-line-strong bg-paper p-5">
             <Eyebrow>Average a day</Eyebrow>
             <p className="mt-1">
               <Amount value={summary.data.averagePerDay} size="lg" />
@@ -110,7 +110,7 @@ export default function ReportsPage() {
       )}
 
       {/* ---- budgets ---- */}
-      <section className="rounded-[--radius-card] border border-line-strong bg-paper p-5">
+      <section className="rounded-[var(--radius-card)] border border-line-strong bg-paper p-5">
         <div className="flex items-center justify-between">
           <Eyebrow>Budget for {month}</Eyebrow>
           <Button variant="ghost" size="sm" onClick={() => setEditingBudget(true)}>
@@ -150,7 +150,7 @@ export default function ReportsPage() {
       </section>
 
       {/* ---- norms: design 3e ---- */}
-      <section className="rounded-[--radius-card] border border-line-strong bg-paper p-5">
+      <section className="rounded-[var(--radius-card)] border border-line-strong bg-paper p-5">
         <Eyebrow>Against your usual</Eyebrow>
 
         {(norms.data?.length ?? 0) === 0 ? (
@@ -212,7 +212,7 @@ export default function ReportsPage() {
       </section>
 
       {/* ---- trend ---- */}
-      <section className="rounded-[--radius-card] border border-line-strong bg-paper p-5">
+      <section className="rounded-[var(--radius-card)] border border-line-strong bg-paper p-5">
         <Eyebrow>Last six months</Eyebrow>
         {(trend.data?.length ?? 0) === 0 ? (
           <p className="mt-2 text-sm text-ink-muted">Not enough history yet.</p>
@@ -223,7 +223,7 @@ export default function ReportsPage() {
 
       {/* ---- category comparison ---- */}
       {(comparison.data?.byCategory.length ?? 0) > 0 && (
-        <section className="rounded-[--radius-card] border border-line-strong bg-paper p-5">
+        <section className="rounded-[var(--radius-card)] border border-line-strong bg-paper p-5">
           <Eyebrow>Versus {comparison.data!.previous.label}</Eyebrow>
           <ul className="mt-3 flex flex-col gap-2.5">
             {comparison.data!.byCategory.slice(0, 8).map((row) => {

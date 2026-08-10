@@ -73,7 +73,7 @@ export function Sidebar() {
           Gmail and Calendar parsing are on the way. Everything else is ready.
         </p>
         <Link
-          href="/settings/integrations"
+          href="/settings"
           className="mt-2 inline-block text-xs font-semibold text-green hover:underline"
         >
           Manage integrations

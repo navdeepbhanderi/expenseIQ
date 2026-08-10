@@ -49,14 +49,14 @@ function Foundation() {
           </div>
           <button
             onClick={toggle}
-            className="rounded-[--radius-control] border border-line bg-paper px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-paper-raised"
+            className="rounded-[var(--radius-control)] border border-line bg-paper px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-paper-raised"
           >
             {theme === "dark" ? "Switch to light" : "Switch to dark"}
           </button>
         </header>
 
         {/* API — a real typed call against the running backend */}
-        <section className="rounded-[--radius-card] border border-line bg-paper p-5">
+        <section className="rounded-[var(--radius-card)] border border-line bg-paper p-5">
           <h2 className="font-mono text-[11px] uppercase tracking-[0.12em] text-ink-faint">
             API
           </h2>
@@ -77,7 +77,7 @@ function Foundation() {
         </section>
 
         {/* Type — all four families the design specifies */}
-        <section className="rounded-[--radius-card] border border-line bg-paper p-5">
+        <section className="rounded-[var(--radius-card)] border border-line bg-paper p-5">
           <h2 className="font-mono text-[11px] uppercase tracking-[0.12em] text-ink-faint">
             Type
           </h2>
@@ -96,7 +96,7 @@ function Foundation() {
         </section>
 
         {/* Money — the formatter every screen depends on */}
-        <section className="rounded-[--radius-card] border border-line bg-paper p-5">
+        <section className="rounded-[var(--radius-card)] border border-line bg-paper p-5">
           <h2 className="font-mono text-[11px] uppercase tracking-[0.12em] text-ink-faint">
             Money
           </h2>
@@ -118,7 +118,7 @@ function Foundation() {
         </section>
 
         {/* Palette — semantic names only; no component hardcodes a hex */}
-        <section className="rounded-[--radius-card] border border-line bg-paper p-5">
+        <section className="rounded-[var(--radius-card)] border border-line bg-paper p-5">
           <h2 className="font-mono text-[11px] uppercase tracking-[0.12em] text-ink-faint">
             Palette
           </h2>
