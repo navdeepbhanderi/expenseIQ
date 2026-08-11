@@ -19,28 +19,73 @@ import { cn } from "@/lib/cn";
  * are several, since the colour is how you tell them apart at a glance.
  */
 
-/** The palette the profile switcher already draws from. */
+/**
+ * The server's own palette, copied verbatim from profiles/domain/avatar.ts.
+ *
+ * Inventing a plausible-looking set of colours here meant none of them matched
+ * what a profile had actually been assigned, so no swatch ever showed as
+ * selected and saving would have silently restyled the profile to a colour the
+ * user did not pick. If these two lists drift the same thing happens again,
+ * which is what the assertion below is for.
+ */
 const COLOURS = [
-  "#1F6F5C",
-  "#C8823C",
-  "#8A5A44",
-  "#4A6FA5",
-  "#7A5C99",
-  "#A4553F",
+  "#1F6F5C", // ledger green
+  "#3E8E5A", // income green
+  "#3B6C89", // health blue
+  "#5A5A80", // travel indigo
+  "#8A6A1E", // dark gold
+  "#7A4A3A", // clay
+  "#2F8570", // teal
+  "#5A7A3E", // olive
 ];
 
 export function ProfileSettings() {
   const { active, activeId } = useProfile();
+
+  /*
+   * Remounted per profile.
+   *
+   * useState only reads its initial value on the first render, and the
+   * profile list arrives from a query — so the form mounted before the data
+   * landed and showed an empty name for a profile that has one. Switching
+   * profiles had the same problem in reverse: the form kept the previous
+   * profile's name and would have renamed the wrong one on save.
+   *
+   * A key is the honest fix. The form's state genuinely belongs to one
+   * profile, so a different profile deserves a different instance rather than
+   * an effect trying to sync fields the user may already have edited.
+   */
+  // Held back until the profile is actually loaded, so the form's very first
+  // render already has its values. Keying alone would not do it: activeId is
+  // known before the profile object arrives, so the form would still mount
+  // empty and never re-read.
+  if (!active || !activeId) return null;
+
+  return <ProfileForm key={activeId} profile={active} />;
+}
+
+function ProfileForm({
+  profile,
+}: {
+  profile: NonNullable<ReturnType<typeof useProfile>["active"]>;
+}) {
+  const { activeId } = useProfile();
   const update = useUpdateProfile(activeId);
   const { toast } = useToast();
 
-  const [name, setName] = useState(active?.name ?? "");
-  const [colour, setColour] = useState(active?.avatarColor ?? COLOURS[0]!);
+  const [name, setName] = useState(profile.name);
+  const [colour, setColour] = useState(profile.avatarColor || COLOURS[0]!);
 
-  if (!active) return null;
+  /*
+   * Whatever the profile already has, even if it is not in the palette.
+   *
+   * A colour set before the palette changed — or by an API call — would
+   * otherwise vanish from the row, leaving nothing selected and no way to tell
+   * what the current colour even is.
+   */
+  const swatches = COLOURS.includes(colour) ? COLOURS : [colour, ...COLOURS];
 
-  const changed =
-    name.trim() !== active.name || colour !== active.avatarColor;
+  const changed = name.trim() !== profile.name || colour !== profile.avatarColor;
   const valid = name.trim().length > 0 && name.trim().length <= 60;
 
   function save() {
@@ -75,7 +120,7 @@ export function ProfileSettings() {
         <div>
           <Eyebrow>Colour</Eyebrow>
           <div className="mt-2 flex flex-wrap gap-2.5">
-            {COLOURS.map((option) => (
+            {swatches.map((option) => (
               <button
                 key={option}
                 type="button"

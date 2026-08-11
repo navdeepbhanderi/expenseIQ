@@ -12,6 +12,7 @@ import { Topbar } from "./topbar";
 import { Logo } from "@/components/brand/logo";
 import { CaptureDock } from "@/components/capture/capture-dock";
 import { CaptureSheet } from "@/components/capture/capture-sheet";
+import { ManualEntry } from "@/components/capture/manual-entry";
 import { useDashboard } from "@/lib/api/hooks";
 import { useProfile } from "@/components/providers/profile-provider";
 import { useEffect } from "react";
@@ -66,6 +67,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
  */
 function Frame({ children }: { children: React.ReactNode }) {
   const [captureOpen, setCaptureOpen] = useState(false);
+  const [manualOpen, setManualOpen] = useState(false);
   const { activeId } = useProfile();
   const { data: dashboard } = useDashboard(activeId);
   const accounts = dashboard?.accounts ?? [];
@@ -75,7 +77,10 @@ function Frame({ children }: { children: React.ReactNode }) {
       <Sidebar />
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <Topbar onCapture={() => setCaptureOpen(true)} />
+        <Topbar
+          onCapture={() => setCaptureOpen(true)}
+          onManualEntry={() => setManualOpen(true)}
+        />
 
         {/*
          * Bottom padding clears the fixed tab bar and the FAB that overhangs
@@ -85,7 +90,10 @@ function Frame({ children }: { children: React.ReactNode }) {
           {children}
         </main>
 
-        <CaptureDock accounts={accounts} />
+        <CaptureDock
+          accounts={accounts}
+          onManualEntry={() => setManualOpen(true)}
+        />
       </div>
 
       <TabBar onCapture={() => setCaptureOpen(true)} />
@@ -94,7 +102,15 @@ function Frame({ children }: { children: React.ReactNode }) {
         open={captureOpen}
         onOpenChange={setCaptureOpen}
         accounts={accounts}
+        onManualEntry={() => {
+          setCaptureOpen(false);
+          setManualOpen(true);
+        }}
       />
+
+      {/* Always mounted, never gated on the voice preference — switching
+          voice off must not leave anyone unable to record an expense. */}
+      <ManualEntry open={manualOpen} onOpenChange={setManualOpen} />
     </div>
   );
 }

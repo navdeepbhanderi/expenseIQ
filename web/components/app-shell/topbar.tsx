@@ -12,7 +12,17 @@ import { useAuth } from "@/components/providers/auth-provider";
 import { useUnreadCount } from "@/lib/api/hooks";
 
 /** Top bar — design 2a's 62px header. */
-export function Topbar({ onCapture }: { onCapture: () => void }) {
+import { useVoiceEnabled } from "@/lib/voice-preference";
+
+export function Topbar({
+  onCapture,
+  onManualEntry,
+}: {
+  onCapture: () => void;
+  onManualEntry: () => void;
+}) {
+  const [voiceEnabled] = useVoiceEnabled();
+
   const { theme, toggle } = useTheme();
   const { user, logout } = useAuth();
   const { activeId } = useProfile();
@@ -78,7 +88,17 @@ export function Topbar({ onCapture }: { onCapture: () => void }) {
        * Desktop only. On mobile this action is the mic in the tab bar, and
        * two "add expense" affordances on one screen is one too many.
        */}
-      <Button size="sm" onClick={onCapture} className="hidden lg:inline-flex">
+      {/*
+       * With voice on this opens the capture sheet, which offers both speech
+       * and typing. With voice off it goes straight to the manual form —
+       * otherwise the primary action leads to a sheet whose main affordance
+       * the user has just switched off.
+       */}
+      <Button
+        size="sm"
+        onClick={voiceEnabled ? onCapture : onManualEntry}
+        className="hidden lg:inline-flex"
+      >
         <Plus className="size-4" aria-hidden="true" />
         Add expense
       </Button>

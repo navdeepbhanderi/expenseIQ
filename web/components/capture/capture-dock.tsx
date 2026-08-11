@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Mic, Square } from "lucide-react";
+import { Mic, PenLine, Square } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { Button } from "@/components/ui/button";
 import { Banner } from "@/components/ui/feedback";
@@ -14,6 +14,7 @@ import { ApiError } from "@/lib/api/client";
 import { formatMinor, undoSecondsLeft } from "@/lib/money";
 import type { Account, NluCandidate } from "@/lib/api/types";
 import { CandidateCard, HeardLine } from "./candidate-card";
+import { useVoiceEnabled } from "@/lib/voice-preference";
 
 /**
  * The always-present composer — design 5a/5b/5c.
@@ -25,7 +26,15 @@ import { CandidateCard, HeardLine } from "./candidate-card";
  * Hold space to speak, ⏎ to add, Esc to dismiss — 5c states the shortcuts on
  * screen, so they have to actually work.
  */
-export function CaptureDock({ accounts }: { accounts: Account[] }) {
+export function CaptureDock({
+  accounts,
+  onManualEntry,
+}: {
+  accounts: Account[];
+  /** Opens the typed form. Always shown, whatever voice is set to. */
+  onManualEntry?: () => void;
+}) {
+  const [voiceEnabled] = useVoiceEnabled();
   const { activeId } = useProfile();
   const { toast, undoToast } = useToast();
   const { data: categories = [] } = useCategories(activeId);
@@ -285,11 +294,29 @@ export function CaptureDock({ accounts }: { accounts: Account[] }) {
               className="flex-1 bg-transparent text-[15px] text-ink outline-none placeholder:text-ink-faint"
             />
 
+            {/*
+             * The way out of the parser entirely — always here, whatever
+             * voice is set to. Some expenses are faster to type than to
+             * describe, and the parser can be stubbornly wrong about a phrase.
+             */}
+            {onManualEntry && (
+              <button
+                type="button"
+                onClick={onManualEntry}
+                title="Fill it in myself"
+                aria-label="Fill it in myself"
+                className="flex size-9 shrink-0 items-center justify-center rounded-full text-ink-faint transition-colors hover:bg-paper-sunken hover:text-ink"
+              >
+                <PenLine className="size-4" aria-hidden="true" />
+              </button>
+            )}
+
             {listening ? (
               <span className="tabular font-mono text-[13px] text-green">
                 0:{String(speech.elapsed).padStart(2, "0")}
               </span>
             ) : (
+              voiceEnabled &&
               speech.supported && (
                 <span className="hidden text-[13px] text-ink-faint xl:inline">
                   hold{" "}
@@ -301,6 +328,7 @@ export function CaptureDock({ accounts }: { accounts: Account[] }) {
               )
             )}
 
+            {voiceEnabled && (
             <button
               type="button"
               onClick={() => (listening ? speech.stop() : speech.start())}
@@ -318,6 +346,7 @@ export function CaptureDock({ accounts }: { accounts: Account[] }) {
                 <Mic className="size-5" aria-hidden="true" />
               )}
             </button>
+            )}
           </form>
         )}
       </div>

@@ -66,6 +66,31 @@ function arrayParam(
   return { [name]: values.join(",") };
 }
 
+/**
+ * Writes a transaction the user typed themselves.
+ *
+ * Straight to the ledger rather than through the review queue: the queue
+ * exists to confirm guesses, and there is no guess here. Defaults to source
+ * MANUAL on the server, which is what keeps these out of the parser's
+ * accuracy statistics.
+ */
+export function useCreateTransaction(profileId: string | null) {
+  const client = useQueryClient();
+
+  return useMutation({
+    mutationFn: (body: {
+      amountMinor: number;
+      direction: "DEBIT" | "CREDIT";
+      date: string;
+      categoryId?: string;
+      accountId?: string;
+      merchant?: string;
+      note?: string;
+    }) => api.post<Transaction>(`/profiles/${profileId}/transactions`, body),
+    onSuccess: () => invalidate(client, profileId),
+  });
+}
+
 export function useUpdateTransaction(profileId: string | null) {
   const client = useQueryClient();
 

@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Toggle } from "@/components/ui/controls";
 import { Pill } from "@/components/ui/feedback";
 import { useTheme } from "@/lib/theme";
+import { useVoiceEnabled } from "@/lib/voice-preference";
 import { ProfileSettings } from "@/components/settings/profile-settings";
 
 /** Settings — profile, appearance, integrations, sign out. */
@@ -16,6 +17,7 @@ export default function SettingsPage() {
   const { user, logout } = useAuth();
   const { active, profiles } = useProfile();
   const { theme, setTheme } = useTheme();
+  const [voiceEnabled, setVoiceEnabled] = useVoiceEnabled();
 
   return (
     <div className="flex flex-col gap-5 p-4 sm:p-6">
@@ -51,6 +53,26 @@ export default function SettingsPage() {
           checked={theme === "dark"}
           onCheckedChange={(next) => setTheme(next ? "dark" : "light")}
         />
+      </section>
+
+      <section className="rounded-[var(--radius-card)] border border-line-strong bg-paper p-5">
+        <Eyebrow>Capture</Eyebrow>
+        <Toggle
+          className="mt-3"
+          label="Voice input"
+          description="Show the microphone for speaking expenses aloud"
+          checked={voiceEnabled}
+          onCheckedChange={setVoiceEnabled}
+        />
+        <p className="mt-2 text-[13px] text-ink-muted">
+          {voiceEnabled
+            ? "Typing and filling the form in by hand stay available either way."
+            : "The microphone is hidden. You can still type an expense in plain language, or fill the form in yourself."}
+        </p>
+        <p className="mt-2 text-xs text-ink-faint">
+          This setting applies to this device only — an office laptop and a
+          phone reasonably want different answers.
+        </p>
       </section>
 
       <section className="rounded-[var(--radius-card)] border border-line-strong bg-paper p-5">

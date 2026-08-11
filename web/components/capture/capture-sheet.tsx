@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { Mic, Square } from "lucide-react";
+import { Mic, PenLine, Square } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { Sheet } from "@/components/ui/overlay";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import { ApiError } from "@/lib/api/client";
 import { formatMinor, undoSecondsLeft } from "@/lib/money";
 import type { Account, NluCandidate } from "@/lib/api/types";
 import { CandidateCard, HeardLine } from "./candidate-card";
+import { useVoiceEnabled } from "@/lib/voice-preference";
 
 /**
  * Mobile capture — design 5f/5g.
@@ -29,11 +30,15 @@ export function CaptureSheet({
   open,
   onOpenChange,
   accounts,
+  onManualEntry,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   accounts: Account[];
+  /** Opens the typed form — always offered, whatever voice is set to. */
+  onManualEntry: () => void;
 }) {
+  const [voiceEnabled] = useVoiceEnabled();
   const { activeId } = useProfile();
   const { toast, undoToast } = useToast();
   const { data: categories = [] } = useCategories(activeId);
@@ -229,32 +234,57 @@ export function CaptureSheet({
             </form>
 
             <div className="flex flex-col items-center gap-3 py-4">
-              <button
-                type="button"
-                onClick={() => (listening ? speech.stop() : speech.start())}
-                aria-label={listening ? "Stop listening" : "Speak an expense"}
-                disabled={!speech.supported}
-                className={cn(
-                  "flex size-20 items-center justify-center rounded-full transition-transform active:scale-95",
-                  "bg-green text-paper shadow-[0_12px_24px_-10px_rgba(31,111,92,0.7)]",
-                  "disabled:bg-disabled disabled:text-disabled-ink disabled:shadow-none",
-                  listening && "animate-pulse",
-                )}
-              >
-                {listening ? (
-                  <Square className="size-6 fill-current" aria-hidden="true" />
-                ) : (
-                  <Mic className="size-8" aria-hidden="true" />
-                )}
-              </button>
+              {voiceEnabled && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      listening ? speech.stop() : speech.start()
+                    }
+                    aria-label={
+                      listening ? "Stop listening" : "Speak an expense"
+                    }
+                    disabled={!speech.supported}
+                    className={cn(
+                      "flex size-20 items-center justify-center rounded-full transition-transform active:scale-95",
+                      "bg-green text-paper shadow-[0_12px_24px_-10px_rgba(31,111,92,0.7)]",
+                      "disabled:bg-disabled disabled:text-disabled-ink disabled:shadow-none",
+                      listening && "animate-pulse",
+                    )}
+                  >
+                    {listening ? (
+                      <Square className="size-6 fill-current" aria-hidden="true" />
+                    ) : (
+                      <Mic className="size-8" aria-hidden="true" />
+                    )}
+                  </button>
 
-              <p className="text-sm text-ink-muted">
-                {listening
-                  ? `Listening · 0:${String(speech.elapsed).padStart(2, "0")}`
-                  : speech.supported
-                    ? "Tap and say what you spent"
-                    : "Type it above — this browser can't listen"}
-              </p>
+                  <p className="text-sm text-ink-muted">
+                    {listening
+                      ? `Listening · 0:${String(speech.elapsed).padStart(2, "0")}`
+                      : speech.supported
+                        ? "Tap and say what you spent"
+                        : "Type it above — this browser can't listen"}
+                  </p>
+                </>
+              )}
+
+              {/*
+               * The way out of the parser entirely.
+               *
+               * Offered whether or not voice is on, because the parser can be
+               * wrong about a stubborn phrase and because some expenses are
+               * simply faster to type than to describe.
+               */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onManualEntry}
+                className="text-ink-muted"
+              >
+                <PenLine className="size-4" aria-hidden="true" />
+                Fill it in myself
+              </Button>
             </div>
           </>
         ) : (
