@@ -58,13 +58,25 @@ export const settingsKeys = {
 
 /* ---------------------------------------------------------- reminders */
 
+/**
+ * The account's reminder, or null when it has none.
+ *
+ * The endpoint returns an *array* — an account could in principle carry more
+ * than one reminder — while the UI offers a single one. Unwrapping here rather
+ * than at the call site is what keeps `reminder.enabled` from silently reading
+ * a property that does not exist on an array, which is exactly what made the
+ * toggle impossible to switch on: the PUT succeeded every time and the value
+ * the switch rendered from was always undefined.
+ */
 export function useReminder(profileId: string | null, accountId: string) {
   return useQuery({
     queryKey: settingsKeys.reminder(profileId ?? "", accountId),
-    queryFn: () =>
-      api.get<Reminder | null>(
+    queryFn: async () => {
+      const rows = await api.get<Reminder[]>(
         `/profiles/${profileId}/accounts/${accountId}/reminders`,
-      ),
+      );
+      return rows[0] ?? null;
+    },
     enabled: Boolean(profileId && accountId),
   });
 }
@@ -226,4 +238,30 @@ function invalidate(
   if (!profileId) return;
   void client.invalidateQueries({ queryKey: ["profile", profileId] });
   void client.invalidateQueries({ queryKey: keys.profiles });
+}
+
+/* ---------------------------------------------------------------- profile */
+
+/**
+ * Renames or restyles a profile.
+ *
+ * The switcher shows a name and an avatar colour that were fixed at creation
+ * and could not be changed afterwards — so a household created as "Personal"
+ * stayed "Personal" forever.
+ */
+export function useUpdateProfile(profileId: string | null) {
+  const client = useQueryClient();
+
+  return useMutation({
+    mutationFn: (patch: {
+      name?: string;
+      locale?: string;
+      currency?: string;
+      avatarColor?: string;
+    }) => api.patch(`/profiles/${profileId}`, patch),
+    onSuccess: () => {
+      void client.invalidateQueries({ queryKey: ["profile", profileId] });
+      void client.invalidateQueries({ queryKey: keys.profiles });
+    },
+  });
 }

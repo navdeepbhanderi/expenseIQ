@@ -448,4 +448,51 @@ describe('Reminders (e2e)', () => {
         .expect(404);
     });
   });
+
+  describe('partial edits', () => {
+    it('keeps the fields the caller did not send', async () => {
+      const { token, profileId } = await setup();
+      const { id: accountId } = await cardDueInDays(profileId, 10);
+
+      await request(server)
+        .put(`/api/v1/profiles/${profileId}/accounts/${accountId}/reminders`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ offsetDays: 7, timeOfDay: 1200, enabled: true })
+        .expect(200);
+
+      // The UI switches the reminder off with this body alone.
+      const off = await request(server)
+        .put(`/api/v1/profiles/${profileId}/accounts/${accountId}/reminders`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ enabled: false })
+        .expect(200);
+
+      // Filling the gaps with defaults would have reset "a week before, 8 pm"
+      // to "3 days before, 9 am" — a schedule the user never chose.
+      expect(off.body.offsetDays).toBe(7);
+      expect(off.body.timeOfDay).toBe(1200);
+      expect(off.body.enabled).toBe(false);
+    });
+
+    it('returns the reminder as a list the UI can unwrap', async () => {
+      const { token, profileId } = await setup();
+      const { id: accountId } = await cardDueInDays(profileId, 10);
+
+      await request(server)
+        .put(`/api/v1/profiles/${profileId}/accounts/${accountId}/reminders`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ offsetDays: 5 })
+        .expect(200);
+
+      const read = await request(server)
+        .get(`/api/v1/profiles/${profileId}/accounts/${accountId}/reminders`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      // An array, not an object — the web client read `.enabled` off this
+      // directly and got undefined, so the switch could never show as on.
+      expect(Array.isArray(read.body)).toBe(true);
+      expect(read.body[0].offsetDays).toBe(5);
+    });
+  });
 });

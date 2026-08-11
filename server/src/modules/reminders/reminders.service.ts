@@ -63,11 +63,21 @@ export class RemindersService {
       where: { accountId },
     });
 
+    /*
+     * An omitted field keeps what is already there, and only falls back to a
+     * default when there is nothing to keep.
+     *
+     * Every field is optional, and the UI sends one at a time — switching the
+     * reminder off is `{ enabled: false }` on its own. Filling the gaps with
+     * defaults instead of the stored values meant that turning it off silently
+     * reset "a week before, 8 pm" to "3 days before, 9 am", and turning it
+     * back on produced a schedule the user never chose.
+     */
     const data = {
-      offsetDays: dto.offsetDays ?? 3,
-      timeOfDay: dto.timeOfDay ?? 540,
-      channels: dto.channels ?? [ReminderChannel.EMAIL],
-      enabled: dto.enabled ?? true,
+      offsetDays: dto.offsetDays ?? existing?.offsetDays ?? 3,
+      timeOfDay: dto.timeOfDay ?? existing?.timeOfDay ?? 540,
+      channels: dto.channels ?? existing?.channels ?? [ReminderChannel.EMAIL],
+      enabled: dto.enabled ?? existing?.enabled ?? true,
     };
 
     if (existing) {
