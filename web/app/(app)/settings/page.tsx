@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Toggle } from "@/components/ui/controls";
 import { Pill } from "@/components/ui/feedback";
 import { useTheme } from "@/lib/theme";
+import { ProfileSettings } from "@/components/settings/profile-settings";
 
 /** Settings — profile, appearance, integrations, sign out. */
 export default function SettingsPage() {
@@ -38,6 +39,8 @@ export default function SettingsPage() {
           login.
         </p>
       </section>
+
+      <ProfileSettings />
 
       <section className="rounded-[var(--radius-card)] border border-line-strong bg-paper p-5">
         <Eyebrow>Appearance</Eyebrow>

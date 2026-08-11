@@ -119,6 +119,8 @@ export interface RequestOptions extends Omit<RequestInit, "body"> {
   /** Skips the auth header. Used by login/signup, which have no token yet. */
   anonymous?: boolean;
   query?: Record<string, string | number | boolean | undefined | null>;
+  /** Returns the response body as text instead of parsing it as JSON. */
+  raw?: boolean;
 }
 
 function buildUrl(path: string, query?: RequestOptions["query"]): string {
@@ -208,12 +210,26 @@ export async function apiFetch<T>(
   }
 
   const text = await response.text();
+
+  /*
+   * CSV export answers text/csv, and JSON.parse would throw on it.
+   *
+   * Opt-in rather than sniffing the content type: a caller asking for text
+   * knows it is asking for text, and an endpoint that unexpectedly returns
+   * HTML (a proxy error page, say) should still fail loudly here rather than
+   * be handed back as if it were the payload.
+   */
+  if (options?.raw) return text as T;
+
   return (text ? JSON.parse(text) : undefined) as T;
 }
 
 export const api = {
   get: <T>(path: string, options?: RequestOptions) =>
     apiFetch<T>(path, { ...options, method: "GET" }),
+  /** GET returning the body verbatim — for CSV and anything else not JSON. */
+  getText: (path: string, options?: RequestOptions) =>
+    apiFetch<string>(path, { ...options, method: "GET", raw: true }),
   post: <T>(path: string, body?: unknown, options?: RequestOptions) =>
     apiFetch<T>(path, { ...options, method: "POST", body }),
   patch: <T>(path: string, body?: unknown, options?: RequestOptions) =>

@@ -3,7 +3,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "./client";
 import { keys } from "./hooks";
-import type { Money, ProfileKind, ProfileRole, UpcomingDue } from "./types";
+import type {
+  Money,
+  ProfileKind,
+  ProfileRole,
+  UpcomingDue,
+} from "./types";
 
 /*
  * Every type here is transcribed from the server's own interfaces rather than
@@ -217,4 +222,134 @@ function invalidate(
   void client.invalidateQueries({ queryKey: ["profile", profileId] });
   void client.invalidateQueries({ queryKey: familyKeys.dashboard });
   void client.invalidateQueries({ queryKey: keys.profiles });
+}
+
+
+/**
+ * Sets the monthly limits. OWNER only — the server enforces it.
+ *
+ * The read side has been on the Family page since it was built; this is the
+ * half that was missing, so limits could be shown but never chosen.
+ *
+ * Zero removes a limit rather than setting one of nothing — that is what the
+ * API means by it, and what clearing a field has to send.
+ */
+export function useSetSpendLimits(profileId: string | null) {
+  const client = useQueryClient();
+
+  return useMutation({
+    mutationFn: (body: {
+      overallMinor?: number;
+      categories?: { categoryId: string; amountMinor: number }[];
+    }) => api.put(`/profiles/${profileId}/spend-limits`, body),
+    onSuccess: () => invalidate(client, profileId),
+  });
+}
+
+/* ------------------------------------------------------------- allowance */
+
+/**
+ * Grants the monthly allowance — OWNER only.
+ *
+ * The read side and the "credit now" button both shipped, but nothing could
+ * set the amount, so `allowance.data?.allowance` was always null and the whole
+ * section stayed invisible. Same shape of gap as the spend limits.
+ */
+export function useSetAllowance(profileId: string | null) {
+  const client = useQueryClient();
+
+  return useMutation({
+    mutationFn: (body: { amountMinor: number; dayOfMonth?: number }) =>
+      api.put(`/profiles/${profileId}/allowance`, body),
+    onSuccess: () => invalidate(client, profileId),
+  });
+}
+
+export function useRemoveAllowance(profileId: string | null) {
+  const client = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => api.delete(`/profiles/${profileId}/allowance`),
+    onSuccess: () => invalidate(client, profileId),
+  });
+}
+
+/* ----------------------------------------------------------------- goals */
+
+/** Edits a goal — a target that moved, a date that slipped. */
+export function useUpdateGoal(profileId: string | null) {
+  const client = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      goalId,
+      patch,
+    }: {
+      goalId: string;
+      patch: {
+        name?: string;
+        targetMinor?: number;
+        targetDate?: string | null;
+      };
+    }) => api.patch(`/profiles/${profileId}/goals/${goalId}`, patch),
+    onSuccess: () => invalidate(client, profileId),
+  });
+}
+
+export function useDeleteGoal(profileId: string | null) {
+  const client = useQueryClient();
+
+  return useMutation({
+    mutationFn: (goalId: string) =>
+      api.delete(`/profiles/${profileId}/goals/${goalId}`),
+    onSuccess: () => invalidate(client, profileId),
+  });
+}
+
+/* --------------------------------------------------------------- members */
+
+/** Promotes or demotes a member. The server refuses the last owner. */
+export function useChangeRole(profileId: string | null) {
+  const client = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ memberId, role }: { memberId: string; role: ProfileRole }) =>
+      api.patch(`/profiles/${profileId}/members/${memberId}`, { role }),
+    onSuccess: () => invalidate(client, profileId),
+  });
+}
+
+/** family.service.ts ProfileInvite */
+export interface ProfileInvite {
+  id: string;
+  email: string;
+  role: ProfileRole;
+  expiresAt: string;
+  createdAt: string;
+}
+
+/**
+ * Invitations still outstanding.
+ *
+ * Without this an invite was fire-and-forget: no way to see who had been
+ * asked, whether it had expired, or to take it back after inviting the wrong
+ * address — and re-inviting was the only feedback that anything had happened.
+ */
+export function usePendingInvites(profileId: string | null) {
+  return useQuery({
+    queryKey: ["profile", profileId, "invites"] as const,
+    queryFn: () =>
+      api.get<ProfileInvite[]>(`/profiles/${profileId}/members/invites`),
+    enabled: Boolean(profileId),
+  });
+}
+
+export function useRevokeInvite(profileId: string | null) {
+  const client = useQueryClient();
+
+  return useMutation({
+    mutationFn: (inviteId: string) =>
+      api.delete(`/profiles/${profileId}/members/invites/${inviteId}`),
+    onSuccess: () => invalidate(client, profileId),
+  });
 }
