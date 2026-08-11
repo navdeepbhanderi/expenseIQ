@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { cn } from "@/lib/cn";
 import { formatMinor } from "@/lib/money";
 import { Chip } from "@/components/ui/controls";
@@ -34,7 +35,10 @@ export function CandidateCard({
   }) => void;
   className?: string;
 }) {
-  const [editing, setEditing] = useState<"category" | "account" | null>(null);
+  const [editing, setEditing] = useState<"category" | "account" | null>(
+    null,
+  );
+  const router = useRouter();
 
   const category = categories.find((c) => c.id === candidate.categoryId);
   const account = accounts.find((a) => a.id === candidate.accountId);
@@ -62,6 +66,10 @@ export function CandidateCard({
               setEditing(null);
             }}
             options={categories.map((c) => ({ value: c.id, label: c.name }))}
+            emptyAction={{
+              label: "Create a category",
+              onSelect: () => router.push("/settings/categories"),
+            }}
           />
         ) : (
           <Chip
@@ -102,6 +110,10 @@ export function CandidateCard({
               setEditing(null);
             }}
             options={accounts.map((a) => ({ value: a.id, label: a.name }))}
+            emptyAction={{
+              label: "No accounts yet — add one",
+              onSelect: () => router.push("/accounts"),
+            }}
           />
         ) : (
           <Chip

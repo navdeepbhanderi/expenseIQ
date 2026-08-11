@@ -18,6 +18,7 @@ import { useToast } from "@/components/ui/toast";
 import { CandidateCard, HeardLine } from "@/components/capture/candidate-card";
 import { formatMinor, undoSecondsLeft } from "@/lib/money";
 import { ApiError } from "@/lib/api/client";
+import { useNluAccuracy } from "@/lib/api/settings";
 
 /**
  * Review queue — design 2b (desktop) and 4e (mobile).
@@ -33,6 +34,7 @@ export default function ReviewPage() {
   const { data: categories = [] } = useCategories(activeId);
   const { data: dashboard } = useDashboard(activeId);
 
+  const accuracy = useNluAccuracy(activeId);
   const confirm = useConfirm(activeId);
   const discard = useDiscard(activeId);
   const undo = useUndo(activeId);
@@ -111,6 +113,14 @@ export default function ReviewPage() {
           Everything you&rsquo;ve said is already in the ledger. Speak or type
           an expense and it will appear here first.
         </EmptyState>
+
+        {accuracy.data && accuracy.data.total >= 5 && (
+          <p className="mt-3 text-center text-xs text-ink-faint">
+            {accuracy.data.correctFirstTime} of {accuracy.data.total} read
+            correctly on the first try over the last {accuracy.data.windowDays}{" "}
+            days
+          </p>
+        )}
       </div>
     );
   }
@@ -187,9 +197,23 @@ export default function ReviewPage() {
         })}
       </ul>
 
-      <Eyebrow className="mt-2">
-        Nothing here has touched your ledger yet.
-      </Eyebrow>
+      <div className="mt-2 flex flex-col gap-1">
+        <Eyebrow>Nothing here has touched your ledger yet.</Eyebrow>
+
+        {/*
+         * Design 2b's accuracy line. Shown only once there is enough to
+         * measure — "0 of 0 read correctly" is not a statistic, it is noise.
+         */}
+        {accuracy.data && accuracy.data.total >= 5 && (
+          <p className="text-xs text-ink-faint">
+            {accuracy.data.correctFirstTime} of {accuracy.data.total} entries
+            read correctly on the first try over the last{" "}
+            {accuracy.data.windowDays} days
+            {accuracy.data.mostCorrectedField &&
+              ` · ${accuracy.data.mostCorrectedField} needs the most fixing`}
+          </p>
+        )}
+      </div>
     </div>
   );
 }

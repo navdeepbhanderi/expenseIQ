@@ -11,6 +11,7 @@ import { AmountInput } from "@/components/ui/input";
 import { EmptyState, Pill, Progress } from "@/components/ui/feedback";
 import { AccountDetailSkeleton } from "@/components/ui/skeletons";
 import { EditAccount } from "@/components/accounts/edit-account";
+import { ReminderSettings } from "@/components/accounts/reminder-settings";
 import { formatCompact, formatMinor } from "@/lib/money";
 import { cn } from "@/lib/cn";
 import type { CardPosition, LoanPosition } from "@/lib/api/types";
@@ -80,6 +81,9 @@ export default function AccountDetailPage({
           accountId={accountId}
         />
       )}
+
+      {/* Only cards and loans have a due date to be reminded about. */}
+      {(card || loan) && <ReminderSettings accountId={accountId} />}
 
       {!card && !loan && (
         <section className="rounded-[var(--radius-card)] border border-line-strong bg-paper p-5">
