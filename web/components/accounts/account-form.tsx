@@ -6,6 +6,8 @@ import { Select } from "@/components/ui/select";
 import { Toggle } from "@/components/ui/controls";
 import { Eyebrow } from "@/components/ui/display";
 import { parseAmountToMinor } from "@/lib/money";
+import { CalendarClock } from "lucide-react";
+import { describeCycle, previewCycle } from "@/lib/billing-cycle";
 import type { Account, AccountType } from "@/lib/api/types";
 
 export const TYPE_LABELS: Record<AccountType, string> = {
@@ -171,6 +173,13 @@ export function AccountForm({
     value: AccountFormValues[K],
   ) => onChange({ ...values, [key]: value });
 
+  // Recomputed as the two day fields are typed, so the answer appears while
+  // the user is still deciding rather than after they have saved.
+  const cycle =
+    values.type === "CREDIT_CARD"
+      ? previewCycle(Number(values.statementDay), Number(values.dueDay))
+      : null;
+
   const digits = (s: string) => s.replace(/\D/g, "");
   const isCard = values.type === "CREDIT_CARD";
   const isLoan = values.type === "LOAN";
@@ -267,6 +276,26 @@ export function AccountForm({
               onChange={(e) => set("dueDay", digits(e.target.value))}
             />
           </div>
+
+          {/*
+           * What those two numbers actually mean, spelled out.
+           *
+           * Two days of the month with no explanation makes the commonest
+           * real setup look broken: statement on the 15th, due on the 5th, is
+           * the 5th of the NEXT month, but typed side by side it reads as
+           * though the bill falls due ten days before it exists. The server
+           * always resolved it correctly; the user simply could not see it and
+           * had to either trust it or work it out.
+           */}
+          {cycle && (
+            <p className="-mt-1 flex items-center gap-1.5 rounded-[var(--radius-control)] border border-line bg-paper-sunken px-3 py-2.5 text-[13px] text-ink-muted">
+              <CalendarClock
+                className="size-3.5 shrink-0 text-ink-faint"
+                aria-hidden="true"
+              />
+              {describeCycle(cycle)}
+            </p>
+          )}
 
           <Input
             label="Minimum due"
