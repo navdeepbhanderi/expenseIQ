@@ -12,6 +12,7 @@ import {
 } from './domain/norms';
 import { addMonths, startOfMonth } from '@/modules/dashboard/dashboard.service';
 import type { SetBudgetsDto } from './dto/budget.dto';
+import { monthKey } from '@/common/time/calendar';
 
 export interface BudgetLine {
   categoryId: string | null;
@@ -76,7 +77,7 @@ export class BudgetsService {
     const overallBudget = budgets.find((b) => b.categoryId === null);
 
     return {
-      month: start.toISOString().slice(0, 7),
+      month: monthKey(start),
       overall: overallBudget
         ? computeBudgetStatus(
             totalSpent,
@@ -223,13 +224,13 @@ export class BudgetsService {
       if (!row.categoryId) continue;
       const months =
         byCategory.get(row.categoryId) ?? new Map<string, bigint>();
-      const key = row.date.toISOString().slice(0, 7);
+      const key = monthKey(row.date);
       months.set(key, (months.get(key) ?? 0n) + row.amountMinor);
       byCategory.set(row.categoryId, months);
     }
 
     const monthKeys = Array.from({ length: window }, (_, i) =>
-      addMonths(windowStart, i).toISOString().slice(0, 7),
+      monthKey(addMonths(windowStart, i)),
     );
 
     const lines: CategoryNormLine[] = [];

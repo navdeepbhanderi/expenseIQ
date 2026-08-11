@@ -7,6 +7,7 @@ import {
   DashboardService,
   type UpcomingDue,
 } from '@/modules/dashboard/dashboard.service';
+import { monthKey } from '@/common/time/calendar';
 
 export interface FamilyMemberSummary {
   profileId: string;
@@ -119,7 +120,7 @@ export class FamilyDashboardService {
     }
 
     return {
-      month: monthStart.toISOString().slice(0, 7),
+      month: monthKey(monthStart),
       householdSpent,
       householdIncome,
       members,

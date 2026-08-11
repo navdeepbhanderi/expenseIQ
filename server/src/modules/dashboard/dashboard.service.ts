@@ -2,6 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { AccountType, Direction, type Account } from '@prisma/client';
 
 import { PrismaService } from '@/infra/prisma/prisma.service';
+import {
+  addMonths,
+  daysBetween,
+  monthKey,
+  startOfDay,
+  startOfMonth,
+} from '@/common/time/calendar';
 import { Money } from '@/common/money/money';
 import {
   computeBillingCycle,
@@ -481,30 +488,13 @@ export class DashboardService {
   }
 }
 
-// ─── Date helpers, all UTC ─────────────────────────────────────────────────────
-
-export function startOfMonth(date: Date): Date {
-  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1));
-}
-
-export function addMonths(date: Date, months: number): Date {
-  return new Date(
-    Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + months, 1),
-  );
-}
-
-function startOfDay(date: Date): Date {
-  return new Date(
-    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()),
-  );
-}
-
-function daysBetween(later: Date, earlier: Date): number {
-  return Math.round(
-    (startOfDay(later).getTime() - startOfDay(earlier).getTime()) / 86_400_000,
-  );
-}
-
-function monthKey(date: Date): string {
-  return date.toISOString().slice(0, 7);
-}
+/*
+ * Date helpers.
+ *
+ * Re-exported from common/time/calendar rather than defined here, because
+ * these were the UTC versions that made every "this month" figure report the
+ * previous month for the first five and a half hours of each month in India.
+ * Kept as re-exports so the modules already importing them from this file do
+ * not all have to change at once.
+ */
+export { startOfMonth, addMonths, monthKey } from '@/common/time/calendar';

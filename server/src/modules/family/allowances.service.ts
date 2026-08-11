@@ -7,6 +7,7 @@ import { AppLogger } from '@/common/logger/app-logger.service';
 import { addMonths, startOfMonth } from '@/modules/dashboard/dashboard.service';
 
 import type { SetAllowanceDto } from './dto/family.dto';
+import { monthKey as monthKeyIn } from '@/common/time/calendar';
 
 export interface AllowanceStatus {
   allowance: Allowance | null;
@@ -116,7 +117,15 @@ export class AllowancesService {
       return { credited: false, reason: 'no-allowance' };
     }
 
-    const monthKey = asOf.toISOString().slice(0, 7);
+    /*
+     * The local month, not the UTC one.
+     *
+     * This is the guard that stops an allowance being credited twice. Derived
+     * in UTC, an allowance due on the 1st and credited at 00:30 IST was
+     * recorded against the previous month — so the real first-of-month run
+     * saw no record and credited a second time.
+     */
+    const monthKey = monthKeyIn(asOf);
 
     if (allowance.lastCreditedMonth === monthKey) {
       return { credited: false, reason: 'already-credited' };

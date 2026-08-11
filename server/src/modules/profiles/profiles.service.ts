@@ -9,6 +9,7 @@ import { Prisma, ProfileKind, ProfileRole, type Profile } from '@prisma/client';
 import { PrismaService } from '@/infra/prisma/prisma.service';
 import { deriveInitials, pickAvatarColor } from './domain/avatar';
 import type { CreateProfileDto, UpdateProfileDto } from './dto/profile.dto';
+import { startOfMonth } from '@/common/time/calendar';
 
 /** One row of the design 2c profile switcher. */
 export interface ProfileSummary {
@@ -296,8 +297,4 @@ export class ProfilesService {
 
     return new Map(rows.map((row) => [row.profileId, row._count._all]));
   }
-}
-
-function startOfMonth(now: Date = new Date()): Date {
-  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
 }

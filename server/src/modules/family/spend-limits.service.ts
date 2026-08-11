@@ -15,6 +15,7 @@ import {
 } from '@/modules/notifications/notifications.service';
 
 import type { SetSpendLimitsDto } from './dto/family.dto';
+import { monthKey } from '@/common/time/calendar';
 
 export interface SpendLimitLine {
   categoryId: string | null;
@@ -88,7 +89,7 @@ export class SpendLimitsService {
     const overallLimit = limits.find((limit) => limit.categoryId === null);
 
     return {
-      month: start.toISOString().slice(0, 7),
+      month: monthKey(start),
       overall: overallLimit
         ? {
             categoryId: null,

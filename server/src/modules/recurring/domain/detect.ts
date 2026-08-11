@@ -1,5 +1,6 @@
 import { Cadence } from '@prisma/client';
 import { Money } from '@/common/money/money';
+import { startOfDay } from '@/common/time/calendar';
 
 /**
  * Finds repeating payments in transaction history.
@@ -361,10 +362,4 @@ function nextWeekday(from: Date, dayOfWeek: number | null): Date {
 function clampToMonth(year: number, month: number, day: number): Date {
   const lastDay = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
   return new Date(Date.UTC(year, month, Math.min(day, lastDay)));
-}
-
-function startOfDay(date: Date): Date {
-  return new Date(
-    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()),
-  );
 }

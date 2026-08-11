@@ -38,24 +38,14 @@ export interface ResolvedDate {
   confidence: number;
 }
 
-/**
- * Today's date in a timezone, as YYYY-MM-DD.
+/*
+ * Re-exported rather than defined twice.
  *
- * `toISOString()` is UTC, and India is UTC+5:30 — so between midnight and
- * 05:30 IST it reports yesterday. Every relative date is computed from this,
- * which means the naive version was silently off by one for anyone logging a
- * late-night meal.
+ * The same "today in the user's timezone" question is asked by the budgets,
+ * dashboard and reminder code; two implementations would eventually disagree,
+ * which is exactly how the UTC bug survived as long as it did.
  */
-export function todayIn(timezone: string, now: Date = new Date()): string {
-  // en-CA formats as YYYY-MM-DD, which is what we want without reassembling
-  // parts by hand.
-  return new Intl.DateTimeFormat('en-CA', {
-    timeZone: timezone,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).format(now);
-}
+export { todayIn } from '@/common/time/calendar';
 
 /** Adds days to a YYYY-MM-DD without any timezone involvement. */
 export function addDays(isoDate: string, days: number): string {
