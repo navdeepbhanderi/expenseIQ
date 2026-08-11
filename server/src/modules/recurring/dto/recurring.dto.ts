@@ -104,6 +104,59 @@ export class CreateRecurringDto {
   @IsOptional()
   @IsBoolean()
   autoDebit?: boolean;
+
+  @ApiPropertyOptional({
+    example: 5,
+    minimum: 0,
+    maximum: 6,
+    description:
+      'WEEKLY only. 0 = Sunday … 6 = Saturday. Omit and the rule falls seven ' +
+      'days out from creation, which is an accident of timing rather than a ' +
+      'choice.',
+  })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(6)
+  dayOfWeek?: number;
+
+  @ApiPropertyOptional({
+    example: 4,
+    minimum: 1,
+    maximum: 12,
+    description:
+      'YEARLY and QUARTERLY only. 1 = January. The month the cycle is ' +
+      'anchored to — YEARLY is genuinely ambiguous without it, and for ' +
+      'QUARTERLY it picks Jan/Apr/Jul/Oct over Feb/May/Aug/Nov.',
+  })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(12)
+  monthOfYear?: number;
+
+  @ApiPropertyOptional({
+    example: '2027-03-31',
+    description:
+      'Last date the rule may fire. Omit for "until I turn it off". Use this ' +
+      'for a lease or a policy that ends on a known date.',
+  })
+  @IsOptional()
+  @IsDateString()
+  endsOn?: string;
+
+  @ApiPropertyOptional({
+    example: 6,
+    minimum: 1,
+    description:
+      'Stop after this many entries — the natural way to say "6 EMIs left". ' +
+      'Counted only on entries actually created, so a repeated run does not ' +
+      'consume an instalment. Set with endsOn and whichever comes first wins.',
+  })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  maxOccurrences?: number;
 }
 
 export class UpdateRecurringDto {
@@ -150,4 +203,57 @@ export class UpdateRecurringDto {
   @IsOptional()
   @IsBoolean()
   enabled?: boolean;
+
+  @ApiPropertyOptional({
+    example: 5,
+    minimum: 0,
+    maximum: 6,
+    description:
+      'WEEKLY only. 0 = Sunday … 6 = Saturday. Omit and the rule falls seven ' +
+      'days out from creation, which is an accident of timing rather than a ' +
+      'choice.',
+  })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(6)
+  dayOfWeek?: number;
+
+  @ApiPropertyOptional({
+    example: 4,
+    minimum: 1,
+    maximum: 12,
+    description:
+      'YEARLY and QUARTERLY only. 1 = January. The month the cycle is ' +
+      'anchored to — YEARLY is genuinely ambiguous without it, and for ' +
+      'QUARTERLY it picks Jan/Apr/Jul/Oct over Feb/May/Aug/Nov.',
+  })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(12)
+  monthOfYear?: number;
+
+  @ApiPropertyOptional({
+    example: '2027-03-31',
+    description:
+      'Last date the rule may fire. Omit for "until I turn it off". Use this ' +
+      'for a lease or a policy that ends on a known date.',
+  })
+  @IsOptional()
+  @IsDateString()
+  endsOn?: string;
+
+  @ApiPropertyOptional({
+    example: 6,
+    minimum: 1,
+    description:
+      'Stop after this many entries — the natural way to say "6 EMIs left". ' +
+      'Counted only on entries actually created, so a repeated run does not ' +
+      'consume an instalment. Set with endsOn and whichever comes first wins.',
+  })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  maxOccurrences?: number;
 }

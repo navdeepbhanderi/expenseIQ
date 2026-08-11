@@ -192,6 +192,16 @@ export interface RecurringRule {
   dayOfMonth: number | null;
   /** True for "the last day, whatever it is". */
   onMonthEnd: boolean;
+  /** 0 = Sunday … 6 = Saturday. WEEKLY only. */
+  dayOfWeek: number | null;
+  /** 1-12. The anchor month for YEARLY and QUARTERLY. */
+  monthOfYear: number | null;
+  /** Last date the rule may fire. Null means "until switched off". */
+  endsOn: string | null;
+  /** Stops after this many entries — "6 EMIs". Null means no limit. */
+  maxOccurrences: number | null;
+  /** How many entries it has produced, counted against maxOccurrences. */
+  occurrenceCount: number;
   nextDueDate: string | null;
   autoDebit: boolean;
   /** Null for user-stated schedules — no model was involved. */

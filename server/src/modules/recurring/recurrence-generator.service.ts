@@ -69,16 +69,54 @@ export class RecurrenceGeneratorService {
       const dueDate = rule.nextDueDate;
       if (!dueDate) continue;
 
+      /*
+       * Past its end date — retire it without staging.
+       *
+       * Checked before staging rather than after, because a rule that ran to
+       * its final date should not produce one entry beyond it. A lease that
+       * ends in December must not stage a January rent.
+       */
+      if (rule.endsOn && dueDate > rule.endsOn) {
+        await this.retire(rule.id);
+        continue;
+      }
+
       const created = await this.stage(rule, dueDate);
       if (created) generated += 1;
       else skipped += 1;
 
-      // Advanced regardless. A rule whose entry already existed has simply
-      // been generated before; leaving nextDueDate in the past would make it
-      // due forever and the scheduler would revisit it on every run.
+      // Only a genuinely new entry counts. A re-run that hit the idempotency
+      // index has not consumed an instalment, and counting it would end a
+      // 12-EMI loan early.
+      const count = rule.occurrenceCount + (created ? 1 : 0);
+
+      /*
+       * Exhausted its instalments — this was the last one.
+       *
+       * The entry just staged is kept; it is the final EMI, not one too many.
+       */
+      if (rule.maxOccurrences !== null && count >= rule.maxOccurrences) {
+        await this.retire(rule.id, count);
+        continue;
+      }
+
+      const next = advance(dueDate, rule.cadence, rule.dayOfMonth);
+
+      // The next landing is past the end date, so there is nothing further to
+      // schedule. Retiring here rather than waiting for the next run means the
+      // UI stops showing a due date the rule will never reach.
+      if (rule.endsOn && next > rule.endsOn) {
+        await this.retire(rule.id, count);
+        continue;
+      }
+
+      // Advanced regardless of whether an entry was created. A rule whose
+      // entry already existed has simply been generated before; leaving
+      // nextDueDate in the past would make it due forever and the scheduler
+      // would revisit it on every run.
       await this.prisma.recurringRule.update({
         where: { id: rule.id },
-        data: { nextDueDate: advance(dueDate, rule.cadence) },
+        data: { nextDueDate: next, occurrenceCount: count },
       });
     }
 
@@ -91,6 +129,25 @@ export class RecurrenceGeneratorService {
     }
 
     return { generated, skipped };
+  }
+
+  /**
+   * Ends a rule that has run its course.
+   *
+   * `enabled: false` rather than deleting: the user's history of what they
+   * were paying is worth keeping, and a finished loan reappearing as "never
+   * existed" is worse than one shown as done. `nextDueDate: null` takes it
+   * out of the due query for good.
+   */
+  private async retire(id: string, occurrenceCount?: number): Promise<void> {
+    await this.prisma.recurringRule.update({
+      where: { id },
+      data: {
+        enabled: false,
+        nextDueDate: null,
+        ...(occurrenceCount === undefined ? {} : { occurrenceCount }),
+      },
+    });
   }
 
   private async stage(
@@ -155,10 +212,39 @@ export class RecurrenceGeneratorService {
  * drift the date earlier every month until a "monthly" bill fell twice in
  * one month.
  */
-export function advance(from: Date, cadence: Cadence): Date {
+export function advance(
+  from: Date,
+  cadence: Cadence,
+  /**
+   * The day the rule actually asks for, when it differs from the day it last
+   * landed on.
+   *
+   * Without it the next date is derived from the previous *clamped* one, so a
+   * rule due on the 31st lands on 28 February and then advances to 28 March —
+   * and stays on the 28th forever. Recovering to the 31st needs the original
+   * intent, not the compromise February forced.
+   */
+  anchorDay: number | null = null,
+): Date {
   const year = from.getUTCFullYear();
   const month = from.getUTCMonth();
-  const day = from.getUTCDate();
+
+  /*
+   * The anchor only *recovers* from a clamp — it never overrides a date.
+   *
+   * A due date sitting on the last day of a month that is shorter than the
+   * day the rule asks for is a compromise February imposed, so the next one
+   * goes back to the real day. Any other due date was either never clamped or
+   * was deliberately moved (the PATCH endpoint allows exactly that), and
+   * quietly dragging it back to the rule's day would undo the user's edit.
+   */
+  const lastOfThisMonth = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
+  const wasClamped =
+    anchorDay !== null &&
+    from.getUTCDate() === lastOfThisMonth &&
+    anchorDay > lastOfThisMonth;
+
+  const day = wasClamped ? anchorDay : from.getUTCDate();
 
   switch (cadence) {
     case Cadence.WEEKLY:

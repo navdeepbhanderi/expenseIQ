@@ -3,6 +3,7 @@ import {
   detectRecurrences,
   MIN_CONFIDENCE,
   MIN_OCCURRENCES,
+  nextOccurrence,
   type HistoricalTransaction,
 } from './detect';
 
@@ -279,5 +280,112 @@ describe('detectRecurrences', () => {
 
   it('handles empty input', () => {
     expect(detectRecurrences([])).toEqual([]);
+  });
+});
+
+/*
+ * The anchors, which is where the previous implementation was simply wrong.
+ *
+ * A day-of-month alone answers MONTHLY and nothing else: it says nothing
+ * about which weekday a weekly rule wants, and for YEARLY it leaves "of which
+ * month" to whenever the form happened to be submitted.
+ */
+describe('nextOccurrence anchors', () => {
+  const at = (iso: string) => new Date(`${iso}T00:00:00.000Z`);
+
+  describe('weekly', () => {
+    it('lands on the chosen weekday, not seven days from creation', () => {
+      // Wednesday 12 Aug 2026 → next Friday is the 14th.
+      expect(
+        nextOccurrence('WEEKLY', null, at('2026-08-12'), false, 5),
+      ).toEqual(at('2026-08-14'));
+    });
+
+    it('treats today as due when today is the chosen weekday', () => {
+      // Friday asking for Friday is due now, matching how the monthly path
+      // treats a matching day rather than skipping a week.
+      expect(
+        nextOccurrence('WEEKLY', null, at('2026-08-14'), false, 5),
+      ).toEqual(at('2026-08-14'));
+    });
+
+    it('wraps into the following week', () => {
+      // Friday → Monday is three days out, not minus four.
+      expect(
+        nextOccurrence('WEEKLY', null, at('2026-08-14'), false, 1),
+      ).toEqual(at('2026-08-17'));
+    });
+
+    it('falls back to seven days out when no weekday is set', () => {
+      // Rules created before dayOfWeek existed must not change behaviour.
+      expect(nextOccurrence('WEEKLY', null, at('2026-08-12'))).toEqual(
+        at('2026-08-19'),
+      );
+    });
+  });
+
+  describe('yearly', () => {
+    it('uses the anchor month rather than the current one', () => {
+      // Added in August for a March premium: the old code returned 15 August.
+      expect(
+        nextOccurrence('YEARLY', 15, at('2026-08-10'), false, null, 3),
+      ).toEqual(at('2027-03-15'));
+    });
+
+    it('stays in this year when the anchor is still ahead', () => {
+      expect(
+        nextOccurrence('YEARLY', 15, at('2026-08-10'), false, null, 11),
+      ).toEqual(at('2026-11-15'));
+    });
+
+    it('is due today when the anchor date is today', () => {
+      expect(
+        nextOccurrence('YEARLY', 10, at('2026-08-10'), false, null, 8),
+      ).toEqual(at('2026-08-10'));
+    });
+
+    it('clamps a 29 February anchor in a common year', () => {
+      expect(
+        nextOccurrence('YEARLY', 29, at('2026-08-10'), false, null, 2),
+      ).toEqual(at('2027-02-28'));
+    });
+  });
+
+  describe('quarterly', () => {
+    it('follows the anchor month grid', () => {
+      // Anchored to January: Jan/Apr/Jul/Oct. From 10 Aug the next is October.
+      expect(
+        nextOccurrence('QUARTERLY', 5, at('2026-08-10'), false, null, 1),
+      ).toEqual(at('2026-10-05'));
+    });
+
+    it('sits on a different grid for a different anchor', () => {
+      // Anchored to February: Feb/May/Aug/Nov. From 10 Aug, 5 Aug has passed,
+      // so November — a different answer from the January grid on the same day.
+      expect(
+        nextOccurrence('QUARTERLY', 5, at('2026-08-10'), false, null, 2),
+      ).toEqual(at('2026-11-05'));
+    });
+
+    it('reaches back to an earlier month in the same year', () => {
+      // Anchored to June, asked in February: the grid also contains March, and
+      // walking only forwards from June would skip it.
+      expect(
+        nextOccurrence('QUARTERLY', 20, at('2026-02-01'), false, null, 6),
+      ).toEqual(at('2026-03-20'));
+    });
+
+    it('honours month-end on its grid', () => {
+      expect(
+        nextOccurrence('QUARTERLY', null, at('2026-03-01'), true, null, 4),
+      ).toEqual(at('2026-04-30'));
+    });
+  });
+
+  it('leaves monthly untouched by the new arguments', () => {
+    // Monthly is on-grid every month, so an anchor month must not narrow it.
+    expect(
+      nextOccurrence('MONTHLY', 5, at('2026-08-10'), false, null, 1),
+    ).toEqual(at('2026-09-05'));
   });
 });

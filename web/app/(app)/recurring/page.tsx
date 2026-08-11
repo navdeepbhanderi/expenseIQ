@@ -176,7 +176,12 @@ export default function RecurringPage() {
                     {rule.label ? `${describeSchedule(rule)} · ` : ""}
                     {rule.nextDueDate
                       ? `next ${new Date(rule.nextDueDate).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}`
-                      : "no date set"}
+                      : rule.maxOccurrences !== null &&
+                          rule.occurrenceCount >= rule.maxOccurrences
+                        ? "all done"
+                        : rule.endsOn && !rule.enabled
+                          ? "ended"
+                          : "no date set"}
                   </p>
                 </div>
 
@@ -225,15 +230,81 @@ export default function RecurringPage() {
   );
 }
 
-/** "Monthly on the 1st", "Monthly on the last day". */
+const DAY_NAMES = [
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+];
+
+const MONTH_NAMES = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
+/**
+ * "Monthly on the 1st", "Weekly on Friday", "Yearly in March, 4 left".
+ *
+ * Says the whole rule rather than just its cadence: a weekly schedule that
+ * reads only "Weekly" leaves the user unable to tell, from the list, whether
+ * it is the Friday one they meant — which is exactly the mistake that made
+ * the day pickers necessary in the first place.
+ */
 function describeSchedule(rule: RecurringRule): string {
   const every = rule.cadence.toLowerCase();
 
-  if (rule.cadence === "WEEKLY") return "Weekly";
-  if (rule.onMonthEnd) return `${every} on the last day`;
-  if (!rule.dayOfMonth) return every;
+  const when =
+    rule.cadence === "WEEKLY"
+      ? rule.dayOfWeek === null
+        ? "weekly"
+        : `weekly on ${DAY_NAMES[rule.dayOfWeek]}`
+      : rule.onMonthEnd
+        ? `${every} on the last day`
+        : rule.dayOfMonth
+          ? `${every} on the ${ordinal(rule.dayOfMonth)}`
+          : every;
 
-  return `${every} on the ${ordinal(rule.dayOfMonth)}`;
+  // Which month a yearly rule means is the thing most worth stating — it is
+  // the part that was previously guessed from the creation date.
+  const inMonth =
+    rule.cadence === "YEARLY" && rule.monthOfYear
+      ? ` of ${MONTH_NAMES[rule.monthOfYear - 1]}`
+      : "";
+
+  return `${when}${inMonth}${describeEnding(rule)}`;
+}
+
+/** ", 4 of 6 left" or ", until 31 Mar 2027" — empty when it runs forever. */
+function describeEnding(rule: RecurringRule): string {
+  if (rule.maxOccurrences !== null) {
+    const left = rule.maxOccurrences - rule.occurrenceCount;
+    return left > 0
+      ? `, ${left} of ${rule.maxOccurrences} left`
+      : ", finished";
+  }
+
+  if (rule.endsOn) {
+    return `, until ${new Date(rule.endsOn).toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    })}`;
+  }
+
+  return "";
 }
 
 function ordinal(n: number): string {

@@ -588,34 +588,54 @@ model GoalContribution {
 // ─── Recurring ───────────────────────────────────────────────────────────────
 
 model RecurringRule {
-  id          String    @id @default(uuid())
-  profileId   String
+  id              String    @id @default(uuid())
+  profileId       String
   /// What the user calls it — "Salary", "Rent", "Netflix". Optional, but
   /// without it a list of rules reads "monthly · ₹1,42,000" with no way to
   /// tell an income from an EMI.
-  label       String?
-  merchantId  String?
-  categoryId  String?
-  accountId   String?
-  amountMinor BigInt
-  direction   Direction @default(DEBIT)
-  cadence     Cadence
+  label           String?
+  merchantId      String?
+  categoryId      String?
+  accountId       String?
+  amountMinor     BigInt
+  direction       Direction @default(DEBIT)
+  cadence         Cadence
   /// Day of month, 1-31, clamped to the month's last day. NULL means "the
   /// last day, whatever it is" — a distinct intent from "the 31st", since a
   /// rule set to month-end should land on the 30th in April by design rather
   /// than by clamping.
-  dayOfMonth  Int?
+  dayOfMonth      Int?
   /// True for "last day of the month", however long the month is.
-  onMonthEnd  Boolean   @default(false)
-  nextDueDate DateTime?
-  autoDebit   Boolean   @default(false)
+  onMonthEnd      Boolean   @default(false)
+  /// 0 = Sunday … 6 = Saturday. WEEKLY only — a weekly rule has no day of
+  /// month, and anchoring it to whenever it happened to be created means the
+  /// user cannot say "every Friday".
+  dayOfWeek       Int?
+  /// The last date this rule may fire. Null means it runs until switched
+  /// off — right for rent, wrong for a 6-month EMI or a lease that ends.
+  endsOn          DateTime? @db.Date
+  /// Stop after this many entries. The natural way to say "12 EMIs left":
+  /// counting instalments is how loans are actually described, and it
+  /// survives a date being clamped by a short month.
+  maxOccurrences  Int?
+  /// How many entries this rule has produced. Compared against
+  /// maxOccurrences; incremented only when an entry is genuinely created,
+  /// never on an idempotent re-run.
+  occurrenceCount Int       @default(0)
+  /// 1-12. YEARLY and QUARTERLY only. Without it, "the 15th, yearly" has no
+  /// answer to "of which month" and silently means whichever month the rule
+  /// was created in — an annual premium added in August could never be set
+  /// for March.
+  monthOfYear     Int?
+  nextDueDate     DateTime?
+  autoDebit       Boolean   @default(false)
   /// Detected rules start unconfirmed — they surface as a suggestion before
   /// they ever create a transaction.
-  confidence  Float?
-  confirmed   Boolean   @default(false)
-  enabled     Boolean   @default(true)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  confidence      Float?
+  confirmed       Boolean   @default(false)
+  enabled         Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   profile      Profile       @relation(fields: [profileId], references: [id], onDelete: Cascade)
   merchant     Merchant?     @relation(fields: [merchantId], references: [id], onDelete: SetNull)

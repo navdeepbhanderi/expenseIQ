@@ -198,11 +198,17 @@ export class RecurringService {
         cadence: dto.cadence,
         dayOfMonth: dto.onMonthEnd ? null : (dto.dayOfMonth ?? 1),
         onMonthEnd: dto.onMonthEnd ?? false,
+        dayOfWeek: dto.dayOfWeek ?? null,
+        monthOfYear: dto.monthOfYear ?? null,
+        endsOn: dto.endsOn ? new Date(dto.endsOn) : null,
+        maxOccurrences: dto.maxOccurrences ?? null,
         nextDueDate: nextOccurrence(
           dto.cadence,
           dto.dayOfMonth ?? null,
           new Date(),
           dto.onMonthEnd ?? false,
+          dto.dayOfWeek ?? null,
+          dto.monthOfYear ?? null,
         ),
         autoDebit: dto.autoDebit ?? false,
         confidence: null,
@@ -240,6 +246,8 @@ export class RecurringService {
     const scheduleMoved =
       dto.dayOfMonth !== undefined ||
       dto.onMonthEnd !== undefined ||
+      dto.dayOfWeek !== undefined ||
+      dto.monthOfYear !== undefined ||
       dto.cadence !== undefined;
 
     const recomputed =
@@ -249,6 +257,8 @@ export class RecurringService {
             dto.dayOfMonth ?? existing.dayOfMonth,
             new Date(),
             dto.onMonthEnd ?? existing.onMonthEnd,
+            dto.dayOfWeek ?? existing.dayOfWeek,
+            dto.monthOfYear ?? existing.monthOfYear,
           )
         : undefined;
 
@@ -269,7 +279,22 @@ export class RecurringService {
           ? { dayOfMonth: dto.onMonthEnd ? null : dto.dayOfMonth }
           : {}),
         ...(dto.onMonthEnd !== undefined ? { onMonthEnd: dto.onMonthEnd } : {}),
-        ...(recomputed ? { nextDueDate: recomputed } : {}),
+        ...(dto.dayOfWeek !== undefined ? { dayOfWeek: dto.dayOfWeek } : {}),
+        ...(dto.monthOfYear !== undefined
+          ? { monthOfYear: dto.monthOfYear }
+          : {}),
+        ...(dto.endsOn !== undefined ? { endsOn: new Date(dto.endsOn) } : {}),
+        ...(dto.maxOccurrences !== undefined
+          ? { maxOccurrences: dto.maxOccurrences }
+          : {}),
+        /*
+         * Re-enabled when the schedule is extended.
+         *
+         * A rule the generator retired at its end date has enabled=false and
+         * no due date. Pushing the end date out should revive it, otherwise
+         * "extend my EMI by 6 months" silently does nothing.
+         */
+        ...(recomputed ? { nextDueDate: recomputed, enabled: true } : {}),
       },
     });
   }

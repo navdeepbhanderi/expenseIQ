@@ -274,40 +274,88 @@ export function nextOccurrence(
   from: Date = new Date(),
   /** "The last day, whatever it is" — 30 April, 28 or 29 February. */
   onMonthEnd = false,
+  /**
+   * 0 = Sunday … 6 = Saturday. WEEKLY only.
+   *
+   * Without it a weekly rule fires on whatever weekday it happened to be
+   * created, which is an accident of when the user opened the form rather
+   * than a thing they chose.
+   */
+  dayOfWeek: number | null = null,
+  /**
+   * 1-12. The anchor month for YEARLY and QUARTERLY.
+   *
+   * YEARLY without it is genuinely ambiguous: "the 15th, every year" has no
+   * answer to "of which month", and defaulting to the creation month means an
+   * annual premium added in August can never be set for March. QUARTERLY uses
+   * it to fix which three-month grid the rule sits on — Jan/Apr/Jul/Oct is a
+   * different rule from Feb/May/Aug/Nov, and insurers care which.
+   */
+  monthOfYear: number | null = null,
 ): Date {
   // Month-end is its own intent, not "the 31st clamped". Asking for 31 in a
   // 30-day month and asking for month-end give the same answer in April and
   // different answers to the question "what did the user mean".
   const day = onMonthEnd ? 31 : (dayOfMonth ?? 1);
-  const monthStep =
-    cadence === 'YEARLY'
-      ? 12
-      : cadence === 'QUARTERLY'
-        ? 3
-        : cadence === 'WEEKLY'
-          ? 0
-          : 1;
 
-  // Weekly has no day-of-month; it simply lands seven days out.
-  if (monthStep === 0) {
-    return new Date(from.getTime() + 7 * 24 * 60 * 60 * 1000);
+  if (cadence === 'WEEKLY') {
+    return nextWeekday(from, dayOfWeek);
   }
 
-  const clampedThisMonth = clampToMonth(
-    from.getUTCFullYear(),
-    from.getUTCMonth(),
-    day,
-  );
+  const monthStep = cadence === 'YEARLY' ? 12 : cadence === 'QUARTERLY' ? 3 : 1;
 
-  if (clampedThisMonth.getTime() >= startOfDay(from).getTime()) {
-    return clampedThisMonth;
+  /*
+   * Where the cycle starts.
+   *
+   * Monthly repeats every month, so every month is on-grid and the anchor is
+   * simply "now". Quarterly and yearly only land on certain months, so an
+   * anchor picks which — falling back to the current month keeps rules
+   * created before this field existed behaving exactly as they did.
+   */
+  const anchorMonth =
+    monthStep === 1 || monthOfYear === null
+      ? from.getUTCMonth()
+      : monthOfYear - 1;
+
+  const year = from.getUTCFullYear();
+  const floor = startOfDay(from).getTime();
+
+  /*
+   * Walk the grid from a whole step behind the anchor and take the first
+   * landing that has not already passed.
+   *
+   * Starting behind matters: an anchor in June with a quarterly rule still
+   * needs to offer March of the same year when `from` is February, and a
+   * yearly rule anchored to a month earlier in the year must not skip to the
+   * year after next. The loop is bounded by the number of steps in a cycle
+   * plus one, so it terminates for every cadence.
+   */
+  const stepsPerCycle = 12 / monthStep;
+  for (let i = -stepsPerCycle; i <= stepsPerCycle + 1; i += 1) {
+    const candidate = clampToMonth(year, anchorMonth + i * monthStep, day);
+    if (candidate.getTime() >= floor) return candidate;
   }
 
-  return clampToMonth(
-    from.getUTCFullYear(),
-    from.getUTCMonth() + monthStep,
-    day,
-  );
+  // Unreachable for any real cadence, but a date is a better failure than a
+  // thrown exception inside a nightly job.
+  return clampToMonth(year + 1, anchorMonth, day);
+}
+
+/**
+ * The next date on or after `from` falling on `dayOfWeek`.
+ *
+ * "On or after" rather than "strictly after" so a rule created on a Friday
+ * for Fridays is due today, matching how the month-based path treats a
+ * matching day.
+ */
+function nextWeekday(from: Date, dayOfWeek: number | null): Date {
+  const start = startOfDay(from);
+  // No weekday chosen — the old behaviour, seven days out from now.
+  if (dayOfWeek === null) {
+    return new Date(start.getTime() + 7 * 24 * 60 * 60 * 1000);
+  }
+  const delta = (dayOfWeek - start.getUTCDay() + 7) % 7;
+  return new Date(start.getTime() + delta * 24 * 60 * 60 * 1000);
 }
 
 function clampToMonth(year: number, month: number, day: number): Date {

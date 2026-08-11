@@ -80,6 +80,10 @@ export function useCreateRecurring(profileId: string | null) {
       cadence: string;
       dayOfMonth?: number;
       onMonthEnd?: boolean;
+      dayOfWeek?: number;
+      monthOfYear?: number;
+      endsOn?: string | null;
+      maxOccurrences?: number | null;
       label?: string;
       direction?: "DEBIT" | "CREDIT";
       accountId?: string;
@@ -119,6 +123,10 @@ export function useUpdateRecurring(profileId: string | null) {
         cadence?: string;
         dayOfMonth?: number;
         onMonthEnd?: boolean;
+        dayOfWeek?: number;
+        monthOfYear?: number;
+        endsOn?: string | null;
+        maxOccurrences?: number | null;
         autoDebit?: boolean;
         enabled?: boolean;
       };
