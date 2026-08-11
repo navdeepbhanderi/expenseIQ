@@ -115,6 +115,9 @@ function CardPanel({
 }) {
   const [paying, setPaying] = useState(false);
 
+  // Whether anything is actually owed, as opposed to a date having passed.
+  const owes = card.outstanding.amountMinor > 0;
+
   return (
     <>
       <PayAccountModal
@@ -168,15 +171,26 @@ function CardPanel({
         </p>
       </section>
 
+      {/*
+       * Owing nothing is not being overdue.
+       *
+       * `isOverdue` is pure date arithmetic on the cycle — it says the due
+       * date has passed, not that money is unpaid. A card with a zero balance
+       * was therefore rendered in alarm red as "6 days overdue", which is
+       * both wrong and the kind of wrong that trains people to ignore the
+       * colour when it matters.
+       */}
       <section
         className={cn(
           "rounded-[var(--radius-card)] border p-5",
-          card.cycle.isOverdue
+          owes && card.cycle.isOverdue
             ? "border-spend/30 bg-spend/10 shadow-[inset_3px_0_0_var(--spend)]"
-            : "border-attention-line bg-attention-soft shadow-[inset_3px_0_0_var(--attention)]",
+            : owes
+              ? "border-attention-line bg-attention-soft shadow-[inset_3px_0_0_var(--attention)]"
+              : "border-line-strong bg-paper",
         )}
       >
-        <Eyebrow>Current cycle</Eyebrow>
+        <Eyebrow>{owes ? "Current cycle" : "Billing cycle"}</Eyebrow>
         <p className="mt-1.5 text-sm text-ink">
           Statement{" "}
           <span className="font-semibold">
@@ -190,14 +204,20 @@ function CardPanel({
         <p
           className={cn(
             "mt-0.5 text-[13px]",
-            card.cycle.isOverdue ? "text-spend" : "text-attention-ink",
+            !owes
+              ? "text-ink-muted"
+              : card.cycle.isOverdue
+                ? "text-spend"
+                : "text-attention-ink",
           )}
         >
-          {card.cycle.isOverdue
-            ? `${Math.abs(card.cycle.daysUntilDue)} days overdue`
-            : card.cycle.daysUntilDue === 0
-              ? "Due today"
-              : `In ${card.cycle.daysUntilDue} days`}
+          {!owes
+            ? "Nothing to pay"
+            : card.cycle.isOverdue
+              ? `${Math.abs(card.cycle.daysUntilDue)} days overdue`
+              : card.cycle.daysUntilDue === 0
+                ? "Due today"
+                : `In ${card.cycle.daysUntilDue} days`}
         </p>
 
         {/*
