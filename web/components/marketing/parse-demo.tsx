@@ -84,7 +84,17 @@ export function ParseDemo() {
 
   return (
     <div className="relative w-full max-w-[440px]">
-      <div className="rounded-[20px] border border-line-strong bg-paper p-5 shadow-[0_30px_64px_-34px_rgba(60,45,25,0.7)] sm:p-6">
+      <div
+        className={cn(
+          "rounded-[20px] border border-line-strong bg-paper p-5 sm:p-6",
+          "shadow-[0_30px_64px_-34px_rgba(60,45,25,0.7)]",
+          // Room for the due tile that overhangs the bottom-right corner.
+          // Without it the tile lands on top of the Looks right / Edit row
+          // instead of below it, and the overlap reads as a layout bug
+          // rather than as depth.
+          "sm:pb-16",
+        )}
+      >
         <div className="flex items-center justify-between">
           <span className="font-mono text-[11px] uppercase tracking-[0.1em] text-ink-faint">
             Heard just now
@@ -158,7 +168,10 @@ export function ParseDemo() {
         className={cn(
           "mt-3 flex items-center gap-3 rounded-2xl border border-attention-line bg-attention-soft px-4 py-3.5",
           "shadow-[0_20px_44px_-26px_rgba(60,45,25,0.8)]",
-          "sm:absolute sm:-bottom-7 sm:-right-4 sm:mt-0",
+          // Sits over the card's padded footer, clear of the buttons. Falls
+          // back to stacked below sm, where a negative offset would push it
+          // off a phone screen.
+          "sm:absolute sm:-bottom-6 sm:-right-4 sm:mt-0",
         )}
       >
         <span className="flex size-9 flex-col items-center justify-center rounded-xl bg-attention font-mono leading-[1.05] text-white">
