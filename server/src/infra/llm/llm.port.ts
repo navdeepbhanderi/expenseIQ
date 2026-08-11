@@ -2,7 +2,7 @@
  * The seam between the app and whatever model is behind it.
  *
  * The NLU module depends on this interface and never on `@google/genai`, so
- * swapping providers — or stubbing the model entirely in tests — touches one
+ * swapping providers - or stubbing the model entirely in tests - touches one
  * folder. `InjectionToken` exists because an interface has no runtime value
  * for Nest's DI to resolve.
  */
@@ -13,7 +13,7 @@ export const LLM_PORT = Symbol('LLM_PORT');
  * All three input kinds are declared now even though Phase 4 only ships text.
  *
  * It costs nothing today and means audio (Phase 4 stretch) and images
- * (Phase 5 receipts) don't reshape the module later — Gemini handles all
+ * (Phase 5 receipts) don't reshape the module later - Gemini handles all
  * three through the same call.
  */
 export type ParseInput =
@@ -63,7 +63,7 @@ export interface ExtractionResult {
   /** BCP-47 or a bare language name as the model reports it. */
   detectedLanguage: string | null;
   /**
-   * Several, because one utterance can describe several expenses —
+   * Several, because one utterance can describe several expenses -
    * "groceries 300, uber 640, and bijli ka bill 2400" is three.
    */
   candidates: ExtractedCandidate[];
@@ -113,7 +113,7 @@ export interface LlmPort {
   ): AsyncIterable<PartialExtraction>;
 
   /**
-   * Cheap, high-volume work — the Flash tier. Kept separate from `extract`
+   * Cheap, high-volume work - the Flash tier. Kept separate from `extract`
    * so routing is a property of the call site's intent rather than a flag.
    */
   normalizeMerchant(raw: string, known: string[]): Promise<string>;

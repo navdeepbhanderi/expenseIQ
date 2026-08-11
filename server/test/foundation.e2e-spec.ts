@@ -5,7 +5,7 @@ import { createHarness, type Harness } from './app-harness';
 /**
  * Phase 0 acceptance: the foundation actually holds.
  *
- * These assert the cross-cutting behaviour every later phase depends on —
+ * These assert the cross-cutting behaviour every later phase depends on -
  * if the error envelope or the DB constraints are wrong, every module built
  * on top inherits the bug.
  */
@@ -20,7 +20,7 @@ describe('Foundation (e2e)', () => {
 
   // Every test starts from an empty database. Without this the suite passes
   // once and then fails on re-run, because rows written by the constraint
-  // tests survive — and a test suite that only works on a fresh database is
+  // tests survive - and a test suite that only works on a fresh database is
   // worse than no suite at all.
   beforeEach(async () => {
     await harness.reset();
@@ -88,7 +88,7 @@ describe('Foundation (e2e)', () => {
   describe('database constraints', () => {
     it('rejects a duplicate system category', async () => {
       // A composite unique on (profileId, name) does NOT constrain rows where
-      // profileId IS NULL — Postgres never treats NULL as equal to NULL. The
+      // profileId IS NULL - Postgres never treats NULL as equal to NULL. The
       // partial index added in migration 2 is what actually enforces this.
       await harness.prisma.category.create({
         data: {

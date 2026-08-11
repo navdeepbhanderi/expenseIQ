@@ -26,7 +26,7 @@ export class InviteMemberDto {
     enum: ProfileRole,
     default: ProfileRole.ADULT,
     description:
-      'Recorded on the invite, so accepting cannot escalate it — a CHILD ' +
+      'Recorded on the invite, so accepting cannot escalate it - a CHILD ' +
       'invite stays a CHILD invite however the acceptance is shaped.',
   })
   @IsOptional()

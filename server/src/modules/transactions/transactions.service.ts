@@ -25,7 +25,7 @@ import {
   type TransactionWithRelations,
 } from './transaction-view';
 
-/** One entry in the filter sidebar — design 6c's "Groceries 18". */
+/** One entry in the filter sidebar - design 6c's "Groceries 18". */
 export interface Facet {
   id: string | null;
   label: string;
@@ -90,7 +90,7 @@ export class TransactionsService {
           where: { AND: [where, cursorClause] },
           include: TRANSACTION_RELATIONS,
           // id breaks ties so the cursor is stable when several transactions
-          // share a date — which they routinely do, since date is a day.
+          // share a date - which they routinely do, since date is a day.
           orderBy: [{ date: 'desc' }, { id: 'desc' }],
           take: limit + 1,
         }),
@@ -312,7 +312,7 @@ export class TransactionsService {
     if (query.from || query.to) {
       where.date = {
         ...(query.from ? { gte: new Date(query.from) } : {}),
-        // The end of the range is inclusive of the whole day — a user picking
+        // The end of the range is inclusive of the whole day - a user picking
         // "Aug 1 – Aug 5" means through the end of the 5th, not midnight.
         ...(query.to ? { lte: endOfDay(new Date(query.to)) } : {}),
       };
@@ -492,7 +492,7 @@ function endOfDay(date: Date): Date {
  *
  * A cell beginning with =, +, - or @ is executed as a formula when the file is
  * opened in Excel or Sheets. Since merchant names and notes come from user
- * input — and, from Phase 4, from parsed emails — an exported ledger is a
+ * input - and, from Phase 4, from parsed emails - an exported ledger is a
  * plausible CSV-injection vector. Prefixing a single quote neutralises it
  * while still displaying the original text.
  */

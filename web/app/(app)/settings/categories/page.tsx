@@ -122,7 +122,7 @@ function Row({
   const { toast } = useToast();
   const [confirming, setConfirming] = useState(false);
 
-  // Only fetched once the user is actually considering deletion — the count
+  // Only fetched once the user is actually considering deletion - the count
   // exists to inform that decision, not to be prefetched for every row.
   const usage = useCategoryUsage(activeId, confirming ? category.id : null);
   const count = usage.data ?? 0;
@@ -209,7 +209,7 @@ export function CategoryModal({
 
   const editing = Boolean(category);
 
-  // Derived from the name unless the user overrides it — two letters is a
+  // Derived from the name unless the user overrides it - two letters is a
   // detail nobody wants to think about for every category they add.
   const effectiveMonogram =
     monogram.trim() || name.trim().slice(0, 2).toUpperCase();

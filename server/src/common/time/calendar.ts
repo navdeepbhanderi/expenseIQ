@@ -5,7 +5,7 @@
  *
  * `startOfMonth` was `new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1))`.
  * India is UTC+5:30, so between 00:00 and 05:30 IST on the first of any month,
- * `new Date()` is still in the previous month in UTC — and every "this month"
+ * `new Date()` is still in the previous month in UTC - and every "this month"
  * figure in the product silently reported the month before. Dashboard spend,
  * budgets, spend limits, allowance crediting and the reports all inherited it,
  * for five and a half hours out of every month, with nothing on screen to
@@ -15,8 +15,8 @@
  *
  * These helpers are applied to two different things: an instant ("now"), and a
  * stored date-only column, which Postgres hands back as UTC midnight. Taking
- * the *local* calendar date is right for both — UTC midnight on the 5th is
- * 05:30 IST on the 5th, still the 5th — so a stored date is unaffected while a
+ * the *local* calendar date is right for both - UTC midnight on the 5th is
+ * 05:30 IST on the 5th, still the 5th - so a stored date is unaffected while a
  * live instant is finally correct. That is what makes this a drop-in
  * replacement rather than a migration.
  *

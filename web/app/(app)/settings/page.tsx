@@ -11,8 +11,9 @@ import { Pill } from "@/components/ui/feedback";
 import { useTheme } from "@/lib/theme";
 import { useVoiceEnabled } from "@/lib/voice-preference";
 import { ProfileSettings } from "@/components/settings/profile-settings";
+import { AiProvider } from "@/components/settings/ai-provider";
 
-/** Settings — profile, appearance, integrations, sign out. */
+/** Settings - profile, appearance, integrations, sign out. */
 export default function SettingsPage() {
   const { user, logout } = useAuth();
   const { active, profiles } = useProfile();
@@ -70,10 +71,12 @@ export default function SettingsPage() {
             : "The microphone is hidden. You can still type an expense in plain language, or fill the form in yourself."}
         </p>
         <p className="mt-2 text-xs text-ink-faint">
-          This setting applies to this device only — an office laptop and a
+          This setting applies to this device only - an office laptop and a
           phone reasonably want different answers.
         </p>
       </section>
+
+      <AiProvider />
 
       <section className="rounded-[var(--radius-card)] border border-line-strong bg-paper p-5">
         <Eyebrow>Integrations</Eyebrow>
@@ -89,7 +92,7 @@ export default function SettingsPage() {
                   {title}
                   {/*
                    * Honest rather than a dead toggle. These are genuinely
-                   * unbuilt — a switch that flips and does nothing is worse
+                   * unbuilt - a switch that flips and does nothing is worse
                    * than one that is not there.
                    */}
                   <Pill tone="soon">Soon</Pill>

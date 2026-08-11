@@ -13,7 +13,7 @@ import { cn } from "@/lib/cn";
 import type { DashboardSummary, UpcomingDue } from "@/lib/api/types";
 
 /**
- * Dashboard — design 2a (desktop) and 4c (mobile).
+ * Dashboard - design 2a (desktop) and 4c (mobile).
  *
  * The design's ordering is the whole point: attention first (dues, review
  * queue), routine data second. A dashboard that leads with a spend total
@@ -36,7 +36,7 @@ export default function DashboardPage() {
             </Button>
           }
         >
-          The server didn&rsquo;t answer. Your data is safe — this is just this
+          The server didn&rsquo;t answer. Your data is safe - this is just this
           screen.
         </EmptyState>
       </div>
@@ -93,7 +93,7 @@ function Greeting({
   /*
    * Derived from the server's `asOf`, not from the browser clock. Reading the
    * local time during render would differ between server and client and warn
-   * on hydration — and the server already told us what "now" is.
+   * on hydration - and the server already told us what "now" is.
    */
   const asOf = new Date(data.asOf);
   const hour = asOf.getHours();
@@ -321,7 +321,7 @@ function NetWorthCard({ data }: { data: DashboardSummary }) {
         {formatCompact(net.amountMinor, net.currency)}
       </p>
       {/*
-       * A negative figure early in a home loan is correct, not a bug — the
+       * A negative figure early in a home loan is correct, not a bug - the
        * design shows ₹−34.2L. Saying so here stops it reading as an error.
        */}
       <p className="mt-1.5 text-[13px] text-ink-muted">

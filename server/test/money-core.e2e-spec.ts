@@ -116,7 +116,7 @@ describe('Money core (e2e)', () => {
       const names = (res.body as { name: string }[]).map((c) => c.name);
       expect(names).toContain('Groceries');
 
-      // Shared, not duplicated — one row serves every profile.
+      // Shared, not duplicated - one row serves every profile.
       expect(
         await harness.prisma.category.count({ where: { isSystem: true } }),
       ).toBe(4);
@@ -183,7 +183,7 @@ describe('Money core (e2e)', () => {
         .set('Authorization', `Bearer ${token}`)
         .expect(204);
 
-      // The transaction keeps its category — a hard delete would have
+      // The transaction keeps its category - a hard delete would have
       // rewritten history.
       const transactions = await harness.prisma.transaction.count({
         where: { profileId, categoryId: category.body.id as string },
@@ -397,7 +397,7 @@ describe('Money core (e2e)', () => {
         .send({ type: 'BANK', name: 'SBI Savings' })
         .expect(201);
 
-      // Meera's own profile, but Aarav's account id — must not resolve.
+      // Meera's own profile, but Aarav's account id - must not resolve.
       await request(server)
         .get(`/api/v1/profiles/${meera.profileId}/accounts/${account.body.id}`)
         .set('Authorization', `Bearer ${meera.token}`)
@@ -430,7 +430,7 @@ describe('Money core (e2e)', () => {
 
       expect(res.body.closed).toBe(true);
 
-      // The transaction survives — deleting would have rewritten the month.
+      // The transaction survives - deleting would have rewritten the month.
       expect(
         await harness.prisma.transaction.count({ where: { profileId } }),
       ).toBe(1);
@@ -516,7 +516,7 @@ describe('Money core (e2e)', () => {
       return { groceries, eatingOut, income, accountId: sbi.body.id as string };
     }
 
-    it('returns rows, totals and facets in one call — design 2e', async () => {
+    it('returns rows, totals and facets in one call - design 2e', async () => {
       const { token, profileId } = await createUser('aarav@example.com');
       await seedLedger(token, profileId);
 
@@ -556,7 +556,7 @@ describe('Money core (e2e)', () => {
       const { token, profileId } = await createUser('aarav@example.com');
       await seedLedger(token, profileId);
 
-      // A different branch code must map to the same merchant — that is what
+      // A different branch code must map to the same merchant - that is what
       // makes the table usable as a normalisation cache.
       await request(server)
         .post(`/api/v1/profiles/${profileId}/transactions`)
@@ -588,7 +588,7 @@ describe('Money core (e2e)', () => {
       expect(res.body.items).toHaveLength(1);
 
       // The category facets must still show what picking Eating out instead
-      // would yield — otherwise every other filter reads "0" and the sidebar
+      // would yield - otherwise every other filter reads "0" and the sidebar
       // becomes useless the moment you use it.
       const eatingOut = (
         res.body.facets.categories as { label: string; count: number }[]
@@ -680,7 +680,7 @@ describe('Money core (e2e)', () => {
         .set('Authorization', `Bearer ${token}`)
         .expect(404);
 
-      // The row is still there — that is what makes the design's 10-second
+      // The row is still there - that is what makes the design's 10-second
       // undo possible.
       await request(server)
         .post(
@@ -732,7 +732,7 @@ describe('Money core (e2e)', () => {
       expect(res.headers['content-type']).toContain('text/csv');
       expect(res.text).toContain('Date,Merchant,Category,Account,Source');
       expect(res.text).toContain('Dmart');
-      // Rupees, not paise — a spreadsheet would read paise as 100× too large.
+      // Rupees, not paise - a spreadsheet would read paise as 100× too large.
       expect(res.text).toContain('2140.00');
     });
 
@@ -740,7 +740,7 @@ describe('Money core (e2e)', () => {
       const { token, profileId } = await createUser('aarav@example.com');
 
       // Merchant and note are user input, and from Phase 4 will come from
-      // parsed emails too — an exported ledger is a real CSV-injection vector.
+      // parsed emails too - an exported ledger is a real CSV-injection vector.
       await request(server)
         .post(`/api/v1/profiles/${profileId}/transactions`)
         .set('Authorization', `Bearer ${token}`)

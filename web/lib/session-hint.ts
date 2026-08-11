@@ -10,7 +10,7 @@ import { useSyncExternalStore } from "react";
  * to people who are already signed in. This reads a non-httpOnly hint cookie
  * the server sets alongside the real one.
  *
- * It is a hint and nothing more. It carries no identity and grants no access —
+ * It is a hint and nothing more. It carries no identity and grants no access -
  * every authorisation decision still rests on the httpOnly refresh cookie and
  * the access token. The worst a forged value can do is show the wrong button.
  */

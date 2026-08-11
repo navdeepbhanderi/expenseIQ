@@ -6,7 +6,7 @@ import { resolve } from "node:path";
  * The web copy of the avatar palette must match the server's.
  *
  * They are two literals in two languages, and when they drifted no swatch in
- * the profile form matched the colour a profile actually had — so nothing
+ * the profile form matched the colour a profile actually had - so nothing
  * showed as selected, and saving would have restyled the profile to a colour
  * the user never chose.
  */

@@ -40,7 +40,7 @@ export class RemindersController {
   @Put('accounts/:accountId/reminders')
   @RequireAction('account:edit')
   @ApiOperation({
-    summary: 'Set the reminder — design 6h\'s "3 days ahead, 9 am"',
+    summary: 'Set the reminder - design 6h\'s "3 days ahead, 9 am"',
     description:
       'Editing preserves which cycle has already been notified, so changing ' +
       'the offset mid-cycle cannot send a duplicate.',

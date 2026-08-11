@@ -4,7 +4,7 @@ import { todayIn } from '@/modules/nlu/domain/dates';
 /**
  * One call does language detection, internal translation and extraction.
  *
- * The spec is explicit that the user never sees a translation step — they type
+ * The spec is explicit that the user never sees a translation step - they type
  * or speak in whatever language they think in and get structured output back.
  * Splitting it into detect → translate → extract would triple the latency and
  * the cost for a flow the design budgets at about four seconds end to end.
@@ -14,7 +14,7 @@ export function buildExtractionPrompt(context: ExtractionContext): string {
    * The user's today, not the server's.
    *
    * toISOString() is UTC, so for an IST user between midnight and 05:30 this
-   * stated yesterday's date — and every relative date the model produced was
+   * stated yesterday's date - and every relative date the model produced was
    * then a day out. Someone logging a late dinner got the wrong day, silently.
    */
   const today = todayIn(context.timezone, context.today);
@@ -29,7 +29,7 @@ export function buildExtractionPrompt(context: ExtractionContext): string {
 
 TODAY IS ${today}, a ${weekday} (timezone ${context.timezone}).
 
-DATES — get these right, they are checked.
+DATES - get these right, they are checked.
 Resolve every relative expression against today:
 - "today", "aaj", "abhi", "आज", "આજે" → ${today}
 - "yesterday", "kal", "ગઈકાલે" → the day BEFORE today
@@ -42,12 +42,12 @@ Resolve every relative expression against today:
 
 Hindi and Gujarati "kal" and "parso" mean either direction depending on tense.
 This is an expense log, so assume the PAST unless the sentence clearly points
-forward. A date you were not given is today — but a date you WERE given is
+forward. A date you were not given is today - but a date you WERE given is
 never today.
 
 INPUT LANGUAGE
-The input may be English, Hindi, Gujarati, any other Indian language, or — most
-commonly — a mix of them in one sentence. "petrol bharwaya 1200" and
+The input may be English, Hindi, Gujarati, any other Indian language, or - most
+commonly - a mix of them in one sentence. "petrol bharwaya 1200" and
 "300 रुपये किराने पे खर्च किए" and "amma ko 5000 bheje" are all normal input.
 Understand it directly. Do not translate it back to the user; just extract.
 
@@ -86,7 +86,7 @@ ${
 }
 
 CONFIDENCE
-Score every field 0-1 by how certain you are it is correct — not by how
+Score every field 0-1 by how certain you are it is correct - not by how
 plausible it is. Be honest and be harsh: a low score sends the entry for a
 human glance, which is cheap. A wrongly confident score corrupts someone's
 ledger, which is not.
@@ -97,7 +97,7 @@ ledger, which is not.
 
 ONE EXCEPTION, and it matters. When no date is given, use today and score it
 0.9. People log expenses as they happen, so "no date stated" almost always
-means today — this is a near-certainty, not a guess, and scoring it low would
+means today - this is a near-certainty, not a guess, and scoring it low would
 send every ordinary entry for review over the one field nobody doubts.
 
 Return only the structured object. No prose, no explanation.`;
@@ -107,7 +107,7 @@ Return only the structured object. No prose, no explanation.`;
  * The JSON Schema Gemini is constrained to.
  *
  * With `responseMimeType: application/json` and this schema, the model cannot
- * emit malformed JSON — the decoder won't let it. That turns the roadmap's
+ * emit malformed JSON - the decoder won't let it. That turns the roadmap's
  * "retry on malformed output" from the primary mechanism into a rare fallback.
  * It does *not* make the values right, which is why semantic validation still
  * runs afterwards.
@@ -166,13 +166,13 @@ export const EXTRACTION_SCHEMA = {
  *
  * Two dialects rather than one because the differences are not cosmetic:
  * Gemini marks optional fields `nullable: true`, while strict-mode JSON Schema
- * has no such keyword — nullability is a type union, and *every* property must
+ * has no such keyword - nullability is a type union, and *every* property must
  * appear in `required` with `additionalProperties: false`. Feeding either
  * schema to the other provider is rejected outright.
  *
  * Kept beside its twin so a field added to one is obviously missing from the
  * other. The nullable fields carry `null` in their type union precisely so
- * "not stated" stays expressible — a model forced to emit a string for a date
+ * "not stated" stays expressible - a model forced to emit a string for a date
  * nobody gave will invent one.
  */
 export const EXTRACTION_JSON_SCHEMA = {

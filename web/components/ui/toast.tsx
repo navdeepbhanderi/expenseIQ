@@ -13,7 +13,7 @@ import { cn } from "@/lib/cn";
 import type { Tone } from "./feedback";
 
 /**
- * Toasts — design 6e, and the undo affordance in 5h ("Added ₹300 to
+ * Toasts - design 6e, and the undo affordance in 5h ("Added ₹300 to
  * Groceries · Undo").
  *
  * The undo case is why the action is a first-class field rather than arbitrary

@@ -5,7 +5,7 @@ import { cn } from "@/lib/cn";
 import { checkPassword, passwordStrength } from "@/lib/password";
 
 /**
- * The strength caption and bar — design 7b's "Strong · 10+ characters with a
+ * The strength caption and bar - design 7b's "Strong · 10+ characters with a
  * number".
  *
  * It reports the *server's* rules, not a softer marketing version of them.

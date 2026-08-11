@@ -17,7 +17,7 @@ const bannerTones: Record<Tone, { wrap: string; icon: React.ElementType }> = {
   },
   /*
    * Warning and attention are visually the same marigold, and that is
-   * intentional — the design gives "needs your eye" exactly one colour. They
+   * intentional - the design gives "needs your eye" exactly one colour. They
    * stay separate names because their meanings differ, and a future palette
    * change might separate them.
    */
@@ -97,7 +97,7 @@ export function Pill({
     spend: "border-spend/25 bg-spend/10 text-spend",
     income: "border-income/25 bg-income/10 text-income",
     /*
-     * "Soon" — deliberately dashed and unsaturated, and deliberately NOT
+     * "Soon" - deliberately dashed and unsaturated, and deliberately NOT
      * marigold. Marigold means "needs your eye" in this product; a feature
      * that does not exist yet needs nothing from the user, and borrowing the
      * attention colour for it would dilute the one signal that matters.

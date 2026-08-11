@@ -8,7 +8,7 @@ import * as bcrypt from 'bcrypt';
 @Injectable()
 export class PasswordService {
   /**
-   * Cost 12 — roughly 250ms on current hardware. High enough to make offline
+   * Cost 12 - roughly 250ms on current hardware. High enough to make offline
    * cracking expensive, low enough that login doesn't feel broken and a burst
    * of logins can't pin the event loop.
    */
@@ -27,7 +27,7 @@ export class PasswordService {
    *
    * Login must take the same time whether or not the email exists. Skipping
    * the hash when there's no user turns response latency into an account
-   * enumeration oracle — the one thing the spec's "don't leak which emails
+   * enumeration oracle - the one thing the spec's "don't leak which emails
    * are registered" rule is trying to prevent, undone by a timing side channel.
    */
   async burnTime(): Promise<void> {

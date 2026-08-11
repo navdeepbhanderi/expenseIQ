@@ -6,7 +6,7 @@ import { createHarness, type Harness } from './app-harness';
 /**
  * Phase 1 acceptance: profile access control.
  *
- * The guard asserted here is load-bearing for every later phase — accounts,
+ * The guard asserted here is load-bearing for every later phase - accounts,
  * transactions, NLU and the review queue all sit behind it. If it leaks, all
  * of them leak.
  */
@@ -148,7 +148,7 @@ describe('Profiles (e2e)', () => {
   });
 
   describe('access control', () => {
-    it('answers 404 — not 403 — for another user`s profile', async () => {
+    it('answers 404 - not 403 - for another user`s profile', async () => {
       // A 403 would confirm the profile exists, letting anyone enumerate ids
       // by watching status codes. From outside, inaccessible and nonexistent
       // must look identical.
@@ -294,7 +294,7 @@ describe('Profiles (e2e)', () => {
         .expect(200);
 
       expect(renamed.body.initials).toBe('CO');
-      // Colour is the profile's identity in the switcher — a rename must not
+      // Colour is the profile's identity in the switcher - a rename must not
       // change which colour the user recognises.
       expect(renamed.body.avatarColor).toBe(originalColor);
     });

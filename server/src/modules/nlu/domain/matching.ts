@@ -5,7 +5,7 @@
  * equality is close to useless against speech: the model returns "HDFC" for
  * an account called "HDFC Millennia", "grocery" for "Groceries", "food" for
  * "Eating out". Every one of those failed, the field came back missing, and
- * the user was asked to pick something the system had already understood —
+ * the user was asked to pick something the system had already understood -
  * which is precisely the friction the product exists to remove.
  *
  * The matcher runs in tiers, strongest first, and reports which tier fired so
@@ -33,7 +33,7 @@ const THRESHOLD = 0.55;
  * Category synonyms, in the three languages the product was tested in.
  *
  * Keyed by the seeded category names. These are the words people actually
- * use — "kirana" is far more common than "groceries" in Hinglish speech, and
+ * use - "kirana" is far more common than "groceries" in Hinglish speech, and
  * a model handed the utterance verbatim will return it unchanged.
  */
 const CATEGORY_ALIASES: Record<string, string[]> = {
@@ -183,7 +183,7 @@ function tokens(text: string): string[] {
  * Crudely strips an English plural.
  *
  * "grocery" and "groceries" are three edits apart, which no sane fuzzy
- * threshold treats as the same word — yet a model returning the singular for
+ * threshold treats as the same word - yet a model returning the singular for
  * a category named in the plural is the single most common near-miss. Handled
  * as a rule rather than by loosening the fuzzy gate, which would start
  * matching genuinely unrelated words.
@@ -204,7 +204,7 @@ function stem(word: string): string {
  * name is: "hdcf" for "hdfc". Plain Levenshtein charges two for that, which
  * puts a one-slip typo below any threshold loose enough to be safe.
  *
- * Here for slips only — not for finding loosely related words.
+ * Here for slips only - not for finding loosely related words.
  */
 function editDistance(a: string, b: string): number {
   if (a === b) return 0;
@@ -281,14 +281,14 @@ export function matchName<T extends { id: string; name: string }>(
     }
 
     /*
-     * One name contained in the other — "hdfc" inside "hdfc millennia".
+     * One name contained in the other - "hdfc" inside "hdfc millennia".
      *
      * Scored by how much of the longer name the shorter one accounts for, so
      * a distinctive fragment beats an incidental one. Guarded on length: "a"
      * appears inside almost everything.
      */
     /*
-     * Spelled-out initials — "h.d.f.c." normalises to "h d f c".
+     * Spelled-out initials - "h.d.f.c." normalises to "h d f c".
      *
      * Compared with whitespace removed so the letters reassemble into the
      * word they were always meant to be. Speech-to-text produces this
@@ -331,7 +331,7 @@ export function matchName<T extends { id: string; name: string }>(
      * Shared significant words.
      *
      * "axis card" against "Flipkart Axis Bank" shares "axis" once "card" and
-     * "bank" are discarded as noise — without that filter every card account
+     * "bank" are discarded as noise - without that filter every card account
      * matches every other one on the word "card" alone.
      */
     const spokenTokens = tokens(wanted).filter((t) => !noise.has(t));

@@ -20,7 +20,7 @@ export interface ProfileSummary {
   avatarColor: string;
   role: ProfileRole;
   isDefault: boolean;
-  /** Other members' names — drives "Shared with Meera". */
+  /** Other members' names - drives "Shared with Meera". */
   sharedWith: string[];
   monthSpendMinor: number;
   accountCount: number;
@@ -35,7 +35,7 @@ export interface DeleteImpact {
   accounts: number;
   transactions: number;
   reviewItems: number;
-  /** False when this is the user's last profile — the spec forbids that. */
+  /** False when this is the user's last profile - the spec forbids that. */
   deletable: boolean;
   reason?: string;
 }
@@ -47,7 +47,7 @@ export class ProfilesService {
   /**
    * Creates a profile and its owning membership in one transaction.
    *
-   * A profile with no members is unreachable — no user could ever access it,
+   * A profile with no members is unreachable - no user could ever access it,
    * and it would sit in the database forever. The two writes must not be able
    * to come apart.
    */
@@ -89,7 +89,7 @@ export class ProfilesService {
    *
    * Counts are aggregated in grouped queries rather than per profile, so
    * adding a profile doesn't add round trips. Spend and review counts are
-   * genuinely computed now even though both tables are empty until Phase 2 —
+   * genuinely computed now even though both tables are empty until Phase 2 -
    * the shape is what the frontend codes against, and a hardcoded zero would
    * quietly stay zero once real data arrived.
    */
@@ -154,7 +154,7 @@ export class ProfilesService {
 
     if (dto.name !== undefined) {
       data.name = dto.name;
-      // Initials follow a rename, but the colour deliberately does not — the
+      // Initials follow a rename, but the colour deliberately does not - the
       // design uses colour as the profile's stable identity, and having it
       // shift under the user on a rename would break that.
       data.initials = deriveInitials(dto.name);

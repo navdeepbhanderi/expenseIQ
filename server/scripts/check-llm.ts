@@ -5,7 +5,7 @@
  *
  *   npm run llm:check
  *
- * It makes two live calls — one Pro extraction and one Flash normalisation —
+ * It makes two live calls - one Pro extraction and one Flash normalisation -
  * against inputs this product actually has to handle, and reports latency and
  * token usage. Cheaper and far faster than discovering a bad key or a wrong
  * model id through a failing request in the app.
@@ -104,8 +104,8 @@ async function main(): Promise<void> {
             ? '?'
             : (candidate.amountMinor / 100).toLocaleString('en-IN');
         console.log(
-          `    → ₹${rupees}  ${candidate.category ?? '—'}  ` +
-            `${candidate.account ?? '—'}  (${candidate.confidence ?? '?'})`,
+          `    → ₹${rupees}  ${candidate.category ?? '-'}  ` +
+            `${candidate.account ?? '-'}  (${candidate.confidence ?? '?'})`,
         );
       }
       console.log();
@@ -157,7 +157,7 @@ async function main(): Promise<void> {
  * Turns Google's wall of JSON into the one sentence that matters.
  *
  * Quota errors are the common case and the raw message buries the useful part
- * — the actual limit — under several hundred characters of links and metadata.
+ * - the actual limit - under several hundred characters of links and metadata.
  */
 function describe(error: unknown): string {
   const raw = error instanceof Error ? error.message : String(error);
@@ -169,14 +169,14 @@ function describe(error: unknown): string {
   if (/RESOURCE_EXHAUSTED|429/.test(raw)) {
     if (limit === '0') {
       return (
-        'Quota is zero for this model — it is not available on the free tier. ' +
+        'Quota is zero for this model - it is not available on the free tier. ' +
         'Enable billing on the Google Cloud project, or point ' +
         'GEMINI_MODEL_PRO at gemini-2.5-flash.'
       );
     }
     return (
       `Quota exhausted${limit ? ` (limit ${limit}${perDay ? '/day' : '/min'})` : ''}. ` +
-      'The free tier allows very few requests per day — enable billing for ' +
+      'The free tier allows very few requests per day - enable billing for ' +
       'real development, or set LLM_DRIVER=fake to work offline.'
     );
   }
@@ -186,7 +186,7 @@ function describe(error: unknown): string {
   }
 
   if (/not found|404/i.test(raw)) {
-    return 'Model not found — check GEMINI_MODEL_PRO / GEMINI_MODEL_FLASH.';
+    return 'Model not found - check GEMINI_MODEL_PRO / GEMINI_MODEL_FLASH.';
   }
 
   return raw.slice(0, 300);

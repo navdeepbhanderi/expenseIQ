@@ -52,7 +52,7 @@ export interface ParsedCandidate {
   missingFields: string[];
   uncertainFields: string[];
   canOneTapConfirm: boolean;
-  /** Ranked account guesses — design 3d's "You usually put fuel on HDFC". */
+  /** Ranked account guesses - design 3d's "You usually put fuel on HDFC". */
   suggestedAccounts: { id: string; name: string; reason: string }[];
 }
 
@@ -79,7 +79,7 @@ export class NluService {
    *
    * Synchronous, deliberately. The architecture doc puts this on a queue, but
    * design 5c and 3c show the parse result inline about a second after the
-   * user stops speaking — a queue round-trip cannot deliver that. Queues are
+   * user stops speaking - a queue round-trip cannot deliver that. Queues are
    * for ingestion (Gmail, receipts), where nobody is waiting on screen.
    *
    * Nothing here writes to the ledger. Every candidate lands in the review
@@ -90,7 +90,7 @@ export class NluService {
     input: ParseInput,
     inputMode: InputMode,
     rawInput: string,
-    // Overridden by ingestion paths — a receipt and a spoken sentence take the
+    // Overridden by ingestion paths - a receipt and a spoken sentence take the
     // same route through here but must stay distinguishable in the ledger,
     // because design 2e renders the provenance pill from it.
     sourceOverride?: TransactionSource,
@@ -160,7 +160,7 @@ export class NluService {
      * One date may cover several expenses; two may not.
      *
      * "kal groceries 300 aur petrol 1200" names a single day and means it for
-     * both — refusing to apply it there left the common multi-expense case
+     * both - refusing to apply it there left the common multi-expense case
      * dated today, which is the very bug this resolver exists to fix. But once
      * the sentence names two different days, attributing each to the right
      * clause needs real parsing, and applying one to all would be confidently
@@ -214,7 +214,7 @@ export class NluService {
       /*
        * Fuzzy rather than exact name matching.
        *
-       * The model answers with what was said — "HDFC" for "HDFC Millennia",
+       * The model answers with what was said - "HDFC" for "HDFC Millennia",
        * "grocery" for "Groceries", "kirana" for either. Exact equality
        * rejected all of those and asked the user to pick a value the system
        * had already understood.
@@ -224,7 +224,7 @@ export class NluService {
       /*
        * Fall back to what this profile usually does with this merchant.
        *
-       * Only when the spoken category matched nothing — the user's explicit
+       * Only when the spoken category matched nothing - the user's explicit
        * word always wins over an inference from history. This is what makes
        * "blinkit 400" land in Groceries for someone who has always filed it
        * there, without anyone having to add Blinkit to a synonym table.
@@ -329,7 +329,7 @@ export class NluService {
   /**
    * One retry, with the failure fed back into the attempt.
    *
-   * Only for retryable failures — a rate limit or a truncated response is
+   * Only for retryable failures - a rate limit or a truncated response is
    * worth a second try, an invalid API key is not, and retrying it just
    * doubles the latency before the user sees the same error.
    */
@@ -338,7 +338,7 @@ export class NluService {
     input: ParseInput,
     context: ExtractionContext,
   ) {
-    // Through the resolver, so a profile with its own provider key uses it —
+    // Through the resolver, so a profile with its own provider key uses it -
     // and falls back to the platform if that key has stopped working.
     const call = () => this.resolver.extract(profileId, input, context);
 
@@ -399,7 +399,7 @@ export class NluService {
       },
     });
 
-    // 503 only when the model is entirely unconfigured — otherwise the entry
+    // 503 only when the model is entirely unconfigured - otherwise the entry
     // is safely staged and the user should see it, not an error page.
     if (error instanceof LlmError && !error.retryable && !this.isConfigured()) {
       throw new ServiceUnavailableException(
@@ -483,7 +483,7 @@ export class NluService {
    *
    * The synonym table in matching.ts is a fixed guess at what people call
    * things; this is what *this* user demonstrably does. If every Blinkit
-   * charge has been filed to Groceries, then Blinkit means Groceries here —
+   * charge has been filed to Groceries, then Blinkit means Groceries here -
    * whatever the table says, and whether or not the model offered a category
    * at all.
    *
@@ -564,7 +564,7 @@ export class NluService {
    * Ranked account guesses for a category, independent of a parse.
    *
    * Design 2b shows "Usually: SBI Savings, Cash, HDFC Millennia" when the
-   * user taps the account field on an entry that never named one — that is a
+   * user taps the account field on an entry that never named one - that is a
    * fresh question, not something the original parse response can answer,
    * because the user may have just changed the category.
    */
@@ -626,7 +626,7 @@ export class NluService {
       windowDays: days,
       total,
       correctFirstTime,
-      // Null rather than 0 or 100 on an empty window — "0% accurate" would be
+      // Null rather than 0 or 100 on an empty window - "0% accurate" would be
       // a lie about a user who simply hasn't used the feature yet.
       accuracyPercent: total === 0 ? null : (correctFirstTime / total) * 100,
       mostCorrectedField: mostCorrected?.field ?? null,
@@ -637,7 +637,7 @@ export class NluService {
 /**
  * Clamps and normalises whatever the model returned.
  *
- * `responseSchema` constrains the *shape* — it does not stop the model
+ * `responseSchema` constrains the *shape* - it does not stop the model
  * inventing a negative amount, a confidence of 1.4, or a date in 1970. Every
  * value is checked before it can reach the database.
  *
@@ -700,5 +700,5 @@ function nonEmpty(value: unknown): string | null {
  *
  * Case-insensitive because the model is told the exact names but doesn't
  * always echo the exact casing. A name that matches nothing becomes null
- * rather than a guess — the review queue prompts for it instead.
+ * rather than a guess - the review queue prompts for it instead.
  */

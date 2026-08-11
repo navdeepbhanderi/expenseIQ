@@ -15,7 +15,7 @@ describe('cursor pagination', () => {
     });
 
     it('returns null for junk rather than throwing', () => {
-      // A stale cursor should restart at page 1, not 500 — the client has no
+      // A stale cursor should restart at page 1, not 500 - the client has no
       // way to recover from an error here.
       expect(decodeCursor('not-base64!!')).toBeNull();
       expect(decodeCursor(Buffer.from('{}').toString('base64url'))).toBeNull();

@@ -83,7 +83,7 @@ export class ResetPasswordDto {
     example: 'Kirana@2026',
     minLength: MIN_PASSWORD_LENGTH,
     description:
-      'Same policy as signup — at least 8 characters, one number, one ' +
+      'Same policy as signup - at least 8 characters, one number, one ' +
       'special character. Enforced server-side by domain/password-policy.ts.',
   })
   @IsString()

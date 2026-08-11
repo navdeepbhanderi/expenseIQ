@@ -33,7 +33,7 @@ export interface SpendLimitOverview {
  * Parental spend limits.
  *
  * The spec is emphatic about the design intent: **nudge, never block.** A
- * transaction over the limit is still recorded — "blocking transactions
+ * transaction over the limit is still recorded - "blocking transactions
  * outright could push kids to just not log them, defeating the purpose".
  * So nothing here refuses a write; it raises notifications instead.
  *
@@ -155,7 +155,7 @@ export class SpendLimitsService {
    * Checks limits after a spend and raises the appropriate nudge.
    *
    * Called after a transaction lands rather than before it is written,
-   * because the answer never prevents the write — the spec's design rationale
+   * because the answer never prevents the write - the spec's design rationale
    * is that blocking pushes kids to stop logging, which destroys the data the
    * whole feature exists to produce.
    *
@@ -218,7 +218,7 @@ export class SpendLimitsService {
   /**
    * Tells the owners a limit was exceeded.
    *
-   * Delivered to the *owner's own* profiles, not to the child's — an alert
+   * Delivered to the *owner's own* profiles, not to the child's - an alert
    * about oversight belongs where the person exercising it will actually see
    * it, and a parent does not routinely open their child's profile.
    */

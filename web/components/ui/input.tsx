@@ -5,7 +5,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { formatMinor, parseAmountToMinor } from "@/lib/money";
 
-/** Shared field chrome — 40px, 11px radius, sunken field colour (design 6b). */
+/** Shared field chrome - 40px, 11px radius, sunken field colour (design 6b). */
 const fieldBase =
   "h-10 w-full rounded-[var(--radius-control)] border border-line bg-field px-[13px] text-sm text-ink " +
   "placeholder:text-ink-faint transition-colors " +
@@ -17,7 +17,7 @@ export interface FieldProps {
   label?: string;
   hint?: string;
   error?: string;
-  /** 58px controls for mobile forms — design 6h. */
+  /** 58px controls for mobile forms - design 6h. */
   mobile?: boolean;
 }
 
@@ -25,7 +25,7 @@ export interface FieldProps {
  * Wraps a control with its label, hint and error.
  *
  * The error is wired through `aria-describedby` and `role="alert"` rather than
- * just coloured red — a sighted user sees the red border, and everyone else
+ * just coloured red - a sighted user sees the red border, and everyone else
  * needs the association to know which field failed and why.
  */
 export function Field({
@@ -132,7 +132,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
  * "10." round-trips to 10 and the decimal point vanishes as you type it, and
  * "3 lakh" cannot be expressed at all.
  *
- * Accepts everything parseAmountToMinor accepts — "1,24,860", "3 lakh", "5k" —
+ * Accepts everything parseAmountToMinor accepts - "1,24,860", "3 lakh", "5k" -
  * because people type amounts the way they say them.
  */
 export function AmountInput({
@@ -187,7 +187,7 @@ export function AmountInput({
   );
 }
 
-/** Password field with a reveal toggle — design 6b. */
+/** Password field with a reveal toggle - design 6b. */
 export function PasswordInput({
   label = "Password",
   className,
@@ -206,7 +206,7 @@ export function PasswordInput({
       <button
         type="button"
         onClick={() => setVisible((v) => !v)}
-        // The label states the action, not the state — "Show password" is what
+        // The label states the action, not the state - "Show password" is what
         // pressing it does. Announcing the current state instead is a common
         // and confusing inversion.
         aria-label={visible ? "Hide password" : "Show password"}

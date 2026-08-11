@@ -62,7 +62,7 @@ export class NluController {
   @ApiOperation({
     summary: 'Parse natural language into candidate transactions',
     description:
-      'Synchronous, not queued — design 5c shows the result inline about a ' +
+      'Synchronous, not queued - design 5c shows the result inline about a ' +
       'second after the user stops speaking. One input can yield several ' +
       'candidates ("groceries 300, uber 640, bijli 2400" is three). Nothing ' +
       'reaches the ledger: every candidate is staged in the review queue.',
@@ -92,11 +92,11 @@ export class NluController {
     },
   })
   @ApiOperation({
-    summary: 'Parse spoken audio directly — the fallback path',
+    summary: 'Parse spoken audio directly - the fallback path',
     description:
       'Use POST /parse with the browser transcript by default: measured here, ' +
       'the text path is 2.2s against 4.9s for audio, costs a fraction as ' +
-      'much, and is just as accurate — Gemini reconstructs "teen so rupee ' +
+      'much, and is just as accurate - Gemini reconstructs "teen so rupee ' +
       'kirana pay kharch kiya" as ₹300 Groceries without difficulty. ' +
       'Send audio when the browser produces no transcript at all, which is ' +
       'its real failure mode on Gujarati and heavy code-mixing.',
@@ -131,7 +131,7 @@ export class NluController {
   @ApiOperation({
     summary: 'Partial readings while the user is still speaking',
     description:
-      'Drives design 5b and 3b — "Reading as ₹300 · Groceries · today" ' +
+      'Drives design 5b and 3b - "Reading as ₹300 · Groceries · today" ' +
       'appearing mid-sentence. Previews only; nothing here is authoritative ' +
       'and nothing is written. Call POST /parse to actually stage an entry.',
   })
@@ -164,7 +164,7 @@ export class NluController {
     summary: 'Which account this expense probably belongs on',
     description:
       'Design 2b\'s "Usually: SBI Savings, Cash, HDFC Millennia". Pure ' +
-      'transaction history, no model call — which card someone puts petrol ' +
+      'transaction history, no model call - which card someone puts petrol ' +
       'on is a database question, answered better and for free.',
   })
   suggestAccounts(
@@ -180,7 +180,7 @@ export class NluController {
     summary: 'How often parses are right first time',
     description:
       'Design 2b: "21 of 23 entries read correctly on the first try". ' +
-      'Returns null accuracy on an empty window rather than 0% — a user who ' +
+      'Returns null accuracy on an empty window rather than 0% - a user who ' +
       'has not used the feature is not 0% accurate.',
   })
   accuracy(

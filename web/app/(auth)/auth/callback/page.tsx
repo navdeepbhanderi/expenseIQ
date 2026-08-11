@@ -11,7 +11,7 @@ import { api, setAccessToken } from "@/lib/api/client";
 import type { AuthUser } from "@/lib/api/types";
 
 /**
- * Where Google sends the user back — `/auth/callback#accessToken=…`.
+ * Where Google sends the user back - `/auth/callback#accessToken=…`.
  *
  * The token arrives in the URL *fragment* rather than the query string, which
  * is the right call by the server: fragments are never transmitted to any
@@ -21,7 +21,7 @@ import type { AuthUser } from "@/lib/api/types";
  *
  * Failures arrive the same way, as `#error=<code>`. The server sends a code
  * rather than a sentence so the copy lives here and so the UI can route on it
- * — an unverified account belongs on the verify screen, not on a dead end.
+ * - an unverified account belongs on the verify screen, not on a dead end.
  */
 
 interface Failure {

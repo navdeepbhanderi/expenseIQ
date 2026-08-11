@@ -70,7 +70,7 @@ export class ReviewQueueService {
    * Applies the user's corrections and records what changed.
    *
    * The corrections are the point. They drive design 2b's accuracy stat and,
-   * later, per-profile category learning — so an edit that silently overwrote
+   * later, per-profile category learning - so an edit that silently overwrote
    * the parse would throw away the most valuable signal the product collects.
    */
   async edit(profileId: string, itemId: string, dto: EditReviewItemDto) {
@@ -167,7 +167,7 @@ export class ReviewQueueService {
    * Moves a reviewed entry into the ledger.
    *
    * This is the only path by which AI-parsed data becomes a transaction, and
-   * it requires an explicit call — the human-in-the-loop rule the whole
+   * it requires an explicit call - the human-in-the-loop rule the whole
    * product is built around.
    */
   async confirm(profileId: string, itemId: string): Promise<ConfirmResult> {
@@ -188,7 +188,7 @@ export class ReviewQueueService {
             : Number(item.parsedAmountMinor),
       })
     ) {
-      // Design 3d: "amount not found — add it to continue".
+      // Design 3d: "amount not found - add it to continue".
       throw new BadRequestException({
         message: 'Add an amount before confirming this entry',
         details: { missingFields: item.missingFields },
@@ -273,7 +273,7 @@ export class ReviewQueueService {
       try {
         confirmed.push(await this.confirm(profileId, itemId));
       } catch (error) {
-        // One unconfirmable entry must not abort the batch — design 4b shows
+        // One unconfirmable entry must not abort the batch - design 4b shows
         // three candidates where one is missing an account, and the other two
         // should still land.
         failed.push({
@@ -320,7 +320,7 @@ export class ReviewQueueService {
     const age = Date.now() - transaction.createdAt.getTime();
     if (age > UNDO_WINDOW_MS) {
       throw new BadRequestException({
-        message: 'The undo window has passed — edit or delete it instead',
+        message: 'The undo window has passed - edit or delete it instead',
         details: { transactionId },
       });
     }

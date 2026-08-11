@@ -34,25 +34,21 @@ export const envSchema = z.object({
 
   // Optional until Phase 4 so the app boots without an LLM key while the
   // core CRUD phases are being built. NluModule asserts it at init.
-  GEMINI_API_KEY: z.string().optional(),
-  // Comma-separated fallback chains, strongest first — see DEFAULT_CHAINS in
+  // Comma-separated fallback chains, strongest first - see DEFAULT_CHAINS in
   // gemini.adapter.ts for why a chain rather than one model. Left empty, the
   // adapter's own defaults apply.
   //
   // Both default to Flash models, not Pro: every Pro model has a free-tier
   // quota of zero, so an unbilled project gets 429 on every extraction. Put
   // gemini-3.1-pro-preview at the head of the pro chain once billing is on.
-  GEMINI_MODEL_PRO: z.string().default('gemini-3.5-flash'),
-  GEMINI_MODEL_FLASH: z.string().default('gemini-3.1-flash-lite'),
   // Gemini 2.5 spends "thinking" tokens before answering, billed as output and
   // counted against maxOutputTokens. Measured on the hardest extraction case
   // here, thinking cost 610 tokens and 2.1 extra seconds for an identical
-  // result — against a design that budgets about four seconds for the whole
+  // result - against a design that budgets about four seconds for the whole
   // speak-to-confirmed flow. Raise it if extraction quality ever needs it.
-  GEMINI_THINKING_BUDGET: z.coerce.number().int().min(0).default(0),
 
   /*
-   * Groq — the platform default.
+   * Groq - the platform default.
    *
    * Chosen for the free tier's shape rather than for raw quality:
    * llama-3.1-8b-instant allows 14,400 requests a day at 30/minute, where
@@ -65,7 +61,7 @@ export const envSchema = z.object({
   /**
    * Encrypts user-supplied provider keys at rest. `openssl rand -hex 32`.
    *
-   * Optional so the app still boots without it — the bring-your-own-key
+   * Optional so the app still boots without it - the bring-your-own-key
    * feature is then simply unavailable rather than the whole server refusing
    * to start over a feature most deployments will not use.
    */
@@ -80,13 +76,10 @@ export const envSchema = z.object({
   GROQ_MODELS_VISION: z.string().optional(),
   GROQ_TIMEOUT_MS: z.coerce.number().int().min(1000).default(20_000),
 
-  OPENROUTER_API_KEY: z.string().optional(),
   // Comma-separated chains, same convention as the Gemini ones. Left empty,
-  // the adapter's measured defaults apply — see openrouter.adapter.ts.
-  OPENROUTER_MODELS_TEXT: z.string().optional(),
+  // the adapter's measured defaults apply — see groq.adapter.ts.
   // Receipts. Must be a model that does BOTH vision and structured output,
   // which on the free tier is a much shorter list than either alone.
-  OPENROUTER_MODELS_VISION: z.string().optional(),
   /**
    * How long one OpenRouter model gets before the adapter abandons it for the
    * next in the chain.
@@ -102,7 +95,6 @@ export const envSchema = z.object({
    * anyone tolerates, so a contended model costs one short pause rather than
    * dominating the request.
    */
-  OPENROUTER_TIMEOUT_MS: z.coerce.number().int().min(1000).default(12_000),
 });
 
 export type Env = z.infer<typeof envSchema>;

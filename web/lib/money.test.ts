@@ -45,8 +45,8 @@ describe("formatMoney", () => {
   it("renders an em dash for absent money rather than ₹0", () => {
     // A missing budget and a zero budget are different facts, and the design
     // shows them differently. Collapsing null to ₹0 invents data.
-    expect(formatMoney(null)).toBe("—");
-    expect(formatMoney(undefined)).toBe("—");
+    expect(formatMoney(null)).toBe("-");
+    expect(formatMoney(undefined)).toBe("-");
     expect(formatMoney({ amountMinor: 0, currency: "INR" })).toBe("₹0");
   });
 });
@@ -62,7 +62,7 @@ describe("formatCompact", () => {
     expect(formatCompact(5_00_000_00)).toBe("₹5L");
   });
 
-  it("keeps the sign — design 2a shows net worth as ₹−34.2L", () => {
+  it("keeps the sign - design 2a shows net worth as ₹−34.2L", () => {
     expect(formatCompact(-34_20_000_00)).toBe("−₹34.2L");
   });
 
@@ -81,7 +81,7 @@ describe("parseAmountToMinor", () => {
 
   it("understands spoken magnitudes", () => {
     // Rejecting "2 lakh" would be the app being pedantic at the user's
-    // expense — it is how the amount would be said out loud.
+    // expense - it is how the amount would be said out loud.
     expect(parseAmountToMinor("3 lakh")).toBe(3_00_000_00);
     expect(parseAmountToMinor("1.5cr")).toBe(1_50_00_000_00);
     expect(parseAmountToMinor("5k")).toBe(5_000_00);
@@ -115,7 +115,7 @@ describe("percentOf", () => {
   });
 
   it("returns null instead of dividing by zero", () => {
-    // A profile with no budget must render "—", not "Infinity%" or "NaN%".
+    // A profile with no budget must render "-", not "Infinity%" or "NaN%".
     expect(percentOf(100, 0)).toBeNull();
   });
 });

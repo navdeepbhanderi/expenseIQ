@@ -146,7 +146,7 @@ describe('Insights (e2e)', () => {
       expect(res.body.recentTransactions).toHaveLength(3);
       expect(res.body.netWorth).toBeDefined();
 
-      // Hydrated, not ids — design 2a draws these rows without a second call.
+      // Hydrated, not ids - design 2a draws these rows without a second call.
       const [recent] = res.body.recentTransactions;
       expect(recent.amountMinor).toBeDefined();
       expect(recent.date).toBeDefined();
@@ -275,7 +275,7 @@ describe('Insights (e2e)', () => {
         .expect(200);
 
       // The loan contributes its *current* outstanding, not the original
-      // principal — so it is less than ₹60 L and improves with each EMI.
+      // principal - so it is less than ₹60 L and improves with each EMI.
       expect(res.body.liabilities.amountMinor).toBeLessThan(60_00_000_00);
       expect(res.body.liabilities.amountMinor).toBeGreaterThan(0);
       expect(res.body.net.amountMinor).toBeLessThan(0);
@@ -328,7 +328,7 @@ describe('Insights (e2e)', () => {
       expect(res.body[0].minimumDue.amountMinor).toBeGreaterThan(0);
     });
 
-    it('omits a settled card — it does not need your eye', async () => {
+    it('omits a settled card - it does not need your eye', async () => {
       const { token, profileId } = await createUser();
 
       await harness.prisma.account.create({
@@ -378,7 +378,7 @@ describe('Insights (e2e)', () => {
   });
 
   describe('budgets', () => {
-    it('reports remaining and used percent — design 2a', async () => {
+    it('reports remaining and used percent - design 2a', async () => {
       const { token, profileId } = await createUser();
       await spend(profileId, 64_210, thisMonth(2));
 
@@ -469,7 +469,7 @@ describe('Insights (e2e)', () => {
     });
   });
 
-  // Norms live under /reports (design 2a's sidebar item), not /budgets —
+  // Norms live under /reports (design 2a's sidebar item), not /budgets -
   // one canonical path per concept.
   describe('category norms', () => {
     it('reports "usual" from complete months only', async () => {

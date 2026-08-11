@@ -2,13 +2,13 @@
  * Resolves amounts spoken with Indian scale words.
  *
  * Like the date resolver, this exists because the failure is silent. A model
- * that mishears "teen lakh" as 3 produces ₹3 — plausible-looking, wrong by
+ * that mishears "teen lakh" as 3 produces ₹3 - plausible-looking, wrong by
  * five orders of magnitude, and filed without complaint. "5k" comes back as 5,
  * "1.5 crore" as 1.5. The user sees a number, and a number is what they
  * expected, so nothing looks amiss until a total is inspected weeks later.
  *
  * Deliberately narrow. This only fires when the utterance contains an explicit
- * scale word — lakh, crore, hazaar, k, thousand and their Devanagari and
+ * scale word - lakh, crore, hazaar, k, thousand and their Devanagari and
  * Gujarati spellings. A bare "482" is left entirely to the model, which reads
  * it correctly and has the context to know which of several numbers in a
  * sentence is the amount. Overriding those would trade a rare failure for a
@@ -16,7 +16,7 @@
  */
 
 export interface ResolvedAmount {
-  /** Paise, never a float — the whole product's money rule. */
+  /** Paise, never a float - the whole product's money rule. */
   amountMinor: number;
   /** The substring that produced it. */
   matched: string;
@@ -36,7 +36,7 @@ const SCALES: { pattern: string; multiplier: number }[] = [
 /**
  * Fractional prefixes, which are ordinary speech rather than an edge case.
  *
- * "sava lakh" is 1.25 lakh and "dedh lakh" is 1.5 — said far more often than
+ * "sava lakh" is 1.25 lakh and "dedh lakh" is 1.5 - said far more often than
  * the digits are. A model that does not know them returns the scale alone.
  */
 const FRACTIONS: Record<string, number> = {
@@ -85,7 +85,7 @@ export function resolveAmount(utterance: string): ResolvedAmount | null {
      * A number, or a fraction word, immediately before the scale.
      *
      * Requiring one or the other is what keeps this from firing on "k" inside
-     * an unrelated word, and on a bare "lakh" with no quantity — which is a
+     * an unrelated word, and on a bare "lakh" with no quantity - which is a
      * turn of phrase ("lakhon log") rather than an amount.
      */
     const numeric = new RegExp(
@@ -126,7 +126,7 @@ export function resolveAmount(utterance: string): ResolvedAmount | null {
  * Rupees to paise, rounded rather than truncated.
  *
  * 1.5 lakh is 150000 exactly, but floating-point multiplication of a fraction
- * by a large scale can land a hair under — and truncating that loses a paisa
+ * by a large scale can land a hair under - and truncating that loses a paisa
  * in a way that never reconciles.
  */
 function toPaise(rupees: number): number {

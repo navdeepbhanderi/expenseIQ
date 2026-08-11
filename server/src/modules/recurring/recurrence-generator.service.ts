@@ -21,7 +21,7 @@ import { AppLogger } from '@/common/logger/app-logger.service';
  * common recurring payment in this product's own design is an electricity
  * bill, and design 2e shows it varying between ₹1,890 and ₹3,120. Writing a
  * predicted amount straight into the ledger would silently record a number
- * nobody has seen, and every downstream total — budgets, norms, net worth —
+ * nobody has seen, and every downstream total - budgets, norms, net worth -
  * would inherit it.
  *
  * So generated entries land in the review queue like everything else. What
@@ -44,8 +44,8 @@ export class RecurrenceGeneratorService {
    * Stages every rule that has come due, and advances its schedule.
    *
    * Idempotent per rule per due date via `sourceRefId`, backed by the partial
-   * unique index on (source, sourceRefId). A scheduler that fires twice — or
-   * a retried job — cannot produce two entries for the same month, which is
+   * unique index on (source, sourceRefId). A scheduler that fires twice - or
+   * a retried job - cannot produce two entries for the same month, which is
    * the failure mode that would quietly double someone's recorded spending.
    */
   async generateDue(
@@ -70,7 +70,7 @@ export class RecurrenceGeneratorService {
       if (!dueDate) continue;
 
       /*
-       * Past its end date — retire it without staging.
+       * Past its end date - retire it without staging.
        *
        * Checked before staging rather than after, because a rule that ran to
        * its final date should not produce one entry beyond it. A lease that
@@ -91,7 +91,7 @@ export class RecurrenceGeneratorService {
       const count = rule.occurrenceCount + (created ? 1 : 0);
 
       /*
-       * Exhausted its instalments — this was the last one.
+       * Exhausted its instalments - this was the last one.
        *
        * The entry just staged is kept; it is the final EMI, not one too many.
        */
@@ -185,7 +185,7 @@ export class RecurrenceGeneratorService {
           parsedNote: null,
           confidence: rule.confidence,
           confidenceBand: band,
-          // Nothing is missing — the rule supplied every field, which is what
+          // Nothing is missing - the rule supplied every field, which is what
           // makes these one-tap.
           missingFields: [],
           suggestedAccountIds: [],
@@ -220,7 +220,7 @@ export function advance(
    * landed on.
    *
    * Without it the next date is derived from the previous *clamped* one, so a
-   * rule due on the 31st lands on 28 February and then advances to 28 March —
+   * rule due on the 31st lands on 28 February and then advances to 28 March -
    * and stays on the 28th forever. Recovering to the 31st needs the original
    * intent, not the compromise February forced.
    */
@@ -230,7 +230,7 @@ export function advance(
   const month = from.getUTCMonth();
 
   /*
-   * The anchor only *recovers* from a clamp — it never overrides a date.
+   * The anchor only *recovers* from a clamp - it never overrides a date.
    *
    * A due date sitting on the last day of a month that is shorter than the
    * day the rule asks for is a compromise February imposed, so the next one

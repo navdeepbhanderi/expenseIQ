@@ -9,7 +9,7 @@ export interface LogContext {
 }
 
 /**
- * Structured JSON logging — one object per line, never `console.log`.
+ * Structured JSON logging - one object per line, never `console.log`.
  *
  * In development it prints a readable single line instead, because reading raw
  * JSON in a terminal while building is miserable and nobody ships their dev
@@ -18,7 +18,7 @@ export interface LogContext {
  * Nest's own internals call this through the LoggerService interface, whose
  * convention is a trailing *string* context (`log('Started', 'NestFactory')`)
  * and, for errors, a stack trace before it. Our application code passes a
- * structured object instead. Both have to be understood — spreading a string
+ * structured object instead. Both have to be understood - spreading a string
  * into the entry turns "NestFactory" into {"0":"N","1":"e",…}.
  */
 @Injectable({ scope: Scope.TRANSIENT })
@@ -71,7 +71,7 @@ export class AppLogger implements LoggerService {
 
 /**
  * Typed rather than a bare Record, so the pretty formatter can read `context`
- * and `trace` as strings instead of stringifying `unknown` — which is how a
+ * and `trace` as strings instead of stringifying `unknown` - which is how a
  * log line ends up reading "[object Object]".
  */
 interface LogEntry {

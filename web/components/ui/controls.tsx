@@ -12,7 +12,7 @@ import { formatMinor } from "@/lib/money";
 /* ------------------------------------------------ Checkbox (design 6c) */
 
 /**
- * Checkbox with an optional count — design 6c's filter list, "Groceries 18".
+ * Checkbox with an optional count - design 6c's filter list, "Groceries 18".
  * The count comes from the API's facets, so the filter tells you how much it
  * will find before you apply it.
  */
@@ -72,7 +72,7 @@ export function Checkbox({
 export interface RadioCardOption {
   value: string;
   label: string;
-  /** Secondary line — "SBI Savings · ****8842". */
+  /** Secondary line - "SBI Savings · ****8842". */
   description?: string;
   /** Right-hand figure, usually a balance. */
   meta?: string;
@@ -83,7 +83,7 @@ export interface RadioCardOption {
  * Radio cards, used for account pickers.
  *
  * A card rather than a dot because the design shows account name, issuer and
- * balance together — picking an account is a decision made on those numbers,
+ * balance together - picking an account is a decision made on those numbers,
  * so they belong inside the target you press.
  */
 export function RadioCards({
@@ -205,7 +205,7 @@ export function Toggle({
 /* ------------------------------------------------ Segmented (design 6c) */
 
 /**
- * Segmented control — the period switcher in design 6c ("This month / Last
+ * Segmented control - the period switcher in design 6c ("This month / Last
  * month / Year"). A radiogroup rather than tabs: it filters what is shown, it
  * does not switch between panels.
  */
@@ -258,7 +258,7 @@ export function Segmented<T extends string>({
 
 /**
  * Multi-select chip. Also the read-only field chip in design 5c's confirm row
- * ("₹300", "◍ Groceries", "Today"), which is why `tone` exists — a missing
+ * ("₹300", "◍ Groceries", "Today"), which is why `tone` exists - a missing
  * field is marigold and dashed, per design 3d's "Account? →".
  */
 export function Chip({
@@ -302,7 +302,7 @@ export function Chip({
 /* --------------------------------------------------- Slider (design 6c) */
 
 /**
- * Slider — design 6c's "Slider · monthly limit". Values are paise, so the
+ * Slider - design 6c's "Slider · monthly limit". Values are paise, so the
  * label formats through the money helper rather than printing a raw number.
  */
 export function Slider({

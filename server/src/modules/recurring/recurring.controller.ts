@@ -54,7 +54,7 @@ export class RecurringController {
     description:
       'Never auto-created. A detected pattern that silently started ' +
       'generating transactions would put rows in the ledger the user never ' +
-      'entered — the same thing the review queue exists to prevent. ' +
+      'entered - the same thing the review queue exists to prevent. ' +
       'Detection proposes; the user disposes. Amount variance does not ' +
       'disqualify a pattern: an electricity bill is recurring and is a ' +
       'different number every month.',
@@ -80,7 +80,7 @@ export class RecurringController {
   @ApiOperation({
     summary: 'Create a recurring entry from scratch',
     description:
-      'For schedules the user already knows — a salary on the 1st, rent on ' +
+      'For schedules the user already knows - a salary on the 1st, rent on ' +
       'the 5th. Detection needs three occurrences before a pattern is ' +
       'visible, which is a quarter for anything monthly, and income may ' +
       'never be detected at all if it is the only credit on the account. ' +
@@ -117,7 +117,7 @@ export class RecurringController {
     description:
       'Generated entries land in the review queue, not the ledger. A ' +
       "confirmed rule is the user's own instruction, but only for the " +
-      "*schedule* — the amount is a prediction, and design 2e's own example " +
+      "*schedule* - the amount is a prediction, and design 2e's own example " +
       'varies between ₹1,890 and ₹3,120. They arrive fully pre-filled, and a ' +
       'rule with a steady amount is marked CLEAR so it confirms in one tap. ' +
       'Idempotent per rule per due date, so a scheduler firing twice cannot ' +

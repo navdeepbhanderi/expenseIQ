@@ -7,13 +7,13 @@ import { startOfDay } from '@/common/time/calendar';
  *
  * Design 2e labels rows "Recurring" and "Auto-debit"; nothing in the specs
  * says how those are decided. This does it from dates alone, with no model
- * involved — periodicity is arithmetic, and asking an LLM whether four dates
+ * involved - periodicity is arithmetic, and asking an LLM whether four dates
  * are a month apart would be slower, costlier and less reliable than
  * subtracting them.
  *
  * The important judgement here: **amount variance does not disqualify a
  * recurrence.** An electricity bill is obviously recurring and is a different
- * number every month — design 2e shows exactly that ("Adani Electricity ·
+ * number every month - design 2e shows exactly that ("Adani Electricity ·
  * Utilities · recurring"). So cadence is decided by the *dates*, and amount
  * stability is reported alongside as metadata rather than used as a filter.
  */
@@ -36,7 +36,7 @@ export interface DetectedRecurrence {
   categoryId: string | null;
   accountId: string | null;
   cadence: Cadence;
-  /** Median of observed amounts — robust to one unusual bill. */
+  /** Median of observed amounts - robust to one unusual bill. */
   typicalAmount: Money;
   /** How much the amount moves. High is normal for utilities. */
   amountVariancePercent: number;
@@ -183,10 +183,10 @@ function matchCadence(intervals: readonly number[]): CadenceProfile | null {
  *
  * Two independent signals, multiplied:
  *
- *   regularity — how tightly the intervals cluster around the cadence. A
+ *   regularity - how tightly the intervals cluster around the cadence. A
  *                subscription billed on the 1st every month scores near 1;
  *                a coffee habit that happens roughly monthly does not.
- *   evidence   — how many occurrences. Three is the minimum to distinguish a
+ *   evidence   - how many occurrences. Three is the minimum to distinguish a
  *                pattern from a coincidence, and confidence keeps rising to
  *                six, after which more data adds little.
  *
@@ -202,7 +202,7 @@ function scoreConfidence(
     (interval) => Math.abs(interval - profile.days) / profile.tolerance,
   );
 
-  // Median deviation, not mean — for the same reason the cadence itself uses
+  // Median deviation, not mean - for the same reason the cadence itself uses
   // a median. One missed month produces a double-length gap whose deviation
   // is an order of magnitude larger than the rest; averaged in, it drags
   // regularity to zero and a perfectly good subscription stops being
@@ -213,7 +213,7 @@ function scoreConfidence(
   const evidence = Math.min(1, (occurrences - MIN_OCCURRENCES + 1) / 4);
 
   // Evidence is floored so a perfectly regular three-payment series still
-  // clears the threshold — three exact months apart is a real subscription.
+  // clears the threshold - three exact months apart is a real subscription.
   return clamp01(regularity * (0.7 + 0.3 * evidence));
 }
 
@@ -263,7 +263,7 @@ function clamp01(value: number): number {
  * The next time a `dayOfMonth` schedule fires, from today.
  *
  * Clamped to the month's last day, so "the 31st" still pays out in February
- * rather than silently skipping it — the same month-end problem the card
+ * rather than silently skipping it - the same month-end problem the card
  * billing cycle solves, and the same answer.
  *
  * Today counts as still upcoming: someone setting up a salary on the 1st, on
@@ -273,7 +273,7 @@ export function nextOccurrence(
   cadence: Cadence,
   dayOfMonth: number | null,
   from: Date = new Date(),
-  /** "The last day, whatever it is" — 30 April, 28 or 29 February. */
+  /** "The last day, whatever it is" - 30 April, 28 or 29 February. */
   onMonthEnd = false,
   /**
    * 0 = Sunday … 6 = Saturday. WEEKLY only.
@@ -289,7 +289,7 @@ export function nextOccurrence(
    * YEARLY without it is genuinely ambiguous: "the 15th, every year" has no
    * answer to "of which month", and defaulting to the creation month means an
    * annual premium added in August can never be set for March. QUARTERLY uses
-   * it to fix which three-month grid the rule sits on — Jan/Apr/Jul/Oct is a
+   * it to fix which three-month grid the rule sits on - Jan/Apr/Jul/Oct is a
    * different rule from Feb/May/Aug/Nov, and insurers care which.
    */
   monthOfYear: number | null = null,
@@ -310,7 +310,7 @@ export function nextOccurrence(
    *
    * Monthly repeats every month, so every month is on-grid and the anchor is
    * simply "now". Quarterly and yearly only land on certain months, so an
-   * anchor picks which — falling back to the current month keeps rules
+   * anchor picks which - falling back to the current month keeps rules
    * created before this field existed behaving exactly as they did.
    */
   const anchorMonth =
@@ -351,7 +351,7 @@ export function nextOccurrence(
  */
 function nextWeekday(from: Date, dayOfWeek: number | null): Date {
   const start = startOfDay(from);
-  // No weekday chosen — the old behaviour, seven days out from now.
+  // No weekday chosen - the old behaviour, seven days out from now.
   if (dayOfWeek === null) {
     return new Date(start.getTime() + 7 * 24 * 60 * 60 * 1000);
   }

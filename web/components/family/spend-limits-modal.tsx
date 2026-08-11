@@ -13,14 +13,14 @@ import { useSetSpendLimits, type SpendLimitOverview } from "@/lib/api/family";
 import { ApiError } from "@/lib/api/client";
 
 /**
- * Chooses the monthly limits — the half of the feature that was missing.
+ * Chooses the monthly limits - the half of the feature that was missing.
  *
  * The Family page has shown limits since it was built, but nothing anywhere
  * could set one, so the section was hidden behind `limits.data?.overall` and
  * never appeared for anybody.
  *
  * Owner-only, matching the server's `spendLimit:set`. The button is not
- * rendered for anyone else rather than shown and rejected — an affordance that
+ * rendered for anyone else rather than shown and rejected - an affordance that
  * always fails is worse than no affordance.
  */
 export function SpendLimitsModal({
@@ -54,7 +54,7 @@ export function SpendLimitsModal({
       ),
   );
 
-  // Spending categories only — a limit on income means nothing.
+  // Spending categories only - a limit on income means nothing.
   const spendCategories = categories.filter((c) => !c.isIncome);
 
   async function submit() {
@@ -86,7 +86,7 @@ export function SpendLimitsModal({
       open={open}
       onOpenChange={onOpenChange}
       title="Monthly spend limits"
-      description="A nudge, never a block — going over is recorded and flagged, never refused."
+      description="A nudge, never a block - going over is recorded and flagged, never refused."
       footer={
         <>
           <Button variant="secondary" onClick={() => onOpenChange(false)}>

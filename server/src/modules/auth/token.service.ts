@@ -23,7 +23,7 @@ export interface AccessTokenPayload {
  * Access tokens are JWTs; refresh tokens deliberately are not.
  *
  * The architecture doc implies a JWT refresh strategy, but a JWT cannot be
- * revoked — and revocation is the entire mechanism behind reuse detection.
+ * revoked - and revocation is the entire mechanism behind reuse detection.
  * So refresh tokens are opaque 256-bit random strings, stored as SHA-256
  * hashes, with the database as the source of truth. That buys real logout,
  * real family revocation, and a stolen-token response that actually works.
@@ -77,7 +77,7 @@ export class TokenService {
 
     // Atomic claim. Two concurrent refreshes race here and exactly one wins;
     // the loser is indistinguishable from a replay, so it's treated as one.
-    // That does mean a double-submitted refresh logs the user out — the
+    // That does mean a double-submitted refresh logs the user out - the
     // deliberate trade, because the alternative is a time window in which a
     // stolen token is silently accepted.
     const claimed = await this.prisma.refreshToken.updateMany({
@@ -87,7 +87,7 @@ export class TokenService {
 
     if (claimed.count === 0) {
       await this.revokeFamily(existing.familyId);
-      this.logger.warn('Refresh token reuse detected — family revoked', {
+      this.logger.warn('Refresh token reuse detected - family revoked', {
         userId: existing.userId,
         familyId: existing.familyId,
       });
@@ -116,7 +116,7 @@ export class TokenService {
     }
   }
 
-  /** Kills every session for a user — password change, account compromise. */
+  /** Kills every session for a user - password change, account compromise. */
   async revokeAllForUser(userId: string): Promise<void> {
     await this.prisma.refreshToken.updateMany({
       where: { userId, revokedAt: null },
@@ -143,7 +143,7 @@ export class TokenService {
       // jsonwebtoken types `expiresIn` as a `ms`-style template literal, which
       // a value read from the environment can't satisfy statically. The format
       // is validated for real by addDuration() below, which throws on anything
-      // it can't parse — so a bad TTL fails at first use, not silently.
+      // it can't parse - so a bad TTL fails at first use, not silently.
       expiresIn: (jwtConfig?.accessTtl ?? '15m') as JwtSignOptions['expiresIn'],
     });
 

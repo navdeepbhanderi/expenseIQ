@@ -10,7 +10,7 @@ const STORAGE_KEY = "expenseiq-profile";
 interface ProfileState {
   profiles: ProfileSummary[];
   active: ProfileSummary | null;
-  /** Null until profiles have loaded — routes must wait rather than fetch. */
+  /** Null until profiles have loaded - routes must wait rather than fetch. */
   activeId: string | null;
   isLoading: boolean;
   select: (profileId: string) => void;

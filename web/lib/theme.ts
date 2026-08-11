@@ -13,7 +13,7 @@ const STORAGE_KEY = "expenseiq-theme";
  * That makes it genuinely external state, so it is read with
  * useSyncExternalStore rather than mirrored into component state via an
  * effect. Mirroring would render once with a guessed value and then correct
- * itself — the exact flash the pre-paint script exists to prevent — and would
+ * itself - the exact flash the pre-paint script exists to prevent - and would
  * drift if anything else ever set the attribute.
  */
 const listeners = new Set<() => void>();
@@ -21,8 +21,8 @@ const listeners = new Set<() => void>();
 function subscribe(listener: () => void): () => void {
   listeners.add(listener);
 
-  // Also observe the attribute directly, so a theme change from anywhere —
-  // devtools, another hook instance, a future settings screen — is picked up.
+  // Also observe the attribute directly, so a theme change from anywhere -
+  // devtools, another hook instance, a future settings screen - is picked up.
   const observer = new MutationObserver(() => {
     for (const l of listeners) l();
   });

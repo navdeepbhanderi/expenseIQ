@@ -1,13 +1,13 @@
 import { cn } from "@/lib/cn";
 
 /**
- * The ledger stack — design 7a.
+ * The ledger stack - design 7a.
  *
  * "Three ruled lines that step up like a balance, with the rupee's double bar
  * built in." Two full rules are the rupee's twin bars and the ruled lines of a
  * household ledger; the short marigold rule is the entry still waiting on you.
  * That third rule is the product's whole idea in one glyph, which is why it is
- * always marigold — the same colour the app reserves for "needs your eye".
+ * always marigold - the same colour the app reserves for "needs your eye".
  *
  * Every dimension is a percentage of `size` rather than a hardcoded pixel, so
  * the 16px favicon and the 104px app icon are the same mark. The design's two
@@ -62,7 +62,7 @@ export function LogoMark({
 }: {
   size?: number;
   variant?: LogoVariant;
-  /** Fully round rather than a squircle — the design's badge treatment. */
+  /** Fully round rather than a squircle - the design's badge treatment. */
   rounded?: boolean;
   className?: string;
 }) {
@@ -126,7 +126,7 @@ export function Wordmark({
   );
 }
 
-/** Mark plus wordmark — the lockup used in the header and footer. */
+/** Mark plus wordmark - the lockup used in the header and footer. */
 export function Logo({
   size = 32,
   variant = "brand",
@@ -152,7 +152,7 @@ export function Logo({
       {/*
        * No sr-only "ExpenseIQ" here: the wordmark is real text and already
        * announces. Adding a hidden label would make a screen reader say the
-       * name twice — the mark is aria-hidden precisely so it does not.
+       * name twice - the mark is aria-hidden precisely so it does not.
        */}
     </span>
   );

@@ -12,7 +12,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
  * listen at all.
  *
  * `lang` is set to en-IN rather than hi-IN deliberately. Indian English
- * recognition handles code-mixed speech — "kal swiggy se 482 ka order" — far
+ * recognition handles code-mixed speech - "kal swiggy se 482 ka order" - far
  * better than a Hindi model does, and the LLM does the real language work
  * downstream. Forcing hi-IN makes English words in the same sentence worse.
  */
@@ -68,7 +68,7 @@ export function useSpeech({
   const finalRef = useRef("");
   // Held in a ref so the recognition callbacks always see the current handler
   // without tearing down and rebuilding the recogniser on every render.
-  // Assigned in an effect rather than during render — a render can be thrown
+  // Assigned in an effect rather than during render - a render can be thrown
   // away, and a ref written during one that never commits is a stale handler.
   const onFinalRef = useRef(onFinal);
   useEffect(() => {
@@ -97,7 +97,7 @@ export function useSpeech({
 
     recognition.lang = LANG;
     // Interim results are what design 5b renders while the user is still
-    // speaking — the whole point of using the browser rather than uploading
+    // speaking - the whole point of using the browser rather than uploading
     // audio at the end.
     recognition.interimResults = true;
     recognition.continuous = false;
@@ -115,7 +115,7 @@ export function useSpeech({
     };
 
     recognition.onerror = (event) => {
-      // "no-speech" and "aborted" are ordinary — the user said nothing, or
+      // "no-speech" and "aborted" are ordinary - the user said nothing, or
       // cancelled. Only a permission refusal is worth a different UI.
       setState(event.error === "not-allowed" ? "denied" : "idle");
     };

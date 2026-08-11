@@ -2,7 +2,7 @@ import { resolveAmount } from './amounts';
 
 const at = (utterance: string) => resolveAmount(utterance)?.amountMinor;
 
-describe('resolveAmount — scale words', () => {
+describe('resolveAmount - scale words', () => {
   it('reads lakh', () => {
     // The failure that motivated this: the model returns 3.
     expect(at('teen lakh nahi, 3 lakh ka transfer')).toBe(3_00_000_00);
@@ -31,7 +31,7 @@ describe('resolveAmount — scale words', () => {
   });
 });
 
-describe('resolveAmount — fractions people actually say', () => {
+describe('resolveAmount - fractions people actually say', () => {
   it.each([
     ['sava lakh', 1_25_000_00],
     ['dedh lakh', 1_50_000_00],
@@ -49,7 +49,7 @@ describe('resolveAmount — fractions people actually say', () => {
   });
 });
 
-describe('resolveAmount — what it must leave alone', () => {
+describe('resolveAmount - what it must leave alone', () => {
   it('ignores a bare number', () => {
     /*
      * The model reads these correctly and has the context to know which of

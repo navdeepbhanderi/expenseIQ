@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Logo } from "@/components/brand/logo";
 
 /**
- * The frame every auth screen sits in — design 7b/7c/7f.
+ * The frame every auth screen sits in - design 7b/7c/7f.
  *
  * One column, centred, capped narrow. The design does not put marketing
  * alongside the form: someone who has reached signup is already convinced, and
@@ -51,7 +51,7 @@ export function AuthShell({
   );
 }
 
-/** The "or" rule between a form and the Google button — design 7b. */
+/** The "or" rule between a form and the Google button - design 7b. */
 export function OrDivider() {
   return (
     <div className="my-5 flex items-center gap-3" aria-hidden="true">

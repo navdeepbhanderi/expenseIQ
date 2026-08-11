@@ -16,7 +16,7 @@ import {
 import { ApiError } from "@/lib/api/client";
 
 /**
- * Due-date reminders — design 6h's "Remind me before due date · 3 days
+ * Due-date reminders - design 6h's "Remind me before due date · 3 days
  * ahead, 9 am".
  *
  * `timeOfDay` is minutes past *local* midnight, and the server interprets it
@@ -94,7 +94,7 @@ export function ReminderSettings({ accountId }: { accountId: string }) {
                 enabled: true,
               });
             } else {
-              // Disabled rather than deleted — turning it back on should
+              // Disabled rather than deleted - turning it back on should
               // restore the schedule the user already chose.
               persist({ enabled: false });
             }
@@ -127,7 +127,7 @@ export function ReminderSettings({ accountId }: { accountId: string }) {
 
           <p className="mt-3 flex items-center gap-2 text-xs text-ink-faint">
             <Bell className="size-3.5" aria-hidden="true" />
-            Sent once per billing cycle — a second run the same day sends
+            Sent once per billing cycle - a second run the same day sends
             nothing.
           </p>
 

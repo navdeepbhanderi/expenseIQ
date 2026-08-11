@@ -20,7 +20,7 @@ import type { Account, Category, NluCandidate } from "@/lib/api/types";
  *
  * The review row lets you swap the category and the account inline, which
  * covers the common case. It does not let you fix an amount the parser heard
- * as 3000 instead of 300, a date, a merchant or a note — and those were
+ * as 3000 instead of 300, a date, a merchant or a note - and those were
  * unreachable, so the only remedy was to discard the entry and say it again,
  * hoping for a better parse.
  *
@@ -66,7 +66,7 @@ export function ReviewEditModal({
      * Only what actually changed.
      *
      * Sending every field would record a Correction for each one, and the
-     * accuracy figure counts corrections — so re-saving an untouched entry
+     * accuracy figure counts corrections - so re-saving an untouched entry
      * would report the parser as having got everything wrong.
      */
     const patch: Record<string, unknown> = {};
@@ -110,7 +110,7 @@ export function ReviewEditModal({
       open={open}
       onOpenChange={onOpenChange}
       title="Fix this entry"
-      description="Still nothing in the ledger — you confirm it after."
+      description="Still nothing in the ledger - you confirm it after."
       footer={
         <>
           <Button variant="secondary" onClick={() => onOpenChange(false)}>

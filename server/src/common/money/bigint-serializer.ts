@@ -6,12 +6,12 @@
  * first response carrying an amount 500s.
  *
  * This lives in its own module, imported for its side effect by AppModule,
- * rather than sitting at the top of main.ts — otherwise it applies only when
+ * rather than sitting at the top of main.ts - otherwise it applies only when
  * the app is booted through main.ts, and every other entry point (tests,
  * scripts, queue workers) inherits the crash.
  *
  * Amounts go out as JSON numbers rather than strings. The largest value
- * representable is 2^53 paise — roughly ₹90 trillion — so nothing realistic
+ * representable is 2^53 paise - roughly ₹90 trillion - so nothing realistic
  * loses precision, and a number spares every client from parsing amounts by
  * hand. Anything beyond that range throws rather than silently rounding.
  */

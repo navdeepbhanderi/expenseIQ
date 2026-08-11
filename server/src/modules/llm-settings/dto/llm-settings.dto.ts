@@ -13,7 +13,7 @@ export class SetLlmCredentialDto {
   model!: string;
 
   /**
-   * The key itself. Write-only — no response ever contains it.
+   * The key itself. Write-only - no response ever contains it.
    *
    * Length-bounded rather than pattern-matched here: the exact shape is
    * checked against the provider's own pattern in the service, which gives a

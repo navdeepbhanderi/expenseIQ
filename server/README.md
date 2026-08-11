@@ -1,4 +1,4 @@
-# ExpenseIQ — Backend
+# ExpenseIQ - Backend
 
 NestJS + PostgreSQL + Prisma. AI-powered expense tracker with multilingual
 natural-language entry and a human-in-the-loop review queue.
@@ -34,9 +34,9 @@ original dev machine:
 ## Testing & quality
 
 ```bash
-npm run verify    # typecheck + lint + unit — run this before every commit
-npm test          # unit — pure domain logic, no database
-npm run test:e2e  # integration — real app against the test database
+npm run verify    # typecheck + lint + unit - run this before every commit
+npm test          # unit - pure domain logic, no database
+npm run test:e2e  # integration - real app against the test database
 npm run lint:fix  # auto-fix lint and formatting
 ```
 
@@ -55,10 +55,10 @@ then, `pkill -f jest` before starting a run if you're unsure.
 
 ```
 src/
-  config/       env contract, validated at boot — a bad env kills the process
+  config/       env contract, validated at boot - a bad env kills the process
                 rather than surfacing as a confusing 500 later
   common/
-    money/      Money value object — integer paise, never float, never Decimal
+    money/      Money value object - integer paise, never float, never Decimal
     pagination/ cursor helpers (offset pagination is wrong for a live ledger)
     logger/     structured JSON logging, redaction at the logger boundary
     filters/    the single error envelope
@@ -70,7 +70,7 @@ src/
 
 Modules with real business rules also get a `domain/` folder: pure functions,
 no DB, no Nest decorators. That's where amortization, billing-cycle rollover
-and confidence banding will live — the parts worth testing exhaustively.
+and confidence banding will live - the parts worth testing exhaustively.
 
 ## Decisions worth knowing
 
@@ -98,12 +98,12 @@ holds the raw input and the per-request telemetry while the children hold the
 candidates.
 
 **Interactive NLU is synchronous.** Queues are for ingestion (Gmail, receipts,
-reminders) only — never for a user waiting on screen. The design shows parse
+reminders) only - never for a user waiting on screen. The design shows parse
 results appearing mid-speech, which a queue round-trip cannot deliver.
 
 **Two tsconfigs, deliberately.** `tsconfig.json` is broad so typecheck and
 type-aware lint cover tests and the seed script. `tsconfig.build.json` narrows
-to `src/` — including `prisma/` and `test/` in the emitted program widens the
+to `src/` - including `prisma/` and `test/` in the emitted program widens the
 inferred `rootDir` and the output silently moves to `dist/src/main.js`.
 
 **Lint is type-aware.** `no-floating-promises` and `no-misused-promises`
@@ -111,7 +111,7 @@ require the type checker and map to real failure modes here: a forgotten
 `await` on a Prisma write loses data silently.
 
 **One `configureApp()`, used by both entry points.** `src/bootstrap.ts` owns
-the HTTP pipeline; `main.ts` and the test harness both call it. Not tidiness —
+the HTTP pipeline; `main.ts` and the test harness both call it. Not tidiness -
 when the two drift, tests stop describing production. It bit once already:
 `cookieParser()` lived only in `main.ts`, so every cookie-based refresh
 silently 401'd under test while working fine in the real app.
@@ -123,7 +123,7 @@ not exposed.
 **Refresh tokens are opaque, not JWTs.** A JWT can't be revoked, and revocation
 is the whole mechanism behind reuse detection. Refresh tokens are 256-bit
 random strings stored as SHA-256 hashes, with the database as the source of
-truth — which buys real logout and real family revocation. Replaying a spent
+truth - which buys real logout and real family revocation. Replaying a spent
 token revokes the entire family descended from that login.
 
 **The access guard answers 404, never 403.** A 403 on someone else's profile
@@ -136,13 +136,13 @@ terms and today's date. Persisting them would mean every one going stale at
 midnight with no write to trigger a refresh.
 
 **Dependency pins live in `overrides`.** `js-yaml` is pinned to `^5.2.3` under
-`@nestjs/swagger` — the advisory affects 5.0.0–5.2.1, and npm's suggested fix
+`@nestjs/swagger` - the advisory affects 5.0.0–5.2.1, and npm's suggested fix
 was to *downgrade* swagger. A scoped override patches within the same major
 without touching anything else. Re-check with `npm audit --omit=dev`.
 
 **Prisma config is `prisma.config.ts`, not `package.json#prisma`.** The old
 block is removed in Prisma 7. The config file loads before anything populates
-`process.env`, so it imports `dotenv/config` explicitly — without that,
+`process.env`, so it imports `dotenv/config` explicitly - without that,
 `DATABASE_URL` is undefined and every migrate command fails confusingly.
 
 **Background work is behind a port, like the LLM.** `QUEUE_DRIVER=inline`
@@ -153,29 +153,29 @@ ends up testing BullMQ rather than this application.
 **Spend limits nudge, they never block.** The spec's rationale is worth
 repeating: refusing a transaction pushes kids to stop logging, which destroys
 the data the feature exists to produce. Exceeding a limit records the spend,
-flags it, and tells the owner — on the *owner's own* profile, because a parent
+flags it, and tells the owner - on the *owner's own* profile, because a parent
 does not routinely open their child's.
 
 **A profile always has at least one owner.** Demoting or removing the last one
-would leave live financial data nobody can administer, invite to, or delete —
+would leave live financial data nobody can administer, invite to, or delete -
 recoverable only through direct database access.
 
 **Reminders key on the billing cycle, not the calendar day.** The spec's edge
-case — "if reminder settings change after a reminder for that cycle already
-fired, don't re-fire" — is unsolvable with a "is today the day?" scan, which
+case - "if reminder settings change after a reminder for that cycle already
+fired, don't re-fire" - is unsolvable with a "is today the day?" scan, which
 also sends nothing at all if it misses its window during a restart. Keying on
 the due date fixes both: at most one send per cycle, and a late scan still
 catches up. `lastFiredCycle` is written *after* delivery, because a duplicate
 notification is a far smaller failure than a missed bill.
 
 **"9 am" means 9 am where the user is.** `timeOfDay` is minutes past *local*
-midnight, resolved through `Intl` rather than a hardcoded offset — 9 am UTC
+midnight, resolved through `Intl` rather than a hardcoded offset - 9 am UTC
 would arrive at 2:30 pm in India. Tested against daylight saving too, even
 though India has none.
 
 **Detection proposes, the user disposes.** A detected recurring payment is
 never auto-created as a rule. A pattern that silently started generating
-transactions would put rows in the ledger the user never entered — the same
+transactions would put rows in the ledger the user never entered - the same
 thing the review queue exists to prevent for parsed input.
 
 **Amount variance does not disqualify a recurrence.** An electricity bill is
@@ -184,7 +184,7 @@ by the dates; amount stability is reported alongside as metadata.
 
 **CSV export neutralises formulas.** A cell starting with `=`, `+`, `-` or `@`
 executes when opened in Excel or Sheets. Merchant names and notes are user
-input — and from Phase 4 will come from parsed emails — so an exported ledger
+input - and from Phase 4 will come from parsed emails - so an exported ledger
 is a real injection vector.
 
 ## Status
@@ -195,7 +195,7 @@ recurrence detection, reminders and notifications.
 
 **Phase 7 is done.** Phase 6 is partial: reminders and in-app notifications are done; the
 Google integrations (Gmail parsing, Calendar, Tasks) are not started and need
-OAuth credentials — `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` are still
+OAuth credentials - `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` are still
 blank. Phases 7–8 per the plan.
 
 ### Gemini setup
@@ -217,7 +217,7 @@ before answering, billed as output and counted against `maxOutputTokens`.
 Measured on the hardest extraction case here: 610 thinking tokens and 2.1
 extra seconds for an *identical* result, against a design that budgets about
 four seconds for the whole speak-to-confirmed flow. The same trap silently
-broke merchant normalisation — 29 thinking tokens against a 32-token ceiling
+broke merchant normalisation - 29 thinking tokens against a 32-token ceiling
 returned an empty string with a 200 response.
 
 ### Voice input: transcript first, audio as fallback
@@ -229,7 +229,7 @@ Measured against real Gemini, not assumed:
 | Browser transcript → `POST /nlu/parse` | 2/2 | **2.2–2.6s** |
 | Audio → `POST /nlu/parse/audio` | 3/3 | 4.7–5.1s |
 
-Both are accurate — Gemini reconstructs `"teen so rupee kirana pay kharch
+Both are accurate - Gemini reconstructs `"teen so rupee kirana pay kharch
 kiya"` as ₹300 Groceries without difficulty, which was the exact failure mode
 that made the audio path look necessary. So the default is the browser
 transcript: twice as fast, a fraction of the cost, and the Web Speech API
@@ -240,7 +240,7 @@ and heavy code-mixing.
 ### Running without a Gemini key
 
 `LLM_DRIVER=fake` selects a deterministic stand-in adapter that genuinely
-parses a useful subset of input — Hindi, Gujarati, Hinglish, Indian scale
+parses a useful subset of input - Hindi, Gujarati, Hinglish, Indian scale
 words, multi-expense sentences. It's what the integration tests use, so the
 whole pipeline is exercised with no network call and no bill, and it makes the
 feature developable before anyone has a key. The default falls back to it when

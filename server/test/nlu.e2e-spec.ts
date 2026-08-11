@@ -6,7 +6,7 @@ import { createHarness, type Harness } from './app-harness';
  * Phase 4 acceptance: natural-language entry and the review queue.
  *
  * Runs against the deterministic fake adapter (LLM_DRIVER=fake), so the whole
- * pipeline — validation, banding, staging, correction, confirmation, undo —
+ * pipeline - validation, banding, staging, correction, confirmation, undo -
  * is exercised with no network call, no API key and no bill. The Gemini
  * adapter sits behind the same LlmPort interface.
  */
@@ -167,7 +167,7 @@ describe('NLU and review queue (e2e)', () => {
       expect(res.body.detectedLanguage).toBe('hi-en');
     });
 
-    it('turns one utterance into several candidates — design 4b', async () => {
+    it('turns one utterance into several candidates - design 4b', async () => {
       const { token, profileId } = await setup();
 
       // "Caught three things"
@@ -246,7 +246,7 @@ describe('NLU and review queue (e2e)', () => {
     it('blocks one-tap when a field is missing, however confident', async () => {
       const { token, profileId } = await setup();
 
-      // No account named — design 3d's "Which account?"
+      // No account named - design 3d's "Which account?"
       const res = await parse(token, profileId, '300 kirane pe').expect(201);
 
       const candidate = res.body.candidates[0];
@@ -257,7 +257,7 @@ describe('NLU and review queue (e2e)', () => {
     it('flags an entry with no amount as unconfirmable', async () => {
       const { token, profileId } = await setup();
 
-      // Design 3d: "paid rahul back · amount not found — add it to continue"
+      // Design 3d: "paid rahul back · amount not found - add it to continue"
       const res = await parse(
         token,
         profileId,
@@ -272,7 +272,7 @@ describe('NLU and review queue (e2e)', () => {
   });
 
   describe('account suggestions', () => {
-    it('suggests the account usually used for that category — design 3d', async () => {
+    it('suggests the account usually used for that category - design 3d', async () => {
       const { token, profileId, hdfcId } = await setup();
       const fuel = await harness.prisma.category.findFirstOrThrow({
         where: { name: 'Fuel' },
@@ -448,7 +448,7 @@ describe('NLU and review queue (e2e)', () => {
     });
   });
 
-  describe('bulk confirm — design 4b`s "Add all three"', () => {
+  describe('bulk confirm - design 4b`s "Add all three"', () => {
     it('confirms what it can and reports what it cannot', async () => {
       const { token, profileId } = await setup();
 
@@ -566,7 +566,7 @@ describe('NLU and review queue (e2e)', () => {
   });
 
   describe('accuracy stats', () => {
-    it('counts first-time-right against edited — design 2b', async () => {
+    it('counts first-time-right against edited - design 2b', async () => {
       const { token, profileId, hdfcId } = await setup();
 
       // One confirmed as parsed.

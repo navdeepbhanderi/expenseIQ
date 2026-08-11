@@ -22,11 +22,11 @@ import { ApiError } from "@/lib/api/client";
 import { useNluAccuracy } from "@/lib/api/settings";
 
 /**
- * Review queue — design 2b (desktop) and 4e (mobile).
+ * Review queue - design 2b (desktop) and 4e (mobile).
  *
  * One card per candidate, every field editable in place. The design's promise
  * is that a clear entry confirms in a tap and an uncertain one says exactly
- * which field it is unsure about — so the work here is making the missing
+ * which field it is unsure about - so the work here is making the missing
  * field obvious, not making a form.
  */
 export default function ReviewPage() {
@@ -225,7 +225,7 @@ export default function ReviewPage() {
 
         {/*
          * Design 2b's accuracy line. Shown only once there is enough to
-         * measure — "0 of 0 read correctly" is not a statistic, it is noise.
+         * measure - "0 of 0 read correctly" is not a statistic, it is noise.
          */}
         {accuracy.data && accuracy.data.total >= 5 && (
           <p className="text-xs text-ink-faint">

@@ -2,11 +2,11 @@ import { Injectable } from '@nestjs/common';
 
 import type { AppConfig } from '@/config/configuration';
 import { LlmError, type ExtractionContext, type ParseInput } from './llm.port';
-import { OpenRouterAdapter } from './openrouter.adapter';
+import { OpenAiCompatibleAdapter } from './openai-compatible.adapter';
 import type { ExtractionResult } from './llm.port';
 
 /**
- * Groq — the platform's default provider.
+ * Groq - the platform's default provider.
  *
  * **Why this is the default rather than OpenRouter or Gemini.**
  *
@@ -18,7 +18,7 @@ import type { ExtractionResult } from './llm.port';
  * several expenses a day. OpenRouter's free tier is 50 requests per *account*
  * per day; Gemini's is roughly 20 per model per day and zero on every Pro
  * model. A household hits either ceiling within a week and the product simply
- * stops working — not degrades, stops. Groq allows 14,400 requests a day at
+ * stops working - not degrades, stops. Groq allows 14,400 requests a day at
  * 30 a minute, which is past the point where a real user would notice a limit.
  *
  * It is also fast. The design budgets about four seconds for speak-to-
@@ -27,7 +27,7 @@ import type { ExtractionResult } from './llm.port';
  *
  * The weaker model matters less than it would have before the date, amount and
  * name resolvers moved into code: the parts a small model gets wrong most
- * often — "kal", "3 lakh", "HDFC" — are no longer its job.
+ * often - "kal", "3 lakh", "HDFC" - are no longer its job.
  *
  * **No vision.** llama-3.1-8b-instant is text-only, so receipts throw
  * non-retryably here and the chain hands off to a provider that can see.
@@ -36,24 +36,28 @@ import type { ExtractionResult } from './llm.port';
 const ENDPOINT = 'https://api.groq.com/openai/v1/chat/completions';
 
 /**
- * 14,400 requests/day, 30/minute, 6k tokens/minute.
+ * openai/gpt-oss-20b — 1,000 requests/day on the free tier.
  *
- * A single model rather than a chain: with a daily cap this high there is
- * nothing to fall back to *within* Groq that would be reached in practice, and
- * the provider chain already handles Groq being down entirely.
+ * NOT llama-3.1-8b-instant, which was the intended default for its
+ * 14,400/day allowance. It rejects json_schema outright, and in json_object
+ * mode an 8B model returns JSON with keys of its own invention, so every
+ * extracted field came back null. Verified against the live API, not the docs.
+ *
+ * 1,000/day is still twenty times OpenRouter's free tier and fifty times
+ * Gemini's per-model allowance, so the reason for choosing Groq stands.
  */
-const DEFAULT_TEXT_CHAIN = ['llama-3.1-8b-instant'] as const;
+const DEFAULT_TEXT_CHAIN = ['openai/gpt-oss-20b'] as const;
 
 const DEFAULT_TIMEOUT_MS = 20_000;
 
 @Injectable()
-export class GroqAdapter extends OpenRouterAdapter {
-  override readonly name = 'groq';
+export class GroqAdapter extends OpenAiCompatibleAdapter {
+  readonly name = 'groq';
 
-  protected override readonly endpoint = ENDPOINT;
-  protected override readonly providerLabel = 'Groq';
+  protected readonly endpoint = ENDPOINT;
+  protected readonly providerLabel = 'Groq';
 
-  protected override credentials(): { apiKey?: string; timeoutMs: number } {
+  protected credentials(): { apiKey?: string; timeoutMs: number } {
     const llm = this.config.get<AppConfig['llm']>('llm');
     return {
       apiKey: llm?.groq.apiKey,
@@ -61,12 +65,27 @@ export class GroqAdapter extends OpenRouterAdapter {
     };
   }
 
+  /**
+   * json_object, not json_schema.
+   *
+   * llama-3.1-8b-instant rejects json_schema outright — every call, not
+   * occasionally — so asking for it would make the platform's own provider
+   * fail on every parse. Groq's supported-models list is short and none of the
+   * entries on it come close to this model's 14,400/day allowance, which is
+   * the whole reason it was chosen.
+   *
+   * The prompt already spells out the schema and the response is validated and
+   * repaired downstream, so the shape guarantee was belt-and-braces rather
+   * than load-bearing.
+   */
+  // Restored: the models below do support json_schema.
+
   protected override extraHeaders(): Record<string, string> {
     // Groq has no attribution headers of its own.
     return {};
   }
 
-  protected override models(tier: 'text' | 'vision'): string[] {
+  protected models(tier: 'text' | 'vision'): string[] {
     const llm = this.config.get<AppConfig['llm']>('llm');
     const configured =
       tier === 'text' ? llm?.groq.models.text : llm?.groq.models.vision;

@@ -93,7 +93,7 @@ export class DashboardController {
   @Get('calendar')
   @RequireAction('account:view')
   @ApiOperation({
-    summary: "Days in a month that carry a bill — design 6d's popover markers",
+    summary: "Days in a month that carry a bill - design 6d's popover markers",
   })
   calendar(
     @Param('profileId', ParseUUIDPipe) profileId: string,

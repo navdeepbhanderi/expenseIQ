@@ -24,7 +24,7 @@ import { GoogleAuthController } from './google-auth.controller';
  *
  * passport-google-oauth20 throws during construction when clientID is absent,
  * so registering it unconditionally would stop the app booting for anyone
- * without a Google Cloud project — an unreasonable price for a feature that
+ * without a Google Cloud project - an unreasonable price for a feature that
  * isn't needed until it's needed. The controller reports 501 when it's off.
  */
 function googleProviders(): Provider[] {

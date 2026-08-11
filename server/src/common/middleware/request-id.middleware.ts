@@ -6,7 +6,7 @@ import { randomUUID } from 'node:crypto';
  * Assigns the correlation id, in middleware rather than in an interceptor.
  *
  * Interceptors only run once a route has matched, so a request that 404s or
- * is rejected by a guard would come back with no `x-request-id` — exactly the
+ * is rejected by a guard would come back with no `x-request-id` - exactly the
  * responses a user is most likely to be reporting when they quote one.
  *
  * An inbound `x-request-id` is honoured so a trace survives a proxy hop,

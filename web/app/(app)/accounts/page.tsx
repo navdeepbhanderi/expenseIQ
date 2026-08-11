@@ -20,7 +20,7 @@ import {
 } from "@/components/accounts/account-form";
 import type { Account, AccountType } from "@/lib/api/types";
 
-/** Accounts list — design 2d's parent, with the add form from 6g. */
+/** Accounts list - design 2d's parent, with the add form from 6g. */
 export default function AccountsPage() {
   const { activeId, active } = useProfile();
   const { data: accounts, isPending } = useAccounts(activeId);

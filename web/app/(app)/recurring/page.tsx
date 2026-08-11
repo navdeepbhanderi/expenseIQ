@@ -20,7 +20,7 @@ import { useToast } from "@/components/ui/toast";
 import { formatMinor } from "@/lib/money";
 
 /**
- * Recurring rules and detected suggestions — design 2e's "Recurring" pill,
+ * Recurring rules and detected suggestions - design 2e's "Recurring" pill,
  * from the other side.
  *
  * Suggestions are shown before they become rules, which is the design's point:
@@ -50,7 +50,7 @@ export default function RecurringPage() {
             Recurring
           </h1>
           <p className="mt-0.5 text-sm text-ink-muted">
-            Salary, rent, EMIs and subscriptions — on a schedule you set. Due
+            Salary, rent, EMIs and subscriptions - on a schedule you set. Due
             entries land in your review queue, never straight in the ledger.
           </p>
         </div>
@@ -59,7 +59,7 @@ export default function RecurringPage() {
           {/*
            * A manual trigger for work that should be automatic.
            *
-           * The server has no scheduler — generate-due and reminders/scan are
+           * The server has no scheduler - generate-due and reminders/scan are
            * both endpoints waiting for a cron that does not exist yet. Until
            * it does, this is the only thing that turns a due schedule into a
            * review entry, so it is exposed rather than hidden. The tooltip
@@ -260,7 +260,7 @@ const MONTH_NAMES = [
  *
  * Says the whole rule rather than just its cadence: a weekly schedule that
  * reads only "Weekly" leaves the user unable to tell, from the list, whether
- * it is the Friday one they meant — which is exactly the mistake that made
+ * it is the Friday one they meant - which is exactly the mistake that made
  * the day pickers necessary in the first place.
  */
 function describeSchedule(rule: RecurringRule): string {
@@ -277,7 +277,7 @@ function describeSchedule(rule: RecurringRule): string {
           ? `${every} on the ${ordinal(rule.dayOfMonth)}`
           : every;
 
-  // Which month a yearly rule means is the thing most worth stating — it is
+  // Which month a yearly rule means is the thing most worth stating - it is
   // the part that was previously guessed from the creation date.
   const inMonth =
     rule.cadence === "YEARLY" && rule.monthOfYear
@@ -287,7 +287,7 @@ function describeSchedule(rule: RecurringRule): string {
   return `${when}${inMonth}${describeEnding(rule)}`;
 }
 
-/** ", 4 of 6 left" or ", until 31 Mar 2027" — empty when it runs forever. */
+/** ", 4 of 6 left" or ", until 31 Mar 2027" - empty when it runs forever. */
 function describeEnding(rule: RecurringRule): string {
   if (rule.maxOccurrences !== null) {
     const left = rule.maxOccurrences - rule.occurrenceCount;

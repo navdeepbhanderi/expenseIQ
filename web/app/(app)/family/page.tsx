@@ -45,11 +45,11 @@ import { AllowanceModal } from "@/components/family/allowance-modal";
 import type { ProfileRole } from "@/lib/api/types";
 
 /**
- * Family — members, limits, allowance, goals, and the cross-profile view.
+ * Family - members, limits, allowance, goals, and the cross-profile view.
  *
  * The design's principle runs through all of it: limits nudge and inform, they
  * never block. An unrecorded expense is worse than a visible one, so nothing
- * on this page prevents a child logging something — it only makes it visible.
+ * on this page prevents a child logging something - it only makes it visible.
  */
 export default function FamilyPage() {
   const { activeId, active } = useProfile();
@@ -125,7 +125,7 @@ export default function FamilyPage() {
 
                 {/*
                  * A member whose detail is hidden still shows a total. The
-                 * server decides this per row — seeing that a teenager spent
+                 * server decides this per row - seeing that a teenager spent
                  * ₹2,000 without seeing on what is the design's whole
                  * "without surveillance" claim.
                  */}
@@ -158,7 +158,7 @@ export default function FamilyPage() {
                 <p className="truncate text-xs text-ink-faint">{member.email}</p>
               </div>
 
-              {/* Your own role is shown, never edited — demoting yourself out
+              {/* Your own role is shown, never edited - demoting yourself out
                   of the profile you are administering is a trap, and the
                   server refuses the last owner anyway. */}
               {member.isYou || isChild ? (
@@ -294,7 +294,7 @@ export default function FamilyPage() {
           )}
 
           <p className="mt-3 text-xs text-ink-faint">
-            Limits are a nudge, never a block — going over is recorded and
+            Limits are a nudge, never a block - going over is recorded and
             flagged, never refused.
           </p>
         </section>
@@ -312,7 +312,7 @@ export default function FamilyPage() {
 
         {(goals.data?.length ?? 0) === 0 ? (
           <p className="mt-2 text-sm text-ink-muted">
-            No goals yet — a bike, a trip, a rainy day.
+            No goals yet - a bike, a trip, a rainy day.
           </p>
         ) : (
           <ul className="mt-3.5 flex flex-col gap-4">
@@ -404,7 +404,7 @@ function GoalRow({ view }: { view: ReturnType<typeof useGoals>["data"] extends
       <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2">
         <p className="text-xs text-ink-faint">
           {view.isAchieved
-            ? "Reached — nice."
+            ? "Reached - nice."
             : view.perMonthToHitTarget
               ? `${formatMinor(view.perMonthToHitTarget.amountMinor)} a month to hit the date`
               : `${formatMinor(view.remaining.amountMinor)} to go`}
@@ -441,7 +441,7 @@ function GoalRow({ view }: { view: ReturnType<typeof useGoals>["data"] extends
               Add to this
             </Button>
 
-            {/* A goal you cannot edit is one you delete and rebuild — losing
+            {/* A goal you cannot edit is one you delete and rebuild - losing
                 every contribution recorded against it. */}
             <Button
               variant="ghost"
@@ -553,8 +553,8 @@ function InviteModal({
           value={role}
           onValueChange={(value) => setRole(value as ProfileRole)}
           options={[
-            { value: "ADULT", label: "Adult — full access" },
-            { value: "CHILD", label: "Child — limited, with an allowance" },
+            { value: "ADULT", label: "Adult - full access" },
+            { value: "CHILD", label: "Child - limited, with an allowance" },
           ]}
         />
         <p className="text-xs leading-relaxed text-ink-faint">
@@ -566,7 +566,7 @@ function InviteModal({
   );
 }
 
-/** Creates a goal, or edits one — the same three fields either way. */
+/** Creates a goal, or edits one - the same three fields either way. */
 function GoalModal({
   open,
   onOpenChange,
@@ -667,7 +667,7 @@ function GoalModal({
           type="date"
           value={targetDate}
           onChange={(e) => setTargetDate(e.target.value)}
-          hint="Optional — with a date, we work out what to put aside each month"
+          hint="Optional - with a date, we work out what to put aside each month"
         />
       </div>
     </Modal>
@@ -678,7 +678,7 @@ function GoalModal({
  * Credits an allowance that is due but not yet paid in.
  *
  * The nightly job normally does this. The button exists for the gap between
- * the due day and that run — and it is safe to press twice, because the
+ * the due day and that run - and it is safe to press twice, because the
  * server guards on lastCreditedMonth and a second call in the same month is
  * a no-op.
  */
@@ -686,7 +686,7 @@ function GoalModal({
  * Changes a member's role in place.
  *
  * The role was a read-only pill, so the only way to promote someone was to
- * remove and re-invite them — which loses their history on the profile. The
+ * remove and re-invite them - which loses their history on the profile. The
  * server refuses to demote the last owner, and that refusal surfaces as a
  * toast rather than a silent no-op.
  */
@@ -832,7 +832,7 @@ function AddProfileModal({
       open={open}
       onOpenChange={onOpenChange}
       title="New profile"
-      description="A separate ledger — a household, a side business, a child."
+      description="A separate ledger - a household, a side business, a child."
       footer={
         <>
           <Button variant="secondary" onClick={() => onOpenChange(false)}>
@@ -880,9 +880,9 @@ function AddProfileModal({
             setKind(value as "PERSONAL" | "SHARED" | "CHILD")
           }
           options={[
-            { value: "SHARED", label: "Shared — a household" },
-            { value: "PERSONAL", label: "Personal — just you" },
-            { value: "CHILD", label: "Child — limited, with an allowance" },
+            { value: "SHARED", label: "Shared - a household" },
+            { value: "PERSONAL", label: "Personal - just you" },
+            { value: "CHILD", label: "Child - limited, with an allowance" },
           ]}
         />
       </div>
@@ -894,7 +894,7 @@ function AddProfileModal({
  * Deleting a profile, with its impact shown first.
  *
  * The server refuses to remove someone's last profile, and it counts what
- * would go — accounts, transactions, pending reviews. Showing those numbers
+ * would go - accounts, transactions, pending reviews. Showing those numbers
  * is the difference between a confirmation and a formality.
  */
 function DeleteProfile() {

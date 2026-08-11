@@ -10,7 +10,7 @@ import { Chip } from "./controls";
 export { toLocalISODate };
 
 /**
- * Date field with quick chips and a calendar popover — design 6d.
+ * Date field with quick chips and a calendar popover - design 6d.
  *
  * The quick chips matter more than the calendar. Almost every expense is
  * logged today or yesterday, and making that one tap instead of a calendar
@@ -18,7 +18,7 @@ export { toLocalISODate };
  *
  * Dates are handled as local calendar days, never as instants. A transaction
  * on the 5th is on the 5th regardless of the user's timezone, which is why
- * lib/today.ts formats from local parts rather than toISOString() — the latter
+ * lib/today.ts formats from local parts rather than toISOString() - the latter
  * shifts the day backwards for anyone east of UTC after 5:30am.
  */
 
@@ -134,7 +134,7 @@ export function Calendar({
 }: {
   value: string;
   onChange: (iso: string) => void;
-  /** Dates to flag — design 6d marks bill-due days in the month view. */
+  /** Dates to flag - design 6d marks bill-due days in the month view. */
   markedDates?: Set<string>;
 }) {
   const selected = fromISODate(value);

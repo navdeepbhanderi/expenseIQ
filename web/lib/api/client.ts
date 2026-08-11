@@ -3,14 +3,14 @@
  *
  * Everything the app knows about talking to the API lives here: the base URL,
  * the access token, the refresh dance, and the error envelope. No component
- * calls `fetch` directly — otherwise the refresh logic has to be remembered in
+ * calls `fetch` directly - otherwise the refresh logic has to be remembered in
  * every call site, and it will not be.
  */
 
 export const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:3100/api/v1";
 
-/** The error envelope every endpoint returns — see http-exception.filter.ts. */
+/** The error envelope every endpoint returns - see http-exception.filter.ts. */
 export interface ErrorEnvelope {
   statusCode: number;
   error: string;
@@ -54,8 +54,8 @@ export class ApiError extends Error {
  *
  * localStorage is readable by any script that gets injected into the page, so
  * a single XSS becomes a stolen session that outlives the tab. In memory, the
- * token dies with the tab, and the httpOnly refresh cookie — which JavaScript
- * cannot read at all — is what survives a reload. Losing the token on refresh
+ * token dies with the tab, and the httpOnly refresh cookie - which JavaScript
+ * cannot read at all - is what survives a reload. Losing the token on refresh
  * is not a bug here; it is the point, and `bootstrapSession` covers it.
  */
 let accessToken: string | null = null;
@@ -81,7 +81,7 @@ export function setUnauthorizedHandler(handler: (() => void) | null): void {
  * they all 401 together, and without this every one of them would POST
  * /auth/refresh. The backend rotates refresh tokens and revokes the whole
  * family on reuse, so a stampede would look exactly like a stolen token being
- * replayed — and log the user out. They share one in-flight refresh instead.
+ * replayed - and log the user out. They share one in-flight refresh instead.
  */
 let refreshInFlight: Promise<string | null> | null = null;
 
@@ -184,7 +184,7 @@ export async function apiFetch<T>(
 
   let response = await send(accessToken);
 
-  // One retry, and only one. A 401 after a fresh token is a real 401 —
+  // One retry, and only one. A 401 after a fresh token is a real 401 -
   // retrying again would loop forever against a revoked session.
   if (response.status === 401 && !anonymous) {
     const token = await refreshAccessToken();
@@ -201,7 +201,7 @@ export async function apiFetch<T>(
     throw await toApiError(response);
   }
 
-  // 204 on delete/undo, and any empty body — .json() would throw on these.
+  // 204 on delete/undo, and any empty body - .json() would throw on these.
   if (
     response.status === 204 ||
     response.headers.get("content-length") === "0"
@@ -227,7 +227,7 @@ export async function apiFetch<T>(
 export const api = {
   get: <T>(path: string, options?: RequestOptions) =>
     apiFetch<T>(path, { ...options, method: "GET" }),
-  /** GET returning the body verbatim — for CSV and anything else not JSON. */
+  /** GET returning the body verbatim - for CSV and anything else not JSON. */
   getText: (path: string, options?: RequestOptions) =>
     apiFetch<string>(path, { ...options, method: "GET", raw: true }),
   post: <T>(path: string, body?: unknown, options?: RequestOptions) =>

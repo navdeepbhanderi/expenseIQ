@@ -31,7 +31,7 @@
   },
   // Broad on purpose: typecheck and type-aware lint should see tests and the
   // seed script too. The emitted build uses tsconfig.build.json, which narrows
-  // to src/ — otherwise including prisma/ and test/ widens the inferred
+  // to src/ - otherwise including prisma/ and test/ widens the inferred
   // rootDir and the output lands at dist/src/main.js instead of dist/main.js.
   "include": [
     "src/**/*",

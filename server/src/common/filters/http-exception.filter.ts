@@ -39,7 +39,7 @@ function isMessage(value: unknown): value is string | string[] {
 }
 
 /**
- * Turns everything — HttpException, Prisma errors, and unexpected throws —
+ * Turns everything - HttpException, Prisma errors, and unexpected throws -
  * into one consistent envelope.
  *
  * The rule that matters: an unrecognised error never leaks its message or
@@ -95,7 +95,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       }
 
       // Narrowed rather than cast: `payload.error as string ?? fallback` is a
-      // lie the compiler believes — the assertion makes the value look
+      // lie the compiler believes - the assertion makes the value look
       // non-nullable, so the `??` never fires and the fallback is dead. Nest's
       // built-in exceptions do omit these fields, so the fallback matters.
       const payload = body as Record<string, unknown>;
@@ -130,7 +130,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
   }
 
   /**
-   * Express middleware throws plain Errors that already carry an HTTP status —
+   * Express middleware throws plain Errors that already carry an HTTP status -
    * body-parser's PayloadTooLargeError (413) and its malformed-JSON
    * SyntaxError (400) are the ones reachable here.
    *
@@ -170,8 +170,8 @@ export class HttpExceptionFilter implements ExceptionFilter {
   }
 
   /**
-   * Maps the Prisma error codes we actually rely on. Notably P2002 — the
-   * unique-constraint violation that enforces ingestion idempotency — must
+   * Maps the Prisma error codes we actually rely on. Notably P2002 - the
+   * unique-constraint violation that enforces ingestion idempotency - must
    * surface as a 409, not a 500, because callers branch on it.
    */
   private fromPrisma(

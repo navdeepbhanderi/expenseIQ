@@ -12,7 +12,7 @@ import type { Comparison, Money as MoneyValue } from "@/lib/api/types";
  *
  * Every amount on every screen goes through here so that direction colouring
  * is decided in one place. The rule from the design: red and green mean debit
- * and credit and nothing else — they are never decoration, and a neutral
+ * and credit and nothing else - they are never decoration, and a neutral
  * figure (a balance, a limit) stays ink.
  */
 export function Amount({
@@ -34,7 +34,7 @@ export function Amount({
     sm: "text-[13px]",
     md: "text-sm",
     lg: "text-lg font-medium",
-    // The headline figure — Newsreader, per design 2a's ₹64,210.
+    // The headline figure - Newsreader, per design 2a's ₹64,210.
     display: "font-display text-[34px] leading-tight font-medium sm:text-[40px]",
   };
 
@@ -61,7 +61,7 @@ export function Amount({
 }
 
 /**
- * Month-over-month delta — design 6f's "↓ 8% vs July".
+ * Month-over-month delta - design 6f's "↓ 8% vs July".
  *
  * Down is good here and up is bad, because this compares *spending*. Wiring
  * green to "up" out of habit would congratulate the user for overspending.
@@ -201,7 +201,7 @@ export function Card({
   );
 }
 
-/** Eyebrow label — mono, uppercase, letterspaced. Used above every panel. */
+/** Eyebrow label - mono, uppercase, letterspaced. Used above every panel. */
 export function Eyebrow({
   children,
   className,

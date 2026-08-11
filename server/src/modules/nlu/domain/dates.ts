@@ -5,8 +5,8 @@
  *
  * Date arithmetic is the one part of extraction that is fully determinate: if
  * someone says "yesterday", there is exactly one right answer and no judgement
- * involved. Small models — and every free model in the fallback chain is
- * small — are unreliable at it in a specific and damaging way: they default to
+ * involved. Small models - and every free model in the fallback chain is
+ * small - are unreliable at it in a specific and damaging way: they default to
  * today. "kal 482 ka order kiya" comes back dated today, which is wrong in the
  * one direction the user cannot detect at a glance, because today is also what
  * they would see if the date had simply not been mentioned.
@@ -16,8 +16,8 @@
  * genuinely need language understanding; the calendar arithmetic is done here
  * where it can be tested.
  *
- * **On "kal" and "parso".** Both are famously ambiguous in Hindi and Gujarati —
- * "kal" is yesterday *or* tomorrow, "parso" the day before *or* after — and the
+ * **On "kal" and "parso".** Both are famously ambiguous in Hindi and Gujarati -
+ * "kal" is yesterday *or* tomorrow, "parso" the day before *or* after - and the
  * distinction lives in verb tense that we are not parsing. This resolves both
  * to the past, because an expense tracker records what has already been spent.
  * A future-dated expense is a rare thing to log and an obviously wrong one to
@@ -151,7 +151,7 @@ const MONTHS: Record<string, number> = {
  * Unicode-aware word boundaries.
  *
  * `\b` is defined against [A-Za-z0-9_], so it does not fire between a space
- * and "आज" — every Devanagari and Gujarati pattern silently failed to match
+ * and "आज" - every Devanagari and Gujarati pattern silently failed to match
  * anything. These lookarounds test for "not a letter or digit in any script",
  * which is what a word boundary was always meant to mean here.
  */
@@ -181,7 +181,7 @@ function toLatinDigits(text: string): string {
  * Finds a date expression in the utterance.
  *
  * Returns null when nothing date-like is said, which is the common case and
- * means "leave the model's answer alone" — usually today, correctly.
+ * means "leave the model's answer alone" - usually today, correctly.
  */
 export function resolveDate(
   utterance: string,
@@ -212,7 +212,7 @@ function explicitIso(text: string): ResolvedDate | null {
 }
 
 /**
- * 5/8/2026 and 05-08-26 — day first, which is the Indian convention.
+ * 5/8/2026 and 05-08-26 - day first, which is the Indian convention.
  *
  * Deliberately not accepting month-first: guessing wrong silently files an
  * expense months away, and there is no way to tell 5/8 from 8/5 without a
@@ -236,7 +236,7 @@ function numericDate(text: string, today: string): ResolvedDate | null {
 
   const iso = clamp(year, month, day);
   // A bare day/month with no year that lands in the future is almost certainly
-  // last year's — nobody logs an expense they have not made yet.
+  // last year's - nobody logs an expense they have not made yet.
   if (!m[3] && iso > today)
     return {
       date: clamp(year - 1, month, day),
@@ -264,14 +264,14 @@ function monthAndDay(text: string, today: string): ResolvedDate | null {
   const year = Number(today.slice(0, 4));
   const iso = clamp(year, month, day);
 
-  // Same reasoning as above — a future date without a year means last year.
+  // Same reasoning as above - a future date without a year means last year.
   return iso > today
     ? { date: clamp(year - 1, month, day), matched: m[0], confidence: 0.85 }
     : { date: iso, matched: m[0], confidence: 0.95 };
 }
 
 /**
- * "on the 5th", "5 tarikh", "5 तारीख को", "૫ તારીખે" — a day in this month.
+ * "on the 5th", "5 tarikh", "5 तारीख को", "૫ તારીખે" - a day in this month.
  *
  * Guarded tightly. A bare number is almost always the amount, so this only
  * fires when the number is attached to an ordinal suffix or an explicit
@@ -298,7 +298,7 @@ function dayOfMonth(text: string, today: string): ResolvedDate | null {
   /*
    * A day later in this month has not happened yet, so it means last month.
    *
-   * Said on 3 August, "on the 28th" is 28 July — the alternative is filing an
+   * Said on 3 August, "on the 28th" is 28 July - the alternative is filing an
    * expense 25 days in the future, which no one means.
    */
   if (iso > today) {
@@ -317,7 +317,7 @@ function dayOfMonth(text: string, today: string): ResolvedDate | null {
 /** "3 days ago", "3 din pehle", "3 दिन पहले", "3 દિવસ પહેલા". */
 function daysAgo(text: string, today: string): ResolvedDate | null {
   /*
-   * "before" only counts when it is not the "day before yesterday" phrase —
+   * "before" only counts when it is not the "day before yesterday" phrase -
    * otherwise "spent 500 day before yesterday" parses as 500 days ago, which
    * is both wrong and wildly so.
    */
@@ -356,7 +356,7 @@ function weeksAgo(text: string, today: string): ResolvedDate | null {
   return null;
 }
 
-/** "last Tuesday", "pichle mangalvar" — the most recent one before today. */
+/** "last Tuesday", "pichle mangalvar" - the most recent one before today. */
 function lastWeekday(text: string, today: string): ResolvedDate | null {
   const names = Object.keys(WEEKDAYS).join('|');
   const m = phrase(
@@ -369,7 +369,7 @@ function lastWeekday(text: string, today: string): ResolvedDate | null {
   const current = new Date(Date.UTC(y, mo - 1, d)).getUTCDay();
 
   // Strictly before today: "last Tuesday" said on a Tuesday means a week ago,
-  // not this morning — otherwise the word "last" does no work.
+  // not this morning - otherwise the word "last" does no work.
   const back = (current - target + 7) % 7 || 7;
 
   return { date: addDays(today, -back), matched: m[0], confidence: 0.85 };
@@ -442,9 +442,9 @@ export function countDateExpressions(utterance: string): number {
    * Counted by scanning windows rather than by matching the whole string,
    * because the resolvers deliberately return only the first hit. Splitting on
    * the common conjunctions is enough to tell "one date, several expenses"
-   * from "several dates" — which is the only distinction that matters here.
+   * from "several dates" - which is the only distinction that matters here.
    */
-  // Punctuation needs no leading space — "300, આજે" is one of the commonest
+  // Punctuation needs no leading space - "300, આજે" is one of the commonest
   // ways to list two expenses, and requiring one meant it never split.
   const clauses = text.split(/\s+(?:and|aur|ane|અને|और|ane)\s+|\s*[,;।|]\s*/);
 

@@ -16,13 +16,13 @@ import { LlmSettingsService } from './llm-settings.service';
  * Chooses which model answers a given parse.
  *
  * The platform's own provider is the default, so the product works the moment
- * someone signs up. A profile that has saved its own key uses that instead —
+ * someone signs up. A profile that has saved its own key uses that instead -
  * their quota, their provider, their choice of model.
  *
  * **Why a user's key does not simply fail closed.**
  *
- * If someone's own key stops working — revoked, out of quota, mistyped past
- * the shape check — the alternative to falling back is that expense capture,
+ * If someone's own key stops working - revoked, out of quota, mistyped past
+ * the shape check - the alternative to falling back is that expense capture,
  * the product's entire point, stops. So the platform provider catches it, and
  * the failure is recorded against the credential so Settings can say plainly
  * that their key is failing and why. Silently absorbing it would be worse than
@@ -68,7 +68,7 @@ export class LlmResolver {
        * The user's key is named in the log, the platform absorbs the request,
        * and the reason is stored where the user will see it.
        *
-       * Never the key itself — not in the message, not in the metadata.
+       * Never the key itself - not in the message, not in the metadata.
        */
       this.logger.warn('User LLM key failed, falling back to the platform', {
         profileId,
@@ -80,7 +80,7 @@ export class LlmResolver {
       await this.settings.noteFailure(profileId, message);
 
       if (error instanceof LlmError && !error.retryable) {
-        // An input this provider fundamentally cannot handle — audio on a
+        // An input this provider fundamentally cannot handle - audio on a
         // text-only model. The platform chain may still manage it.
         return this.platform.extract(input, context);
       }

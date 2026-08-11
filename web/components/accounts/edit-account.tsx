@@ -21,7 +21,7 @@ import type { Account } from "@/lib/api/types";
  * Edit and delete an account.
  *
  * Deleting is the dangerous one, so the dialog names what goes with it. An
- * account is not a row on its own — transactions point at it, and the balance
+ * account is not a row on its own - transactions point at it, and the balance
  * it carries is part of net worth. A confirm that just says "are you sure"
  * gives the user nothing to be sure *about*.
  */

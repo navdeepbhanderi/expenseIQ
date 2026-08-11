@@ -7,7 +7,7 @@ import { EmptyState, Pill } from "@/components/ui/feedback";
 import { ListSkeleton } from "@/components/ui/skeletons";
 import { cn } from "@/lib/cn";
 
-/** Notifications — the banners design 6e describes, as a list. */
+/** Notifications - the banners design 6e describes, as a list. */
 export default function NotificationsPage() {
   const { activeId } = useProfile();
   const { data, isPending } = useNotificationList(activeId);

@@ -6,12 +6,12 @@ import { useProfile } from "@/components/providers/profile-provider";
 import { useMerchants } from "@/lib/api/settings";
 
 /**
- * A merchant field that suggests places you have already been — design 6b.
+ * A merchant field that suggests places you have already been - design 6b.
  *
  * The endpoint has always existed, ordered by how often each merchant has been
  * seen, and nothing called it. Without it every entry retypes "Swiggy" from
- * scratch and, worse, spells it differently each time — "swiggy", "Swiggy*BLR",
- * "swigy" — so the merchant column fragments into near-duplicates and the
+ * scratch and, worse, spells it differently each time - "swiggy", "Swiggy*BLR",
+ * "swigy" - so the merchant column fragments into near-duplicates and the
  * recurring-payment detector, which groups on merchant, stops seeing a
  * pattern that is plainly there.
  *
@@ -32,7 +32,7 @@ export function MerchantInput({
   const { activeId } = useProfile();
   const listId = useId();
 
-  // The hook stays idle below two characters — at one character everything
+  // The hook stays idle below two characters - at one character everything
   // matches, which is not a suggestion.
   const { data: merchants = [] } = useMerchants(activeId, value);
 

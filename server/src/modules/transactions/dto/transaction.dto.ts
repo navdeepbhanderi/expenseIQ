@@ -28,7 +28,7 @@ function toStringArray({ value }: { value: unknown }): unknown {
   if (value === undefined || value === null) return undefined;
 
   const asText = (item: unknown): string[] =>
-    // Anything that isn't a string is left for the validators to reject —
+    // Anything that isn't a string is left for the validators to reject -
     // String(someObject) would produce "[object Object]" and quietly pass a
     // meaningless value into an `in` clause.
     typeof item === 'string' ? item.split(',').filter(Boolean) : [];

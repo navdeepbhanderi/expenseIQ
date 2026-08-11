@@ -15,7 +15,7 @@ import {
  * it: the server has to decrypt it to call the provider, so anyone with both
  * the database and `CREDENTIAL_ENCRYPTION_KEY` can recover it. Real
  * zero-knowledge would mean the browser holding the key and calling the
- * provider directly, which is a different product — the key would then sit in
+ * provider directly, which is a different product - the key would then sit in
  * the user's local storage, exposed to any XSS, and server-side parsing would
  * stop working. The UI says exactly this rather than implying more.
  *
@@ -25,7 +25,7 @@ import {
  *
  * AES-256-GCM rather than CBC because it authenticates as well as encrypts.
  * Without the auth tag, ciphertext could be altered undetectably and would
- * decrypt to a different key — silently sending a user's requests somewhere
+ * decrypt to a different key - silently sending a user's requests somewhere
  * they did not choose.
  */
 
@@ -37,7 +37,7 @@ const IV_BYTES = 12;
 export interface SealedSecret {
   /** Base64 ciphertext. */
   ciphertext: string;
-  /** Base64 nonce. Unique per encryption — reuse under GCM is catastrophic. */
+  /** Base64 nonce. Unique per encryption - reuse under GCM is catastrophic. */
   iv: string;
   /** Base64 GCM authentication tag. */
   authTag: string;
@@ -62,7 +62,7 @@ export function keyFrom(secret: string | undefined): Buffer {
 
   if (!/^[0-9a-fA-F]{64}$/.test(secret)) {
     throw new SecretBoxError(
-      'CREDENTIAL_ENCRYPTION_KEY must be 64 hex characters — generate one with `openssl rand -hex 32`',
+      'CREDENTIAL_ENCRYPTION_KEY must be 64 hex characters - generate one with `openssl rand -hex 32`',
     );
   }
 

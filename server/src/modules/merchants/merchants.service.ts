@@ -9,7 +9,7 @@ import { normalizeMerchant } from './domain/normalize';
  *
  * Two jobs, deliberately the same table:
  *
- *   1. Autocomplete, and design 6b's "Not a known merchant — add it?".
+ *   1. Autocomplete, and design 6b's "Not a known merchant - add it?".
  *   2. The normalisation cache the roadmap asks for. Once "SWIGGY*BLR9284"
  *      has been resolved to "Swiggy", every later occurrence is a database
  *      lookup rather than an LLM call. Keeping them separate would mean
@@ -56,7 +56,7 @@ export class MerchantsService {
    * say), and a read-then-write would race into a unique-constraint violation.
    *
    * The raw string is kept in `rawAliases` so the cache can answer for the
-   * exact form that was seen — "SWIGGY*BLR9284" and "SWIGGY*MUM1122" both map
+   * exact form that was seen - "SWIGGY*BLR9284" and "SWIGGY*MUM1122" both map
    * to Swiggy, and both are worth remembering.
    */
   async record(
@@ -82,7 +82,7 @@ export class MerchantsService {
           seenCount: { increment: 1 },
           lastSeenAt: new Date(),
           rawAliases: [...aliases],
-          // Defaults are only filled in, never overwritten — a user who
+          // Defaults are only filled in, never overwritten - a user who
           // deliberately recategorised a merchant should not have it silently
           // reverted by the next transaction that omits a category.
           ...(existing.defaultCategoryId === null && hints.categoryId

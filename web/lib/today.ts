@@ -6,8 +6,8 @@ import { useSyncExternalStore } from "react";
  * Today's calendar date, as YYYY-MM-DD in the user's local zone.
  *
  * Reading `new Date()` during render is impure and, worse, a hydration hazard:
- * the server renders one day and a client loading either side of midnight —
- * or in another timezone — renders a different one, so a chip labelled "Today"
+ * the server renders one day and a client loading either side of midnight -
+ * or in another timezone - renders a different one, so a chip labelled "Today"
  * would be wrong and React would complain about the mismatch.
  *
  * useSyncExternalStore is the supported answer. The server snapshot is null,

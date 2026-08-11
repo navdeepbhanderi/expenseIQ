@@ -17,7 +17,7 @@ import { useAuth } from "@/components/providers/auth-provider";
 import { ApiError } from "@/lib/api/client";
 
 /**
- * Log in — design 7c, including its error state.
+ * Log in - design 7c, including its error state.
  *
  * Two things the design shows that need care:
  *
@@ -175,7 +175,7 @@ function Login() {
 export default function LoginPage() {
   /*
    * useSearchParams opts the route into client rendering, and without a
-   * Suspense boundary the static prerender throws. Dev never shows this —
+   * Suspense boundary the static prerender throws. Dev never shows this -
    * only `next build` does, which is why every route here that reads params
    * carries one.
    */

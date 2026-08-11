@@ -23,7 +23,7 @@ import { useToast } from "@/components/ui/toast";
 import { formatMinor, percentOf } from "@/lib/money";
 import { cn } from "@/lib/cn";
 
-/** Reports and budgets — design 3e's norms plus the 6f period switcher. */
+/** Reports and budgets - design 3e's norms plus the 6f period switcher. */
 export default function ReportsPage() {
   const { activeId } = useProfile();
   const { data: categories = [] } = useCategories(activeId);
@@ -193,7 +193,7 @@ export default function ReportsPage() {
                     {!norm.isReliable && (
                       <p className="mt-1 text-[11px] text-ink-faint">
                         Based on {norm.sampleMonths} month
-                        {norm.sampleMonths === 1 ? "" : "s"} — still settling
+                        {norm.sampleMonths === 1 ? "" : "s"} - still settling
                       </p>
                     )}
                   </div>
@@ -243,7 +243,7 @@ export default function ReportsPage() {
                     {row.name}
                   </span>
 
-                  {/* The row IS the comparison — current/previous/delta live
+                  {/* The row IS the comparison - current/previous/delta live
                       on it directly, not under a nested key. */}
                   <Amount value={row.current} size="sm" />
                   <Delta comparison={row} periodLabel="" className="w-24 justify-end" />

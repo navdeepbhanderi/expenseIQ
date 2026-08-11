@@ -25,7 +25,7 @@ describe('computeCategoryNorm', () => {
 
   it('ignores a one-off spike, which a mean would not', () => {
     // A wedding month or an annual premium must not redefine "usual" for the
-    // rest of the year — every later month would read as "below normal" and
+    // rest of the year - every later month would read as "below normal" and
     // the nudge would stop meaning anything.
     const spiky = rupees(25_000, 24_000, 26_000, 25_000, 3_00_000);
     const norm = computeCategoryNorm(spiky);

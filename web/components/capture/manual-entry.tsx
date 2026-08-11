@@ -21,8 +21,8 @@ import { useRouter } from "next/navigation";
  * Types an expense in directly, with no model in the loop.
  *
  * Everything else in the product routes through the review queue, because
- * everything else is a guess that needs confirming. This is not a guess — the
- * user typed every field themselves — so it writes to the ledger directly.
+ * everything else is a guess that needs confirming. This is not a guess - the
+ * user typed every field themselves - so it writes to the ledger directly.
  * Sending your own typed input to a queue to be re-confirmed is asking someone
  * to check their own handwriting.
  *
@@ -99,7 +99,7 @@ export function ManualEntry({
       open={open}
       onOpenChange={onOpenChange}
       title="Add it yourself"
-      description="Goes straight into the ledger — you typed it, so there is nothing to confirm."
+      description="Goes straight into the ledger - you typed it, so there is nothing to confirm."
       footer={
         <>
           <Button variant="secondary" onClick={() => onOpenChange(false)}>
@@ -179,7 +179,7 @@ export function ManualEntry({
           onValueChange={setAccountId}
           options={accounts.map((a) => ({ value: a.id, label: a.name }))}
           emptyAction={{
-            label: "No accounts yet — add one",
+            label: "No accounts yet - add one",
             onSelect: () => router.push("/accounts"),
           }}
         />

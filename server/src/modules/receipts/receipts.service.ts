@@ -23,7 +23,7 @@ import { NluService } from '@/modules/nlu/nlu.service';
  * Design 6b: "Drop a bill or screenshot · PDF, JPG · we'll read the total".
  *
  * Gemini reads JPG, PNG and PDF natively, so there is no separate vision
- * model and no rasterisation step — the file goes to the same LlmPort the
+ * model and no rasterisation step - the file goes to the same LlmPort the
  * text pipeline uses, with `kind: 'image'`.
  */
 export const ACCEPTED_MIME_TYPES = [
@@ -40,7 +40,7 @@ export const MAX_RECEIPT_BYTES = 15 * 1024 * 1024;
 /**
  * Vision requests cost several times a text request, so uploads are capped
  * per profile per day. This is the "receipt cost cap" flagged as an open item
- * in the plan — a runaway client here is a billing incident, not just load.
+ * in the plan - a runaway client here is a billing incident, not just load.
  */
 export const MAX_RECEIPTS_PER_DAY = 50;
 
@@ -69,7 +69,7 @@ export class ReceiptsService {
    * A vision call takes several seconds, and holding the request open for it
    * means a slow upload on a phone connection times out having already
    * succeeded. The client watches the receipt's status, or simply watches the
-   * review queue — which is where the result lands either way.
+   * review queue - which is where the result lands either way.
    */
   async upload(
     profileId: string,
@@ -163,7 +163,7 @@ export class ReceiptsService {
     } catch (error) {
       // Marked FAILED rather than left PENDING forever. NluService has already
       // preserved a review item carrying the raw reference, so the user can
-      // still enter the expense by hand — the spec's rule that input is never
+      // still enter the expense by hand - the spec's rule that input is never
       // silently dropped applies to a photograph as much as to speech.
       await this.prisma.receipt.update({
         where: { id: receipt.id },

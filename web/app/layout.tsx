@@ -43,7 +43,7 @@ const plexDevanagari = IBM_Plex_Sans_Devanagari({
 
 export const metadata: Metadata = {
   title: {
-    default: "ExpenseIQ — Say it, and it's tracked",
+    default: "ExpenseIQ - Say it, and it's tracked",
     template: "%s · ExpenseIQ",
   },
   description:

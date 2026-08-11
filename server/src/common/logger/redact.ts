@@ -1,5 +1,5 @@
 /**
- * Redaction happens here, at the logger boundary — not at each call site.
+ * Redaction happens here, at the logger boundary - not at each call site.
  *
  * The architecture doc is explicit about this and it's the right call: if
  * redaction is the caller's job, one forgotten `logger.debug(req.body)` during
@@ -20,7 +20,7 @@ export const REDACTED = '[redacted]';
  * Deep-clones a value with sensitive fields removed.
  *
  * Cycles are tracked because request/response objects are full of them and a
- * naive walk would blow the stack in the middle of writing an error log — the
+ * naive walk would blow the stack in the middle of writing an error log - the
  * exact moment logging must not fail.
  */
 export function redact(value: unknown, seen = new WeakSet<object>()): unknown {

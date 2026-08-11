@@ -8,7 +8,7 @@ import { NAV_ITEMS } from "./nav-items";
 import { useProfile } from "@/components/providers/profile-provider";
 
 /**
- * Desktop sidebar — design 2a. 228px, appears at lg and above.
+ * Desktop sidebar - design 2a. 228px, appears at lg and above.
  *
  * The review count is the only badge in the nav, and it is marigold: it is
  * the one place in the app that is actually waiting on the user. Adding a
@@ -64,8 +64,8 @@ export function Sidebar() {
       </nav>
 
       {/*
-       * Design 2a puts an integrations note here. Gmail parsing is unbuilt —
-       * Phase 6b — so this says what is true rather than reporting a count
+       * Design 2a puts an integrations note here. Gmail parsing is unbuilt -
+       * Phase 6b - so this says what is true rather than reporting a count
        * from a feature that does not run.
        */}
       <div className="mt-auto rounded-xl border border-line-soft bg-paper-sunken p-3">

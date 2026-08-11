@@ -27,7 +27,7 @@ export function useAccounts(profileId: string | null) {
  * One account with its computed position.
  *
  * The card cycle and loan amortisation come from the server, not from
- * arithmetic here — statement dates that clamp correctly in February and an
+ * arithmetic here - statement dates that clamp correctly in February and an
  * EMI schedule that settles to the last paisa are exactly the things a client
  * reimplementation gets subtly wrong.
  */

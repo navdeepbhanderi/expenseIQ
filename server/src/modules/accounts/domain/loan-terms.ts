@@ -24,7 +24,7 @@ export function loanTermsFrom(account: Account): LoanTerms | null {
     principal: Money.fromBigInt(account.principalMinor),
     annualRatePercent: account.interestRate,
     tenureMonths: account.tenureMonths,
-    // Only when the user actually supplied one — a stored zero would read as
+    // Only when the user actually supplied one - a stored zero would read as
     // "an EMI of nothing" rather than "not specified".
     ...(account.emiAmountMinor !== null && account.emiAmountMinor > 0n
       ? { emi: Money.fromBigInt(account.emiAmountMinor) }

@@ -41,7 +41,7 @@ describe('addDays', () => {
   });
 });
 
-describe('resolveDate — the reported bug', () => {
+describe('resolveDate - the reported bug', () => {
   it('reads "yesterday" as yesterday, not today', () => {
     // The whole reason this module exists: the model answered today.
     expect(on('yesterday spend 500')?.date).toBe('2026-08-09');
@@ -49,7 +49,7 @@ describe('resolveDate — the reported bug', () => {
 
   it('leaves an utterance with no date alone', () => {
     // Null means "keep whatever the model said", which for an unstated date
-    // is today — correctly, since people log expenses as they happen.
+    // is today - correctly, since people log expenses as they happen.
     expect(on('spent 500 on groceries')).toBeNull();
   });
 
@@ -60,7 +60,7 @@ describe('resolveDate — the reported bug', () => {
   });
 });
 
-describe('resolveDate — English', () => {
+describe('resolveDate - English', () => {
   it.each([
     ['today', '2026-08-10'],
     ['yesterday', '2026-08-09'],
@@ -85,7 +85,7 @@ describe('resolveDate — English', () => {
   });
 });
 
-describe('resolveDate — a specific day of this month', () => {
+describe('resolveDate - a specific day of this month', () => {
   it('reads an ordinal', () => {
     expect(on('spent 500 on the 5th')?.date).toBe('2026-08-05');
   });
@@ -105,7 +105,7 @@ describe('resolveDate — a specific day of this month', () => {
 
   it('rolls a future day back to last month', () => {
     /*
-     * Said on the 10th, "the 28th" cannot mean this month — that has not
+     * Said on the 10th, "the 28th" cannot mean this month - that has not
      * happened. Filing it 18 days in the future would put it beyond every
      * "this month" total the user looks at.
      */
@@ -119,7 +119,7 @@ describe('resolveDate — a specific day of this month', () => {
   });
 });
 
-describe('resolveDate — explicit dates', () => {
+describe('resolveDate - explicit dates', () => {
   it('reads an ISO date verbatim', () => {
     expect(on('spent 500 on 2026-07-04')?.date).toBe('2026-07-04');
   });
@@ -146,7 +146,7 @@ describe('resolveDate — explicit dates', () => {
   });
 });
 
-describe('resolveDate — Hindi and Hinglish', () => {
+describe('resolveDate - Hindi and Hinglish', () => {
   it.each([
     ['aaj', '2026-08-10'],
     ['आज', '2026-08-10'],
@@ -176,7 +176,7 @@ describe('resolveDate — Hindi and Hinglish', () => {
   });
 });
 
-describe('resolveDate — Gujarati', () => {
+describe('resolveDate - Gujarati', () => {
   it.each([
     ['આજે', '2026-08-10'],
     ['ગઈકાલે', '2026-08-09'],
@@ -190,7 +190,7 @@ describe('resolveDate — Gujarati', () => {
   });
 });
 
-describe('resolveDate — precedence', () => {
+describe('resolveDate - precedence', () => {
   it('prefers an explicit date over a relative word', () => {
     // Both appear; the specific one is what the user actually pinned down.
     expect(on('yesterday I paid the 5 aug bill')?.date).toBe('2026-08-05');

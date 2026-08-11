@@ -44,7 +44,7 @@ export class BudgetsController {
   @ApiOperation({
     summary: 'Replace the month`s budgets',
     description:
-      'PUT rather than PATCH because the design edits budgets as a set — a ' +
+      'PUT rather than PATCH because the design edits budgets as a set - a ' +
       'partial update would leave a category the user just cleared still ' +
       'budgeted. An amount of 0 removes a budget rather than storing a zero.',
   })

@@ -12,7 +12,7 @@ import { useStoredValue } from "@/lib/stored-value";
  * every screen.
  *
  * A local preference rather than a server one, deliberately. It describes this
- * device — the office laptop, not the phone — and syncing it across devices
+ * device - the office laptop, not the phone - and syncing it across devices
  * would get it wrong on at least one of them. It also means turning it off
  * takes effect instantly with no request.
  *

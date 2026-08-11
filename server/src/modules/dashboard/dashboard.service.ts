@@ -52,7 +52,7 @@ export interface UpcomingDue {
   daysUntilDue: number;
   isOverdue: boolean;
   autoDebit: boolean;
-  /** Cards only — design 2a shows "min ₹1,180" alongside the total. */
+  /** Cards only - design 2a shows "min ₹1,180" alongside the total. */
   minimumDue: Money | null;
 }
 
@@ -79,7 +79,7 @@ export interface DashboardSummary {
   /**
    * Fully hydrated, not ids.
    *
-   * Design 2a renders these rows inline — amount, category monogram and tint,
+   * Design 2a renders these rows inline - amount, category monogram and tint,
    * account, merchant, and the "Recurring" pill. Returning ids would have
    * forced the client into a second round trip to draw the panel, which is
    * the exact thing this single aggregate endpoint exists to avoid. Same
@@ -98,7 +98,7 @@ export class DashboardService {
    *
    * A dashboard that fires eight parallel calls is eight chances to show a
    * half-loaded screen and eight opportunities for the numbers to disagree
-   * with each other. The queries still run concurrently — they're just
+   * with each other. The queries still run concurrently - they're just
    * assembled server-side into one consistent snapshot.
    */
   async summary(
@@ -142,7 +142,7 @@ export class DashboardService {
       this.prisma.transaction.findMany({
         where: { profileId, deletedAt: null },
         // id breaks ties so the ordering is stable when several transactions
-        // share a date — which they routinely do, since date is a day.
+        // share a date - which they routinely do, since date is a day.
         orderBy: [{ date: 'desc' }, { id: 'desc' }],
         take: 10,
         include: TRANSACTION_RELATIONS,
@@ -176,7 +176,7 @@ export class DashboardService {
   }
 
   /**
-   * Assets minus liabilities — design 2a's "Net worth ₹— 34.2L".
+   * Assets minus liabilities - design 2a's "Net worth ₹- 34.2L".
    *
    * Cards and loans contribute their *current* outstanding, not their limit or
    * original principal, so the figure improves with every EMI paid. A large

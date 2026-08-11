@@ -13,7 +13,7 @@ import type { ExtractedCandidate } from '@/infra/llm/llm.port';
  *
  * That last note matters. Marigold in this design means "needs your eye";
  * red means money going out. A low-confidence parse is not an error and must
- * not be coloured like one — the user is confirming their own spending, not
+ * not be coloured like one - the user is confirming their own spending, not
  * grading a model.
  */
 
@@ -33,7 +33,7 @@ export function bandFor(confidence: number | null): ConfidenceBand {
 }
 
 /**
- * Design 2f: an item below the clear threshold "cannot be one-tap-confirmed —
+ * Design 2f: an item below the clear threshold "cannot be one-tap-confirmed -
  * forces at least a glance". Anything with a missing required field can't
  * either, regardless of how sure the model claims to be.
  */
@@ -50,8 +50,8 @@ export const REQUIRED_FIELDS = ['amount'] as const;
 /**
  * Fields the UI should prompt for.
  *
- * `amount` is genuinely required — design 3d shows "paid rahul back · amount
- * not found — add it to continue". The others are *soft*: a transaction with
+ * `amount` is genuinely required - design 3d shows "paid rahul back · amount
+ * not found - add it to continue". The others are *soft*: a transaction with
  * no account is still a valid transaction, and design 3c happily confirms one
  * with the account left as a suggestion. So they're reported as missing to
  * drive the prompt, but only `amount` blocks confirmation.
@@ -78,7 +78,7 @@ export function findMissingFields(candidate: ExtractedCandidate): string[] {
 /**
  * Whether the candidate can be written to the ledger at all.
  *
- * Takes only the amount, because that is the only hard requirement — and
+ * Takes only the amount, because that is the only hard requirement - and
  * narrowing the parameter lets the review queue reuse this rule against a
  * stored row rather than restating it. Two copies of "what makes an entry
  * confirmable" is how the API and the UI end up disagreeing about whether a
@@ -107,7 +107,7 @@ export function uncertainFields(candidate: ExtractedCandidate): string[] {
  * The score for the item as a whole.
  *
  * The *minimum* of the field scores, not the average. Averaging lets four
- * confident fields hide one the model effectively guessed — which is exactly
+ * confident fields hide one the model effectively guessed - which is exactly
  * the case the review queue exists to catch. A chain is as strong as its
  * weakest link, and so is a parsed transaction.
  *

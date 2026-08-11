@@ -36,7 +36,7 @@ export class InlineQueueAdapter implements QueuePort {
     }
 
     // Tracked so drain() can await it. A job that throws must not become an
-    // unhandled rejection and take the process down — the caller has already
+    // unhandled rejection and take the process down - the caller has already
     // been told the work was accepted.
     const run = (handler as JobHandler<T>)(payload).catch((error: unknown) => {
       this.logger.error('Inline job failed', undefined, {

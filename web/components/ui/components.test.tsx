@@ -29,7 +29,7 @@ describe("Button", () => {
 
   it("renders as its child when asChild, without a stray spinner node", () => {
     // Regression: Slot accepts exactly one element child, and the
-    // `{isLoading && ...}` short-circuit counted as a second one — which
+    // `{isLoading && ...}` short-circuit counted as a second one - which
     // only surfaced as a prerender crash at build time, not in dev.
     render(
       <Button asChild>
@@ -114,7 +114,7 @@ describe("AmountKeypad", () => {
     await userEvent.click(screen.getByRole("button", { name: "0" }));
     await userEvent.click(screen.getByRole("button", { name: "0" }));
 
-    // 3, 0, 0 makes ₹3.00 — there is no decimal point to mis-place.
+    // 3, 0, 0 makes ₹3.00 - there is no decimal point to mis-place.
     expect(screen.getByTestId("minor")).toHaveTextContent("300");
     expect(screen.getByText("₹3.00")).toBeInTheDocument();
   });
@@ -301,7 +301,7 @@ describe("Modal", () => {
       </Modal>,
     );
 
-    // Still named, just not shown — a dialog without a name is unnavigable.
+    // Still named, just not shown - a dialog without a name is unnavigable.
     expect(screen.getByRole("dialog", { name: "Confirm expense" })).toBeTruthy();
   });
 });

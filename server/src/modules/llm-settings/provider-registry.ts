@@ -4,7 +4,7 @@
  * A closed list rather than free text, for two reasons that both matter.
  *
  * A typo'd model id fails at parse time, several seconds after the user
- * pressed save, with a provider error they cannot act on — whereas rejecting
+ * pressed save, with a provider error they cannot act on - whereas rejecting
  * it at save time says exactly what is wrong while they are still looking at
  * the form. And a free-text endpoint would let anyone point the server at an
  * arbitrary URL, which turns a settings field into server-side request
@@ -12,14 +12,14 @@
  *
  * The daily limits are the free-tier figures as published, and they are shown
  * in the UI because they are the single most useful thing to know when
- * choosing. They are advisory — providers change them — so nothing in the code
+ * choosing. They are advisory - providers change them - so nothing in the code
  * enforces or depends on them.
  *
  * **Every model here must support JSON-schema structured output.** Extraction
  * asks for a schema-constrained response, and a model without it fails on
  * every call, not intermittently. Groq's llama-3.3-70b-versatile was listed
  * here until a live call returned "This model does not support response
- * format `json_schema`" — offering a model that cannot work is worse than
+ * format `json_schema`" - offering a model that cannot work is worse than
  * offering fewer, because the failure only appears at parse time.
  */
 
@@ -54,10 +54,17 @@ export const PROVIDERS: ProviderDefinition[] = [
     keyPlaceholder: 'gsk_…',
     models: [
       {
-        id: 'llama-3.1-8b-instant',
-        label: 'Llama 3.1 8B Instant',
-        freePerDay: 14_400,
-        note: 'Fast, and the most generous free tier here. What the platform uses.',
+        id: 'openai/gpt-oss-20b',
+        label: 'GPT-OSS 20B',
+        freePerDay: 1_000,
+        note: 'What the platform uses. Fast, and reliable at structured output.',
+        vision: false,
+      },
+      {
+        id: 'openai/gpt-oss-120b',
+        label: 'GPT-OSS 120B',
+        freePerDay: 1_000,
+        note: 'Better on unusual phrasing, a little slower.',
         vision: false,
       },
     ],
@@ -117,7 +124,7 @@ export function isKnownModel(providerId: string, modelId: string): boolean {
  * The registry as the browser needs it.
  *
  * `keyPattern` is sent as a string because a RegExp does not survive JSON, and
- * the client re-compiles it to validate before saving — a wrong-looking key
+ * the client re-compiles it to validate before saving - a wrong-looking key
  * caught in the form beats one caught by the provider ten seconds later.
  */
 export function publicRegistry() {

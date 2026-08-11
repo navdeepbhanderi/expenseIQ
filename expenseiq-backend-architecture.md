@@ -1,4 +1,4 @@
-# ExpenseIQ — Backend Architecture
+# ExpenseIQ - Backend Architecture
 
 ## 1. High-Level Architecture
 
@@ -33,7 +33,7 @@
                                 └───────────────────────┘
 ```
 
-**Core principle:** Modular monolith. Not microservices — you don't need that complexity for a portfolio project, and a well-structured monolith with clear module boundaries demonstrates the *same* architectural thinking without the operational overhead. You can talk about "how I'd split this into services later" in interviews, which is actually a better signal than over-engineering it upfront.
+**Core principle:** Modular monolith. Not microservices - you don't need that complexity for a portfolio project, and a well-structured monolith with clear module boundaries demonstrates the *same* architectural thinking without the operational overhead. You can talk about "how I'd split this into services later" in interviews, which is actually a better signal than over-engineering it upfront.
 
 ---
 
@@ -161,7 +161,7 @@ src/
 
 ## 3. RBAC & Multi-Tenancy Design (Family + Profiles)
 
-This is the core architectural complexity of the project — worth designing carefully since it's your main differentiator.
+This is the core architectural complexity of the project - worth designing carefully since it's your main differentiator.
 
 ### 3.1 Data Model Relationships
 
@@ -409,7 +409,7 @@ enum IntegrationType {
 }
 ```
 
-**Note on secrets:** `oauthTokenRef` stores a reference/ID, not the raw token — actual tokens live in a secrets manager (or encrypted column with app-level encryption, minimum). Never store OAuth tokens in plaintext in your primary DB.
+**Note on secrets:** `oauthTokenRef` stores a reference/ID, not the raw token - actual tokens live in a secrets manager (or encrypted column with app-level encryption, minimum). Never store OAuth tokens in plaintext in your primary DB.
 
 ---
 
@@ -478,7 +478,7 @@ Dashboard
   GET    /profiles/:profileId/dashboard/spend-by-category
   GET    /profiles/:profileId/dashboard/trend
 
-Webhooks (external, no user JWT — verified via signature)
+Webhooks (external, no user JWT - verified via signature)
   POST   /webhooks/gmail/push-notification
 ```
 
@@ -503,14 +503,14 @@ const existing = await prisma.reviewQueueItem.findUnique({
 if (existing) return; // already processed, skip
 ```
 
-This directly maps to the DB `@@unique([source, sourceRefId])` constraint — enforced at the DB level, not just app logic, so it's safe even under concurrent job execution.
+This directly maps to the DB `@@unique([source, sourceRefId])` constraint - enforced at the DB level, not just app logic, so it's safe even under concurrent job execution.
 
 ---
 
 ## 7. LLM/NLU Service Design
 
 ```typescript
-// nlu.service.ts — simplified shape
+// nlu.service.ts - simplified shape
 
 async extractExpense(rawInput: string, profileId: string): Promise<ExtractionResult> {
   // 1. Check merchant cache for known normalization first (cost optimization)
@@ -523,16 +523,16 @@ async extractExpense(rawInput: string, profileId: string): Promise<ExtractionRes
 }
 ```
 
-**Provider:** Google Gemini, not Claude — see the amendment note at the end of
+**Provider:** Google Gemini, not Claude - see the amendment note at the end of
 this section.
 
-**Prompt design principle:** keep extraction and translation in a single LLM call (not two separate calls) — reduces latency and cost. The prompt instructs: detect language → translate internally → extract fields → return JSON only, no prose.
+**Prompt design principle:** keep extraction and translation in a single LLM call (not two separate calls) - reduces latency and cost. The prompt instructs: detect language → translate internally → extract fields → return JSON only, no prose.
 
-**Failure handling:** LLM calls can fail (timeout, malformed output, rate limit). Every extraction that fails validation still gets written to `ReviewQueueItem` with `confidenceScore: null` and status `PENDING`, with `rawInput` preserved — so the user can still manually complete it. **Never silently drop a user's input.**
+**Failure handling:** LLM calls can fail (timeout, malformed output, rate limit). Every extraction that fails validation still gets written to `ReviewQueueItem` with `confidenceScore: null` and status `PENDING`, with `rawInput` preserved - so the user can still manually complete it. **Never silently drop a user's input.**
 
 ---
 
-### Amendment — LLM provider is Gemini, not Claude
+### Amendment - LLM provider is Gemini, not Claude
 
 This section was written against Claude. The build uses **Google Gemini Pro**
 (`@google/genai`), which changes three things:
@@ -540,7 +540,7 @@ This section was written against Claude. The build uses **Google Gemini Pro**
 - **Structured output is constrained, not requested.** Gemini takes a
   `responseSchema` with `responseMimeType: application/json`, so the model
   cannot emit malformed JSON. Step 5's retry becomes a rare fallback rather
-  than the primary mechanism — schema validation still runs, because
+  than the primary mechanism - schema validation still runs, because
   constrained decoding prevents malformed output, not *wrong* output.
 - **Receipts need no separate vision model.** Gemini reads JPG and PDF
   natively through the same interface, which removes a step from the
@@ -559,18 +559,18 @@ stays one folder deep. See `~/.claude/plans/zazzy-finding-feather.md` Part 4.
 
 ### 8.1 Validation
 - DTOs with `class-validator` decorators on every endpoint
-- Global `ValidationPipe` with `whitelist: true` (strips unexpected fields — basic security hygiene)
+- Global `ValidationPipe` with `whitelist: true` (strips unexpected fields - basic security hygiene)
 
 ### 8.2 Error Handling
 - Global exception filter → consistent error shape `{ statusCode, message, error }`
 - Never leak stack traces or internal errors to client in production
 
 ### 8.3 Logging
-- Structured JSON logging (not console.log) — request ID, user ID, latency per request
+- Structured JSON logging (not console.log) - request ID, user ID, latency per request
 - Sensitive fields (tokens, passwords) redacted at the logger level, not per-call
 
 ### 8.4 Rate Limiting
-- `@nestjs/throttler` on auth endpoints and NLU endpoints (LLM calls cost money — protect against abuse)
+- `@nestjs/throttler` on auth endpoints and NLU endpoints (LLM calls cost money - protect against abuse)
 
 ### 8.5 Testing Strategy
 - Unit tests: services, especially `nlu.service.ts` extraction logic (mock LLM responses)
@@ -581,13 +581,13 @@ stays one folder deep. See `~/.claude/plans/zazzy-finding-feather.md` Part 4.
 
 ## 9. Build Order (maps back to your phased roadmap)
 
-1. **Auth + Users + Profiles** modules first — everything depends on these
-2. **Accounts + Transactions + Categories** — core CRUD, no AI yet
-3. **Dashboard** — aggregation queries over transactions (good SQL/Prisma practice)
-4. **NLU module** — single LLM call, review queue flow
-5. **Families + RBAC** — now that Profile exists, layer family linking + guards on top
-6. **Integrations (Gmail, Calendar)** — background jobs, OAuth, webhooks
-7. **Reminders + Notifications** — cron jobs, email delivery
-8. **Spend limits** (family feature) — depends on both Families and Transactions being stable
+1. **Auth + Users + Profiles** modules first - everything depends on these
+2. **Accounts + Transactions + Categories** - core CRUD, no AI yet
+3. **Dashboard** - aggregation queries over transactions (good SQL/Prisma practice)
+4. **NLU module** - single LLM call, review queue flow
+5. **Families + RBAC** - now that Profile exists, layer family linking + guards on top
+6. **Integrations (Gmail, Calendar)** - background jobs, OAuth, webhooks
+7. **Reminders + Notifications** - cron jobs, email delivery
+8. **Spend limits** (family feature) - depends on both Families and Transactions being stable
 
-This order keeps every stage demoable — you're never in a state where nothing works while you build a huge subsystem.
+This order keeps every stage demoable - you're never in a state where nothing works while you build a huge subsystem.

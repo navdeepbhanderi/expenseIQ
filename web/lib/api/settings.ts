@@ -7,7 +7,7 @@ import type { Category, Merchant, ProfileKind } from "./types";
 
 /*
  * Shapes transcribed from the server's own interfaces, not inferred from a
- * sample response — sampling an endpoint while its collections are empty
+ * sample response - sampling an endpoint while its collections are empty
  * proves nothing about the collections.
  */
 
@@ -30,7 +30,7 @@ export interface DeleteImpact {
   accounts: number;
   transactions: number;
   reviewItems: number;
-  /** False when this is the user's last profile — the spec forbids that. */
+  /** False when this is the user's last profile - the spec forbids that. */
   deletable: boolean;
   reason?: string;
 }
@@ -61,8 +61,8 @@ export const settingsKeys = {
 /**
  * The account's reminder, or null when it has none.
  *
- * The endpoint returns an *array* — an account could in principle carry more
- * than one reminder — while the UI offers a single one. Unwrapping here rather
+ * The endpoint returns an *array* - an account could in principle carry more
+ * than one reminder - while the UI offers a single one. Unwrapping here rather
  * than at the call site is what keeps `reminder.enabled` from silently reading
  * a property that does not exist on an array, which is exactly what made the
  * toggle impossible to switch on: the PUT succeeded every time and the value
@@ -151,7 +151,7 @@ export function useDeleteCategory(profileId: string | null) {
   });
 }
 
-/** How many transactions a category holds — shown before deleting it. */
+/** How many transactions a category holds - shown before deleting it. */
 export function useCategoryUsage(
   profileId: string | null,
   categoryId: string | null,
@@ -210,7 +210,7 @@ export function useNluAccuracy(profileId: string | null) {
   });
 }
 
-/** Merchant autocomplete — design 6b's "Not a known merchant — add it?". */
+/** Merchant autocomplete - design 6b's "Not a known merchant - add it?". */
 export function useMerchants(profileId: string | null, q: string) {
   return useQuery({
     queryKey: settingsKeys.merchants(profileId ?? "", q),
@@ -246,7 +246,7 @@ function invalidate(
  * Renames or restyles a profile.
  *
  * The switcher shows a name and an avatar colour that were fixed at creation
- * and could not be changed afterwards — so a household created as "Personal"
+ * and could not be changed afterwards - so a household created as "Personal"
  * stayed "Personal" forever.
  */
 export function useUpdateProfile(profileId: string | null) {
@@ -262,6 +262,86 @@ export function useUpdateProfile(profileId: string | null) {
     onSuccess: () => {
       void client.invalidateQueries({ queryKey: ["profile", profileId] });
       void client.invalidateQueries({ queryKey: keys.profiles });
+    },
+  });
+}
+
+/* ------------------------------------------------------------ AI provider */
+
+export interface ProviderModel {
+  id: string;
+  label: string;
+  /** Free requests per day as published. Null when there is no free tier. */
+  freePerDay: number | null;
+  note: string;
+  vision: boolean;
+}
+
+export interface ProviderDefinition {
+  id: string;
+  label: string;
+  keyUrl: string;
+  /** Regex source. Recompiled here so a wrong key is caught in the form. */
+  keyPattern: string;
+  keyPlaceholder: string;
+  models: ProviderModel[];
+}
+
+export interface LlmCredentialView {
+  configured: boolean;
+  provider: string | null;
+  model: string | null;
+  /** "gsk_…NCwF". The only part of a key that ever comes back. */
+  keyHint: string | null;
+  lastUsedAt: string | null;
+  lastError: string | null;
+}
+
+/** Public - it describes what the product supports, not anything personal. */
+export function useLlmProviders() {
+  return useQuery({
+    queryKey: ["llm-providers"] as const,
+    queryFn: () => api.get<ProviderDefinition[]>("/llm/providers"),
+    // The registry changes when the server is redeployed, not during a session.
+    staleTime: Infinity,
+  });
+}
+
+export function useLlmCredential(profileId: string | null) {
+  return useQuery({
+    queryKey: ["profile", profileId, "llm-credential"] as const,
+    queryFn: () =>
+      api.get<LlmCredentialView>(`/profiles/${profileId}/llm-credential`),
+    enabled: Boolean(profileId),
+  });
+}
+
+/**
+ * Saves a key.
+ *
+ * Write-only by design: there is no hook to read one back because there is no
+ * endpoint that returns one. Changing a model means re-entering the key, which
+ * is the cost of never storing it anywhere it can be read out.
+ */
+export function useSetLlmCredential(profileId: string | null) {
+  const client = useQueryClient();
+
+  return useMutation({
+    mutationFn: (body: { provider: string; model: string; apiKey: string }) =>
+      api.put<LlmCredentialView>(`/profiles/${profileId}/llm-credential`, body),
+    onSuccess: () => {
+      void client.invalidateQueries({ queryKey: ["profile", profileId] });
+    },
+  });
+}
+
+export function useRemoveLlmCredential(profileId: string | null) {
+  const client = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => api.delete(`/profiles/${profileId}/llm-credential`),
+    onSuccess: () => {
+      void client.invalidateQueries({ queryKey: ["profile", profileId] });
     },
   });
 }

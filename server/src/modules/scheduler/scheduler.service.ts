@@ -16,9 +16,9 @@ import { RemindersService } from '@/modules/reminders/reminders.service';
  * happened until someone pressed a button. A scheduled expense tracker that
  * only works when you remember to poke it is not a scheduled expense tracker.
  *
- * Both underlying operations are already idempotent — recurrence generation is
+ * Both underlying operations are already idempotent - recurrence generation is
  * keyed on (rule, due date) behind a partial unique index, and the reminder
- * scan is keyed on the billing cycle — so a double run, a restart mid-job, or
+ * scan is keyed on the billing cycle - so a double run, a restart mid-job, or
  * a manual trigger racing the cron all collapse to the same result. That is
  * what makes running this on a timer safe rather than merely convenient.
  */

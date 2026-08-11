@@ -10,7 +10,7 @@ import { AppLogger } from '../logger/app-logger.service';
 
 /**
  * One structured line per request: method, path, status, latency, requestId,
- * userId. That set is what makes a production log searchable — anything less
+ * userId. That set is what makes a production log searchable - anything less
  * and you can't answer "what did this user hit before the 500?".
  *
  * The correlation id itself is assigned upstream by RequestIdMiddleware, so

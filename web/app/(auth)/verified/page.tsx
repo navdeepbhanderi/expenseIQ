@@ -10,7 +10,7 @@ import { AuthShell } from "@/components/auth/auth-shell";
 import { api, ApiError } from "@/lib/api/client";
 
 /**
- * Verified — design 7e's success state.
+ * Verified - design 7e's success state.
  *
  * Reached two ways: by following the emailed link (which carries `token` and
  * must be consumed here) or by the verify page's poller noticing the address

@@ -36,7 +36,7 @@ import type { TokenPair } from './token.service';
 const REFRESH_COOKIE = 'eiq_refresh';
 
 /**
- * A readable hint that a session exists — deliberately NOT the session.
+ * A readable hint that a session exists - deliberately NOT the session.
  *
  * The refresh token is httpOnly, so the marketing pages (which have no auth
  * context, by design, to stay static) cannot tell a signed-in visitor from a
@@ -50,8 +50,8 @@ const SESSION_HINT_COOKIE = 'eiq_session';
 /**
  * Auth endpoints carry a much tighter rate limit than the global default.
  *
- * These are the routes worth brute-forcing — password guessing on login,
- * account enumeration on signup, and token grinding on refresh — so they get
+ * These are the routes worth brute-forcing - password guessing on login,
+ * account enumeration on signup, and token grinding on refresh - so they get
  * 10 requests per minute rather than the app-wide 120.
  */
 @ApiTags('auth')
@@ -116,7 +116,7 @@ export class AuthController {
   @ApiOperation({
     summary: 'Request a password reset link',
     description:
-      'Always 202, whether or not the address exists — answering differently ' +
+      'Always 202, whether or not the address exists - answering differently ' +
       'would turn this into a membership check for any list of emails.',
   })
   forgotPassword(@Body() dto: ForgotPasswordDto): Promise<{ message: string }> {
@@ -208,7 +208,7 @@ export class AuthController {
 
   /**
    * The refresh token goes in an httpOnly cookie so browser JavaScript can
-   * never read it — that's what stops an XSS bug from turning into a stolen
+   * never read it - that's what stops an XSS bug from turning into a stolen
    * long-lived session. A body field is accepted too, for non-browser clients
    * that have no cookie jar.
    */
@@ -221,7 +221,7 @@ export class AuthController {
   }
 
   private setRefreshCookie(response: Response, tokens: TokenPair): void {
-    // Readable by the client on purpose — see SESSION_HINT_COOKIE.
+    // Readable by the client on purpose - see SESSION_HINT_COOKIE.
     response.cookie(SESSION_HINT_COOKIE, '1', {
       httpOnly: false,
       secure:

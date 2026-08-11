@@ -13,7 +13,7 @@ import { api, ApiError } from "@/lib/api/client";
 /**
  * Forgot password.
  *
- * The success state deliberately does not confirm the address exists — the
+ * The success state deliberately does not confirm the address exists - the
  * server answers identically either way, and a UI that said "we found you"
  * would undo that and turn this form into a membership check.
  */

@@ -3,12 +3,12 @@
  *
  * These are hand-written, and that is a deliberate compromise rather than an
  * oversight. The backend's Swagger decorators document request DTOs but not
- * response schemas, so `schema.d.ts` — generated from the live spec — types
+ * response schemas, so `schema.d.ts` - generated from the live spec - types
  * every response as `Record<string, never>`. Generated types therefore cover
  * paths, params and request bodies; the shapes below cover what comes back.
  *
  * Every type here was verified against a live response, not inferred from the
- * server source. If the API changes, these must change with it — the safety
+ * server source. If the API changes, these must change with it - the safety
  * net is the per-phase check against real data, not the compiler.
  */
 
@@ -36,7 +36,7 @@ export interface LoginResponse {
 export type ProfileKind = "PERSONAL" | "SHARED" | "CHILD";
 export type ProfileRole = "OWNER" | "ADULT" | "CHILD";
 
-/** The full design 2c switcher payload — every field the card renders. */
+/** The full design 2c switcher payload - every field the card renders. */
 export interface ProfileSummary {
   id: string;
   name: string;
@@ -46,7 +46,7 @@ export interface ProfileSummary {
   avatarColor: string;
   role: ProfileRole;
   isDefault: boolean;
-  /** Display names of the other members — "Shared with Meera". */
+  /** Display names of the other members - "Shared with Meera". */
   sharedWith: string[];
   monthSpendMinor: number;
   accountCount: number;
@@ -61,7 +61,7 @@ export interface Category {
   id: string;
   profileId: string | null;
   name: string;
-  /** Two letters — the design renders these instead of icons. */
+  /** Two letters - the design renders these instead of icons. */
   monogram: string;
   tint: string;
   isIncome: boolean;
@@ -101,7 +101,7 @@ export interface Account {
   updatedAt: string;
 }
 
-/** Design 2d's card panel — the computed half the raw account doesn't carry. */
+/** Design 2d's card panel - the computed half the raw account doesn't carry. */
 export interface CardPosition {
   outstanding: Money;
   creditLimit: Money;
@@ -114,7 +114,7 @@ export interface CardPosition {
    *
    * Both the current and the next are given, and the UI needs both: when this
    * month's statement has not generated yet, `dueDate` is the *previous*
-   * cycle's — correct, but baffling on its own. Showing "next statement 15
+   * cycle's - correct, but baffling on its own. Showing "next statement 15
    * Aug, due 5 Sep" alongside it is what makes the current figure make sense.
    */
   cycle: {
@@ -128,7 +128,7 @@ export interface CardPosition {
   };
 }
 
-/** Design 2d's loan panel — "98 of 240 EMIs paid · closes Mar 2038". */
+/** Design 2d's loan panel - "98 of 240 EMIs paid · closes Mar 2038". */
 export interface LoanPosition {
   principal: Money;
   emi: Money;
@@ -182,7 +182,7 @@ export interface Merchant {
 export interface RecurringRule {
   id: string;
   profileId: string;
-  /** What the user calls it — "Salary", "Rent". Null for detected rules. */
+  /** What the user calls it - "Salary", "Rent". Null for detected rules. */
   label: string | null;
   categoryId: string | null;
   accountId: string | null;
@@ -198,13 +198,13 @@ export interface RecurringRule {
   monthOfYear: number | null;
   /** Last date the rule may fire. Null means "until switched off". */
   endsOn: string | null;
-  /** Stops after this many entries — "6 EMIs". Null means no limit. */
+  /** Stops after this many entries - "6 EMIs". Null means no limit. */
   maxOccurrences: number | null;
   /** How many entries it has produced, counted against maxOccurrences. */
   occurrenceCount: number;
   nextDueDate: string | null;
   autoDebit: boolean;
-  /** Null for user-stated schedules — no model was involved. */
+  /** Null for user-stated schedules - no model was involved. */
   confidence: number | null;
   confirmed: boolean;
   enabled: boolean;
@@ -212,7 +212,7 @@ export interface RecurringRule {
 
 /**
  * One transaction with its relations, identical whether it came from
- * GET /transactions or the dashboard's recent list — both are built from the
+ * GET /transactions or the dashboard's recent list - both are built from the
  * same Prisma include, so one component renders both.
  */
 export interface Transaction {
@@ -237,11 +237,11 @@ export interface Transaction {
   category: Category | null;
   account: Account | null;
   merchant: Merchant | null;
-  /** Present means the row belongs to a pattern — drives design 2e's pill. */
+  /** Present means the row belongs to a pattern - drives design 2e's pill. */
   recurringRule: RecurringRule | null;
 }
 
-/** Design 6c's filter counts — "Groceries 18". */
+/** Design 6c's filter counts - "Groceries 18". */
 export interface Facet {
   id: string | null;
   label: string;
@@ -277,7 +277,7 @@ export interface BudgetStatus {
   spent: Money;
   remaining: Money;
   usedPercent: number;
-  /** Past 80% — the nudge threshold for child spend limits. */
+  /** Past 80% - the nudge threshold for child spend limits. */
   isApproaching: boolean;
   isOver: boolean;
 }
@@ -286,7 +286,7 @@ export interface Comparison {
   current: Money;
   previous: Money;
   delta: Money;
-  /** Null when last month had no spend — never Infinity. */
+  /** Null when last month had no spend - never Infinity. */
   deltaPercent: number | null;
   direction: "up" | "down" | "flat";
 }
@@ -343,7 +343,7 @@ export type ConfidenceBand = "CLEAR" | "FAIRLY_SURE" | "NEEDS_FIELD";
 export interface AccountSuggestion {
   id: string;
   name: string;
-  /** Rendered verbatim — "You usually put this on HDFC Millennia". */
+  /** Rendered verbatim - "You usually put this on HDFC Millennia". */
   reason: string;
 }
 
@@ -379,7 +379,7 @@ export interface ConfirmResult {
   transaction: Transaction;
   /**
    * Null once the window has closed. `expiresAt` is an instant, not a
-   * duration — the client derives the remaining seconds from it, so a slow
+   * duration - the client derives the remaining seconds from it, so a slow
    * response cannot hand out a full 10 seconds that the server will not
    * honour.
    */

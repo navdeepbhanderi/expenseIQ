@@ -5,7 +5,7 @@ import { cn } from "@/lib/cn";
 import { CategoryMark } from "@/components/ui/display";
 
 /**
- * The hero's "Heard just now" card — design 8a.
+ * The hero's "Heard just now" card - design 8a.
  *
  * The design leads with the resolved amount at 56px Newsreader, not with the
  * chips: the point being made is that a spoken sentence becomes a number you
@@ -159,7 +159,7 @@ export function ParseDemo() {
       </div>
 
       {/*
-       * Overhangs the card's corner — the overlap is what makes these read as
+       * Overhangs the card's corner - the overlap is what makes these read as
        * one composition. Tucked inside the card on the smallest screens, where
        * a negative offset would push it off the viewport.
        */}

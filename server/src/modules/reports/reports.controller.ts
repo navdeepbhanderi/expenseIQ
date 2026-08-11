@@ -39,7 +39,7 @@ export class ReportsController {
     summary: 'Totals for a month, quarter or year',
     description:
       'The per-day average divides by days *elapsed*, not days in the ' +
-      'period — dividing August by 31 on the 5th under-reports it six-fold.',
+      'period - dividing August by 31 on the 5th under-reports it six-fold.',
   })
   summary(
     @Param('profileId', ParseUUIDPipe) profileId: string,
@@ -51,7 +51,7 @@ export class ReportsController {
   @Get('comparison')
   @RequireAction('transaction:view')
   @ApiOperation({
-    summary: 'This period against the last — design 6f\'s "↓ 8% vs July"',
+    summary: 'This period against the last - design 6f\'s "↓ 8% vs July"',
     description:
       'Includes categories that disappeared this period. A subscription that ' +
       'stopped is the most interesting row on the screen, and listing only ' +
@@ -70,7 +70,7 @@ export class ReportsController {
     summary: 'Per-category "usual" spend',
     description:
       'Design 3e\'s "74% of your usual ₹25,000 on groceries". Median of the ' +
-      'complete months on record — a mean would let one wedding month ' +
+      'complete months on record - a mean would let one wedding month ' +
       'redefine normal for the rest of the year. Returns isReliable: false ' +
       'below three months so the UI can stay quiet rather than sound sure.',
   })

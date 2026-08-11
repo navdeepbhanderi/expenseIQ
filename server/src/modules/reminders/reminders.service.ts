@@ -67,7 +67,7 @@ export class RemindersService {
      * An omitted field keeps what is already there, and only falls back to a
      * default when there is nothing to keep.
      *
-     * Every field is optional, and the UI sends one at a time — switching the
+     * Every field is optional, and the UI sends one at a time - switching the
      * reminder off is `{ enabled: false }` on its own. Filling the gaps with
      * defaults instead of the stored values meant that turning it off silently
      * reset "a week before, 8 pm" to "3 days before, 9 am", and turning it
@@ -96,8 +96,8 @@ export class RemindersService {
    * The daily scan.
    *
    * Walks every enabled reminder, works out whether this cycle's notification
-   * is due, and records the cycle it fired for so a second run the same day —
-   * or a retried job — sends nothing.
+   * is due, and records the cycle it fired for so a second run the same day -
+   * or a retried job - sends nothing.
    *
    * Scoped to one profile so it can be triggered per user in a test or an
    * endpoint; the scheduler will fan out across profiles.
@@ -153,7 +153,7 @@ export class RemindersService {
       });
 
       // Written after delivery, not before. If the process dies mid-send the
-      // reminder is retried — a duplicate notification is a far smaller
+      // reminder is retried - a duplicate notification is a far smaller
       // failure than a missed bill.
       await this.prisma.reminder.update({
         where: { id: reminder.id },
@@ -277,7 +277,7 @@ export class RemindersService {
     }
 
     // PUSH, CALENDAR and TASKS are recorded as requested but not delivered
-    // here — they need a device token and Google OAuth respectively, and are
+    // here - they need a device token and Google OAuth respectively, and are
     // wired through the integrations module.
   }
 

@@ -211,7 +211,7 @@ describe('Reports and gap-fill endpoints (e2e)', () => {
   });
 
   describe('reports/comparison', () => {
-    it('compares this month with the last — design 6f', async () => {
+    it('compares this month with the last - design 6f', async () => {
       const { token, profileId } = await setup();
 
       await spend(profileId, 50_000, lastMonth(10), 'Groceries');
@@ -282,7 +282,7 @@ describe('Reports and gap-fill endpoints (e2e)', () => {
         .set('Authorization', `Bearer ${token}`)
         .expect(200);
 
-      // The duplicate under /budgets is gone — one path per concept.
+      // The duplicate under /budgets is gone - one path per concept.
       await request(server)
         .get(`/api/v1/profiles/${profileId}/budgets/norms`)
         .set('Authorization', `Bearer ${token}`)
@@ -291,7 +291,7 @@ describe('Reports and gap-fill endpoints (e2e)', () => {
   });
 
   describe('nlu/suggestions/account', () => {
-    it('answers independently of a parse — design 2b`s "Usually: …"', async () => {
+    it('answers independently of a parse - design 2b`s "Usually: …"', async () => {
       const { token, profileId } = await setup();
 
       const hdfc = await request(server)
@@ -379,7 +379,7 @@ describe('Reports and gap-fill endpoints (e2e)', () => {
         .expect(200);
       expect(remaining.body.page.total).toBe(1);
 
-      // Soft, not hard — the rows survive for restore.
+      // Soft, not hard - the rows survive for restore.
       expect(
         await harness.prisma.transaction.count({ where: { profileId } }),
       ).toBe(3);

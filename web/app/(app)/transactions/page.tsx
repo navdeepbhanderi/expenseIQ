@@ -23,7 +23,7 @@ import { cn } from "@/lib/cn";
 import type { Facet, Transaction } from "@/lib/api/types";
 
 /**
- * Transactions — design 2e (desktop) and 4g (mobile).
+ * Transactions - design 2e (desktop) and 4g (mobile).
  *
  * Filters are a persistent sidebar on desktop and a sheet on mobile, which is
  * the design's split and the right one: a filter panel that eats half a phone
@@ -62,7 +62,7 @@ export default function TransactionsPage() {
 
       return { ...current, [key]: next.length > 0 ? next : undefined };
     });
-    // Selection is by id, and a filter change can hide a selected row — a
+    // Selection is by id, and a filter change can hide a selected row - a
     // bulk delete must never act on something no longer on screen.
     setSelected([]);
   };
@@ -240,7 +240,7 @@ export default function TransactionsPage() {
 
           {query.isPending ? (
             // The filter sidebar is already rendered around this, so only the
-            // rows need standing in for — a whole-page skeleton would draw a
+            // rows need standing in for - a whole-page skeleton would draw a
             // second set of filters over the real ones.
             <div className="overflow-hidden rounded-[var(--radius-card)] border border-line-strong bg-paper px-4">
               {[0, 1, 2, 3, 4, 5].map((i) => (
@@ -319,7 +319,7 @@ export default function TransactionsPage() {
             /*
              * Deletion is soft, so this is a real restore rather than a
              * cosmetic undo. The endpoint existed from the start precisely so
-             * a mis-tap would be recoverable, and nothing had ever called it —
+             * a mis-tap would be recoverable, and nothing had ever called it -
              * which is why the dialog used to claim it could not be undone.
              */
             undoToast(

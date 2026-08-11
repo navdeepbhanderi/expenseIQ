@@ -87,7 +87,7 @@ export class GoalsService {
    *
    * Design 6.5 lets an OWNER contribute to a CHILD's goal, so "who put this
    * in" is part of the record rather than something a running total can
-   * express. Both the ledger row and the cached total are written together —
+   * express. Both the ledger row and the cached total are written together -
    * a total that disagrees with its own contributions is worse than either.
    */
   async contribute(
@@ -170,7 +170,7 @@ export class GoalsService {
   /**
    * What it takes per month to arrive on time.
    *
-   * The number that turns a goal from a wish into a plan — and the reason a
+   * The number that turns a goal from a wish into a plan - and the reason a
    * savings goal belongs in a finance app rather than a notes app. Null when
    * there is no deadline or the target date has passed, because "₹Infinity a
    * month" helps nobody.

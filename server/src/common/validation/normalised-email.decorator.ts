@@ -6,7 +6,7 @@ import { IsEmail } from 'class-validator';
  * Trims and lower-cases an email *before* validating it.
  *
  * Order matters. A bare `@IsEmail()` rejects "  Aarav@Example.com " outright,
- * because the surrounding whitespace makes it not-an-email — so a user who
+ * because the surrounding whitespace makes it not-an-email - so a user who
  * pastes their address from a password manager or an email client gets told
  * it's invalid. Normalising first means validation sees what the user meant.
  *

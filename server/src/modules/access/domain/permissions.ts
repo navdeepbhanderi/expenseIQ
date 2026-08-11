@@ -9,7 +9,7 @@ import { ProfileRole } from '@prisma/client';
  * each role may do with it.
  *
  * The feature spec is emphatic that CHILD restrictions are enforced
- * server-side, not merely hidden in the UI — "a determined user could
+ * server-side, not merely hidden in the UI - "a determined user could
  * otherwise hit the API directly". This table is that enforcement.
  */
 export type Action =
@@ -22,13 +22,13 @@ export type Action =
   | 'member:invite'
   | 'member:remove'
   | 'member:changeRole'
-  // Accounts — a CHILD may not link a card or a loan
+  // Accounts - a CHILD may not link a card or a loan
   | 'account:view'
   | 'account:create'
   | 'account:edit'
   | 'account:delete'
   | 'account:linkCredit'
-  // Transactions — a CHILD may log manually but nothing automated
+  // Transactions - a CHILD may log manually but nothing automated
   | 'transaction:view'
   | 'transaction:create'
   | 'transaction:edit'
@@ -39,7 +39,7 @@ export type Action =
   // AI entry
   | 'nlu:parse'
   | 'reviewQueue:manage'
-  // Integrations — off-limits to CHILD regardless of family settings
+  // Integrations - off-limits to CHILD regardless of family settings
   | 'integration:enable'
   | 'integration:disable'
   // Parental controls
@@ -110,12 +110,12 @@ const ADULT_ACTIONS: readonly Action[] = [
  *
  * Two deliberate allowances:
  *
- * `nlu:parse` — the spec's design rationale is nudging over blocking, and
+ * `nlu:parse` - the spec's design rationale is nudging over blocking, and
  * voice entry is the feature most likely to get a kid logging expenses at
  * all. What's blocked is *automated ingestion* (Gmail, SMS), which is
  * `integration:enable`.
  *
- * `account:create` without `account:linkCredit` — the spec restricts "card
+ * `account:create` without `account:linkCredit` - the spec restricts "card
  * and loan linking" specifically, not accounts as a concept. A kid tracking
  * cash or a piggy bank is exactly the manual entry the spec does allow. The
  * credit restriction is enforced separately, in AccountsService, because

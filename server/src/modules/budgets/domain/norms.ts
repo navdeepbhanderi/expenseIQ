@@ -1,7 +1,7 @@
 import { Money } from '@/common/money/money';
 
 /**
- * Spending norms and comparisons — the numbers the design states as plain
+ * Spending norms and comparisons - the numbers the design states as plain
  * sentences and the specs never model.
  *
  *   design 3e: "74% of your usual ₹25,000 on groceries"
@@ -10,7 +10,7 @@ import { Money } from '@/common/money/money';
  */
 
 export interface CategoryNorm {
-  /** The "usual" figure. Median, not mean — see below. */
+  /** The "usual" figure. Median, not mean - see below. */
   usual: Money;
   /** How many months of history it was computed from. */
   sampleMonths: number;
@@ -66,13 +66,13 @@ export interface Comparison {
   current: Money;
   previous: Money;
   delta: Money;
-  /** Null when the previous period was zero — see below. */
+  /** Null when the previous period was zero - see below. */
   deltaPercent: number | null;
   direction: Trend;
 }
 
 /**
- * Period-over-period comparison — design 6f's "↓ 8% vs July".
+ * Period-over-period comparison - design 6f's "↓ 8% vs July".
  *
  * `deltaPercent` is null rather than Infinity when the previous period was
  * zero. Going from ₹0 to ₹500 is not a "+∞% increase"; there is no meaningful
@@ -97,7 +97,7 @@ export interface BudgetStatus {
   spent: Money;
   remaining: Money;
   usedPercent: number;
-  /** Past 80% — the spec's nudge threshold for child spend limits. */
+  /** Past 80% - the spec's nudge threshold for child spend limits. */
   isApproaching: boolean;
   isOver: boolean;
 }
@@ -124,7 +124,7 @@ export function computeBudgetStatus(spent: Money, budget: Money): BudgetStatus {
 }
 
 /**
- * Where this month stands against the norm — design 3e's "74% of your usual".
+ * Where this month stands against the norm - design 3e's "74% of your usual".
  *
  * Returns null when there isn't enough history, so callers can't accidentally
  * render a confident-sounding comparison built on one month of data.

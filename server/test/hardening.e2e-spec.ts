@@ -8,7 +8,7 @@ import { createHarness, type Harness } from './app-harness';
  *
  * These are the properties that decay silently. Nobody notices a missing
  * security header or a leaked password hash while adding a feature, because
- * no feature test asserts them — so they get asserted here, once, against the
+ * no feature test asserts them - so they get asserted here, once, against the
  * real pipeline.
  */
 describe('Hardening (e2e)', () => {
@@ -94,7 +94,7 @@ describe('Hardening (e2e)', () => {
     it('applies the configured limit, not the framework default', async () => {
       // 150kb sits above Nest's built-in 100kb default and below our 256kb.
       // If this 413s, useBodyParser never took effect and the configured
-      // limit is dead code — which is exactly what app.use(express.json())
+      // limit is dead code - which is exactly what app.use(express.json())
       // did before, because Nest's parser had already claimed the body.
       const payload = 'x'.repeat(150 * 1024);
 
@@ -107,7 +107,7 @@ describe('Hardening (e2e)', () => {
   });
 
   describe('error envelope', () => {
-    // Every error, from any layer, must be the same shape — a client that
+    // Every error, from any layer, must be the same shape - a client that
     // special-cases per endpoint is a client that breaks on the next one.
     const hasEnvelope = (body: Record<string, unknown>): void => {
       expect(typeof body.statusCode).toBe('number');
@@ -163,7 +163,7 @@ describe('Hardening (e2e)', () => {
   describe('input rejection', () => {
     it('strips unknown properties rather than passing them to the ORM', async () => {
       // whitelist + forbidNonWhitelisted. Without it, POSTing a field the DTO
-      // never declared could reach Prisma — role escalation by request body.
+      // never declared could reach Prisma - role escalation by request body.
       const response = await request(server)
         .post('/api/v1/auth/signup')
         .send({

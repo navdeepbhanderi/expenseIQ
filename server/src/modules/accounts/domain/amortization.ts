@@ -2,7 +2,7 @@ import { Money } from '@/common/money/money';
 import { clampToMonth } from './billing-cycle';
 
 /**
- * Loan amortization — the numbers behind design 2d.
+ * Loan amortization - the numbers behind design 2d.
  *
  *   "98 of 240 EMIs paid · 36% principal cleared · Closes Mar 2038"
  *   "Interest paid ₹14.2 L · Principal paid ₹7.38 L · Prepay saving ₹3.9 L"
@@ -93,7 +93,7 @@ export function computeEmi(
   const growth = Math.pow(1 + monthlyRate, tenureMonths);
   const factor = (monthlyRate * growth) / (growth - 1);
 
-  // Rounded up, as lenders do — rounding down would leave a residue that the
+  // Rounded up, as lenders do - rounding down would leave a residue that the
   // final instalment has to absorb.
   return principal.multiply(factor, 'ceil');
 }
@@ -103,7 +103,7 @@ export function computeEmi(
  *
  * The final instalment is adjusted to whatever actually clears the balance.
  * Rounding each month's EMI up accumulates a small overpayment across the
- * term, so a fixed last payment would leave the balance slightly negative —
+ * term, so a fixed last payment would leave the balance slightly negative -
  * a loan that repays more than was borrowed.
  */
 export function buildSchedule(terms: LoanTerms): ScheduleRow[] {
@@ -122,7 +122,7 @@ export function buildSchedule(terms: LoanTerms): ScheduleRow[] {
     throw new AmortizationError('EMI must be positive');
   }
 
-  // An EMI that doesn't cover the first month's interest never amortises —
+  // An EMI that doesn't cover the first month's interest never amortises -
   // the balance grows every month and the schedule would run forever.
   const firstInterest = terms.principal.multiply(monthlyRate);
   if (monthlyRate > 0 && !emi.greaterThan(firstInterest)) {
@@ -210,7 +210,7 @@ export function summariseLoan(terms: LoanTerms, emisPaid: number): LoanSummary {
  * What a lump-sum prepayment today would save.
  *
  * Models the common Indian arrangement: the EMI stays fixed and the tenure
- * shortens. (Reducing the EMI instead saves far less interest — worth
+ * shortens. (Reducing the EMI instead saves far less interest - worth
  * surfacing as a separate option later.)
  */
 export function simulatePrepayment(

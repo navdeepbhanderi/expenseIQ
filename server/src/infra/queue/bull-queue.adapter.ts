@@ -10,7 +10,7 @@ import type { JobHandler, QueueName, QueuePort } from './queue.port';
  * BullMQ on Redis.
  *
  * Jobs survive a restart, retry with backoff, and can later be worked by a
- * separate process — which is the whole reason ingestion is queued rather
+ * separate process - which is the whole reason ingestion is queued rather
  * than done in the request.
  */
 @Injectable()

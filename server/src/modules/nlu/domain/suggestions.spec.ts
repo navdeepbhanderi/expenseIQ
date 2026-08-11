@@ -89,7 +89,7 @@ describe('suggestAccounts', () => {
   });
 
   describe('the "usually" claim', () => {
-    // Below three uses the wording overstates what the data supports —
+    // Below three uses the wording overstates what the data supports -
     // "you usually put this on X" after one use is a guess wearing a fact's
     // clothing, and the user sees this string verbatim.
     it.each([
@@ -139,7 +139,7 @@ describe('suggestAccounts', () => {
   });
 
   it('leaks no internal score onto the returned shape', () => {
-    // The score is a ranking device, not part of the contract — the UI renders
+    // The score is a ranking device, not part of the contract - the UI renders
     // `reason`, and exposing a raw number invites it being displayed.
     const result = suggestAccounts(
       input({ affinity: affinityOf({ [FUEL]: { [hdfc.id]: 5 } }) }),

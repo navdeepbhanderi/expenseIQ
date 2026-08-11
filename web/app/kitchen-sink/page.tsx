@@ -55,7 +55,7 @@ import { toLocalISODate } from "@/lib/today";
  *
  * This is the visual diff surface: open the design file at the matching
  * anchor and compare. It also catches the failure the component library is
- * most prone to — a component that looks right in light and breaks in dark,
+ * most prone to - a component that looks right in light and breaks in dark,
  * which no product screen would reveal until much later.
  */
 export default function KitchenSinkPage() {

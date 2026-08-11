@@ -16,7 +16,7 @@ export interface GoogleIdentity {
 }
 
 /**
- * Registered only when Google credentials are configured — see auth.module.ts.
+ * Registered only when Google credentials are configured - see auth.module.ts.
  *
  * passport-google-oauth20 throws at construction if clientID is missing, so an
  * unconditional registration would make the whole app refuse to boot for
@@ -57,7 +57,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     };
 
     // Cast because what passes through here is a *pre-authentication
-    // identity*, not an authenticated user — at this point in the flow the
+    // identity*, not an authenticated user - at this point in the flow the
     // account may not exist yet, so it has no id. Passport's contract is that
     // done()'s value lands on `req.user`, so the callback controller reads it
     // from there and immediately exchanges it for a real user via

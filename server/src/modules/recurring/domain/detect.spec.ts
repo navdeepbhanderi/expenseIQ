@@ -135,7 +135,7 @@ describe('detectRecurrences', () => {
     expect(found?.cadence).toBe(Cadence.MONTHLY);
   });
 
-  it('ignores two occurrences — a coincidence looks like a pattern', () => {
+  it('ignores two occurrences - a coincidence looks like a pattern', () => {
     expect(
       detectRecurrences(
         series({
@@ -179,7 +179,7 @@ describe('detectRecurrences', () => {
 
     // Five payments 30 days apart from 1 Jan land on 1 May, so the next is
     // 30 days later. Note this is a fixed 30-day step, not "the 1st of the
-    // month" — a real monthly bill drifts, which is what the tolerance is for.
+    // month" - a real monthly bill drifts, which is what the tolerance is for.
     expect(found?.nextExpected.toISOString().slice(0, 10)).toBe('2026-05-31');
   });
 
@@ -361,7 +361,7 @@ describe('nextOccurrence anchors', () => {
 
     it('sits on a different grid for a different anchor', () => {
       // Anchored to February: Feb/May/Aug/Nov. From 10 Aug, 5 Aug has passed,
-      // so November — a different answer from the January grid on the same day.
+      // so November - a different answer from the January grid on the same day.
       expect(
         nextOccurrence('QUARTERLY', 5, at('2026-08-10'), false, null, 2),
       ).toEqual(at('2026-11-05'));

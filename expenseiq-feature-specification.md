@@ -1,16 +1,16 @@
-# ExpenseIQ — Complete Feature Documentation
+# ExpenseIQ - Complete Feature Documentation
 ## Phase-Wise Detailed Specification
 
-This document details **every feature**, its purpose, user flow, edge cases, and acceptance criteria — organized by the same phases as the build roadmap, so you can build directly from this.
+This document details **every feature**, its purpose, user flow, edge cases, and acceptance criteria - organized by the same phases as the build roadmap, so you can build directly from this.
 
 ---
 
-# PHASE 0 — Foundation
-*(No user-facing features — infra only. See architecture doc.)*
+# PHASE 0 - Foundation
+*(No user-facing features - infra only. See architecture doc.)*
 
 ---
 
-# PHASE 1 — Core MVP
+# PHASE 1 - Core MVP
 
 ## 1.1 Authentication
 
@@ -22,29 +22,29 @@ This document details **every feature**, its purpose, user flow, edge cases, and
 2. Frontend validates: email format, password strength (min 8 chars, 1 number, 1 special char)
 3. Backend checks email uniqueness → creates user with `emailVerified: false`
 4. Verification email sent with time-limited token (24h expiry)
-5. User cannot log in until verified — login attempt shows "Please verify your email" with a resend option
+5. User cannot log in until verified - login attempt shows "Please verify your email" with a resend option
 
 **Edge cases:**
-- Duplicate email → generic error ("account may already exist") — don't leak which emails are registered (security)
+- Duplicate email → generic error ("account may already exist") - don't leak which emails are registered (security)
 - Expired verification token → allow resend, invalidate old token
 - User signs up with email, later tries Google Sign-In with same email → link accounts automatically if email matches and is verified
 
 **Acceptance criteria:** User cannot access any protected route without a verified account.
 
 ### 1.1.2 Email Verification
-**Purpose:** Confirm email ownership before granting access — prevents fake accounts, ensures reminder emails actually reach the user.
+**Purpose:** Confirm email ownership before granting access - prevents fake accounts, ensures reminder emails actually reach the user.
 
 **Flow:**
 1. Click link in email → `/auth/verify-email?token=xxx`
 2. Backend validates token, marks `emailVerified: true`, redirects to login with success message
 
-> **Resolved — link, not OTP.** The design system's component kit (`6b`) shows a
+> **Resolved - link, not OTP.** The design system's component kit (`6b`) shows a
 > 4-digit OTP field with a "resend in 24s" timer, which contradicts this
 > section. The link wins and is what's built: a 24-hour signed token, one
 > usable link at a time (requesting a resend invalidates the previous one), and
 > an expired link returns `details: { canResend: true }` so the UI can offer
 > the resend inline. **The `6b` OTP control is therefore dead and should be
-> dropped or repurposed in the design** — nothing in the API serves it.
+> dropped or repurposed in the design** - nothing in the API serves it.
 
 ### 1.1.3 Google Sign-In
 **Purpose:** Frictionless signup, matches your stated requirement.
@@ -59,14 +59,14 @@ This document details **every feature**, its purpose, user flow, edge cases, and
 2. Frontend silently refreshes access token before expiry
 3. Logout → refresh token invalidated server-side (stored in DB or Redis with revocation check)
 
-**Edge case:** Refresh token reuse detection — if an already-used refresh token is presented again, treat as potential theft and invalidate the entire token family (force re-login).
+**Edge case:** Refresh token reuse detection - if an already-used refresh token is presented again, treat as potential theft and invalidate the entire token family (force re-login).
 
 ---
 
 ## 1.2 Profiles
 
 ### 1.2.1 Multi-Profile Support
-**Purpose:** One user can manage multiple financial "contexts" — e.g., personal vs a side business, or (later) linked family members.
+**Purpose:** One user can manage multiple financial "contexts" - e.g., personal vs a side business, or (later) linked family members.
 
 **Flow:**
 1. New user gets one default profile auto-created ("Personal")
@@ -82,7 +82,7 @@ This document details **every feature**, its purpose, user flow, edge cases, and
 ## 1.3 Accounts (Bank / Credit Card / Loan)
 
 ### 1.3.1 Bank Account
-**Fields:** name, current balance (optional, user-entered — this isn't live bank sync)
+**Fields:** name, current balance (optional, user-entered - this isn't live bank sync)
 **Purpose:** Track cash/bank balance manually, associate transactions with a source.
 
 ### 1.3.2 Credit Card
@@ -100,7 +100,7 @@ This document details **every feature**, its purpose, user flow, edge cases, and
 
 **Auto-calculation:** Given principal, rate, tenure → optionally auto-compute EMI (standard EMI formula) if user doesn't want to enter it manually, but allow override since real EMI may include insurance/fees.
 
-**Progress tracking:** Show "X of Y EMIs paid" and remaining balance estimate — this is a dashboard feature (see 1.4).
+**Progress tracking:** Show "X of Y EMIs paid" and remaining balance estimate - this is a dashboard feature (see 1.4).
 
 ---
 
@@ -116,12 +116,12 @@ This document details **every feature**, its purpose, user flow, edge cases, and
 
 ### 1.4.3 Dashboard
 **Widgets:**
-- **Monthly spend by category** — donut/pie chart
-- **Income vs expense trend** — line chart, last 6 months
-- **Recent transactions** — list, last 10
-- **Upcoming dues** — cards showing next 3 upcoming credit card/loan due dates with amount and days-remaining
-- **Credit utilization** — per card, balance/limit as a progress bar (flag in red if >30% utilization — real financial literacy signal)
-- **Net worth** — design `2a` shows "Net worth ₹— 34.2L". Not in the original
+- **Monthly spend by category** - donut/pie chart
+- **Income vs expense trend** - line chart, last 6 months
+- **Recent transactions** - list, last 10
+- **Upcoming dues** - cards showing next 3 upcoming credit card/loan due dates with amount and days-remaining
+- **Credit utilization** - per card, balance/limit as a progress bar (flag in red if >30% utilization - real financial literacy signal)
+- **Net worth** - design `2a` shows "Net worth ₹- 34.2L". Not in the original
   widget list; added here because the screen renders it.
 
 **Net worth sign convention (resolved).** Assets minus liabilities, where:
@@ -133,19 +133,19 @@ This document details **every feature**, its purpose, user flow, edge cases, and
 | `LOAN` | `− outstanding principal` (from the amortisation schedule, not the original principal) |
 
 A large home loan therefore makes net worth negative early in its term, which
-is why design `2a` shows a negative figure — that's correct and expected, not a
+is why design `2a` shows a negative figure - that's correct and expected, not a
 bug. The loan contribution uses the *current* outstanding balance, so net worth
 improves with every EMI paid.
 
 ### 1.4.4 Filters
-Date range, category, account — combinable, applied to transaction list view.
+Date range, category, account - combinable, applied to transaction list view.
 
 ---
 
-# PHASE 2 — LLM-Powered Natural Language Input
+# PHASE 2 - LLM-Powered Natural Language Input
 
 ## 2.1 Text-Based NLU Entry
-**Purpose:** Faster entry than manual form-filling — type naturally instead of selecting dropdowns.
+**Purpose:** Faster entry than manual form-filling - type naturally instead of selecting dropdowns.
 
 **Flow:**
 1. User types: "spent 300 rs on groceries today" (or in Gujarati/Hindi)
@@ -164,24 +164,24 @@ Date range, category, account — combinable, applied to transaction list view.
 **Edge case:** Poor transcription quality (background noise, accent) → show transcribed text to user *before* sending to LLM, let them correct it first (saves an LLM call on garbage input, and is more transparent).
 
 ## 2.3 Multilingual Handling
-**Purpose:** Core requirement — support regional Indian languages (Gujarati, Hindi, others as time allows).
+**Purpose:** Core requirement - support regional Indian languages (Gujarati, Hindi, others as time allows).
 
-**Approach:** Single LLM call does language detection + internal translation + field extraction. User never sees a "translation" step — it's invisible, they just get correct structured output regardless of input language.
+**Approach:** Single LLM call does language detection + internal translation + field extraction. User never sees a "translation" step - it's invisible, they just get correct structured output regardless of input language.
 
-**Edge case:** Code-mixed input (Hinglish/Gujlish — "300 rupiya spend kiya groceries pe") is extremely common in India — the prompt must explicitly handle mixed-language input, not just pure single-language sentences. Test cases should include this.
+**Edge case:** Code-mixed input (Hinglish/Gujlish - "300 rupiya spend kiya groceries pe") is extremely common in India - the prompt must explicitly handle mixed-language input, not just pure single-language sentences. Test cases should include this.
 
 ## 2.4 Review & Confirm UI
-**Screen:** "Pending Review" — list of parsed items awaiting confirmation
+**Screen:** "Pending Review" - list of parsed items awaiting confirmation
 
 **Per item, shown:**
 - Original raw input (for context/trust)
-- Parsed fields (amount, category, merchant, date) — each editable inline
+- Parsed fields (amount, category, merchant, date) - each editable inline
 - Confidence indicator (High/Medium/Low badge)
 - Actions: ✅ Confirm | ✏️ Edit then Confirm | 🗑️ Discard
 
-**Low-confidence handling:** If confidence score below threshold, item is visually flagged (amber border) and cannot be one-tap-confirmed — forces at least a glance/edit before confirming, reducing silent errors.
+**Low-confidence handling:** If confidence score below threshold, item is visually flagged (amber border) and cannot be one-tap-confirmed - forces at least a glance/edit before confirming, reducing silent errors.
 
-**Undo:** After confirm, 10-second undo toast before it's "final" (though even after that, user can still edit/delete from the transaction list normally — this is just a UX nicety for immediate mis-taps).
+**Undo:** After confirm, 10-second undo toast before it's "final" (though even after that, user can still edit/delete from the transaction list normally - this is just a UX nicety for immediate mis-taps).
 
 ## 2.5 Cost & Performance Optimization
 
@@ -198,14 +198,14 @@ LLM response validated against a strict JSON schema before use. Malformed respon
 
 ---
 
-# PHASE 3 — Integrations
+# PHASE 3 - Integrations
 
 ## 3.1 Reminders System
 
 ### 3.1.1 Reminder Configuration
 **Per account**, user sets:
 - Offset (e.g., "remind me 3 days before due date")
-- Channel(s): Email, Push, Calendar (multi-select — can enable more than one)
+- Channel(s): Email, Push, Calendar (multi-select - can enable more than one)
 
 ### 3.1.2 Reminder Delivery
 Daily scheduled job scans all accounts, checks if `dueDate - offsetDays == today`, sends via configured channel(s).
@@ -213,7 +213,7 @@ Daily scheduled job scans all accounts, checks if `dueDate - offsetDays == today
 **Edge case:** If reminder settings change *after* a reminder for that cycle already fired, don't re-fire (track last-fired date per account/cycle to prevent duplicates).
 
 ## 3.2 Google Calendar Integration
-**Purpose:** Native reminders on any device already synced to the user's Google Calendar — reaches the user without building your own notification infra beyond what's necessary.
+**Purpose:** Native reminders on any device already synced to the user's Google Calendar - reaches the user without building your own notification infra beyond what's necessary.
 
 **Flow:**
 1. User toggles "Connect Google Calendar" (off by default) → OAuth consent screen, scoped only to Calendar
@@ -224,7 +224,7 @@ Daily scheduled job scans all accounts, checks if `dueDate - offsetDays == today
 ## 3.3 Google Tasks Integration
 **Purpose:** Alternative reminder surface for users who use Tasks instead of/alongside Calendar (this is the current equivalent of the old standalone "Reminders" app).
 
-**Flow:** Same pattern as Calendar — create a Task per due account, with due date and a link back to the app.
+**Flow:** Same pattern as Calendar - create a Task per due account, with due date and a link back to the app.
 
 ## 3.4 Gmail Parsing (Opt-in)
 **Purpose:** Automatically capture spends from transactional emails (payment confirmations, bill receipts) without manual entry.
@@ -233,12 +233,12 @@ Daily scheduled job scans all accounts, checks if `dueDate - offsetDays == today
 1. User toggles "Connect Gmail" (off by default, clearly explained what's being requested and why before OAuth)
 2. Backend fetches emails matching known transactional sender patterns (banks, payment apps, e-commerce)
 3. Each matching email → LLM extracts amount, merchant, date → written to Review Queue with `source: EMAIL`
-4. **Raw email body is never stored** — only extracted structured fields persist. This is a hard rule, not a nice-to-have.
-5. Processed email IDs tracked (`sourceRefId`) so re-runs/re-polls don't create duplicate review items — enforced via DB unique constraint, not just app logic
+4. **Raw email body is never stored** - only extracted structured fields persist. This is a hard rule, not a nice-to-have.
+5. Processed email IDs tracked (`sourceRefId`) so re-runs/re-polls don't create duplicate review items - enforced via DB unique constraint, not just app logic
 
-**Sync strategy:** Start with periodic polling (every 15 min) for simplicity; Gmail push notifications (via Pub/Sub) are a stretch upgrade — mention both in interviews, build polling first.
+**Sync strategy:** Start with periodic polling (every 15 min) for simplicity; Gmail push notifications (via Pub/Sub) are a stretch upgrade - mention both in interviews, build polling first.
 
-**Edge case:** User disconnects Gmail mid-way through a batch job — job should check `Integration.enabled` before processing each email, not just at job start, so a disconnect mid-run stops further processing.
+**Edge case:** User disconnects Gmail mid-way through a batch job - job should check `Integration.enabled` before processing each email, not just at job start, so a disconnect mid-run stops further processing.
 
 ## 3.5 Platform-Aware Feature Flags
 
@@ -252,17 +252,17 @@ At onboarding (and stored on user/device), detect platform via user-agent or app
 
 ---
 
-# PHASE 4 — Polish, Testing, Deployment Prep
-*(Engineering quality features, not user-facing — see architecture doc for testing strategy, security hardening checklist.)*
+# PHASE 4 - Polish, Testing, Deployment Prep
+*(Engineering quality features, not user-facing - see architecture doc for testing strategy, security hardening checklist.)*
 
 ---
 
-# PHASE 5 — Cloud Deployment
-*(Infra, not features — see architecture doc / roadmap doc.)*
+# PHASE 5 - Cloud Deployment
+*(Infra, not features - see architecture doc / roadmap doc.)*
 
 ---
 
-# PHASE 6 (Now Elevated — Family & RBAC)
+# PHASE 6 (Now Elevated - Family & RBAC)
 
 ## 6.1 Family Group Creation
 **Flow:**
@@ -272,30 +272,30 @@ At onboarding (and stored on user/device), detect platform via user-agent or app
 
 ## 6.2 Roles & Permissions
 See the full permission matrix in the architecture doc (section 3.2). Summary:
-- **OWNER** — full control, can invite/remove members, set spend limits on CHILD profiles
-- **ADULT** — can view family members' summaries (not full detail unless it's their own profile), manage their own profile fully
-- **CHILD** — restricted: manual entry only, no card/loan linking, no email/SMS parsing, subject to spend limits set by OWNER
+- **OWNER** - full control, can invite/remove members, set spend limits on CHILD profiles
+- **ADULT** - can view family members' summaries (not full detail unless it's their own profile), manage their own profile fully
+- **CHILD** - restricted: manual entry only, no card/loan linking, no email/SMS parsing, subject to spend limits set by OWNER
 
 ## 6.3 Child Profile Restrictions (Enforced, not just hidden UI)
-**Important:** restrictions must be enforced server-side (via guards), not just hidden in the UI — a determined user could otherwise hit the API directly and bypass a UI-only restriction.
+**Important:** restrictions must be enforced server-side (via guards), not just hidden in the UI - a determined user could otherwise hit the API directly and bypass a UI-only restriction.
 
 - Attempting to link a credit card on a CHILD profile → 403 Forbidden, clear error message
 - Attempting to enable Gmail/SMS parsing on CHILD profile → 403 Forbidden
 
 ## 6.4 Allowance & Spend Limits
-**Allowance:** OWNER sets a recurring amount credited to CHILD profile (tracked as a special transaction type or a running balance field — design choice, recommend: treat as an "income" transaction auto-created monthly).
+**Allowance:** OWNER sets a recurring amount credited to CHILD profile (tracked as a special transaction type or a running balance field - design choice, recommend: treat as an "income" transaction auto-created monthly).
 
 **Spend limits:** OWNER sets a monthly cap per category (or overall) on a CHILD profile. When CHILD's spend approaches/exceeds the limit:
 - Approaching (80%): in-app nudge notification
 - Exceeded: transaction still allowed (don't hard-block real spending decisions) but flagged, and OWNER gets notified
 
-**Design rationale:** Nudge over hard-block — this is a financial literacy tool, not a parental lockout system. Blocking transactions outright could push kids to just not log them, defeating the purpose.
+**Design rationale:** Nudge over hard-block - this is a financial literacy tool, not a parental lockout system. Blocking transactions outright could push kids to just not log them, defeating the purpose.
 
 ## 6.5 Savings Goals (stretch within 6.x)
-CHILD sets a goal (name, target amount, optional target date). Progress bar on dashboard. OWNER can optionally "contribute" — a manual transfer-like transaction crediting the goal.
+CHILD sets a goal (name, target amount, optional target date). Progress bar on dashboard. OWNER can optionally "contribute" - a manual transfer-like transaction crediting the goal.
 
 ## 6.6 Family Dashboard (OWNER/ADULT view)
-Aggregate view across all linked family profiles — total household spend, per-member breakdown, upcoming dues across all accounts in the family. This is a genuinely differentiated feature — most personal finance apps don't do cross-profile aggregation well.
+Aggregate view across all linked family profiles - total household spend, per-member breakdown, upcoming dues across all accounts in the family. This is a genuinely differentiated feature - most personal finance apps don't do cross-profile aggregation well.
 
 ---
 
@@ -312,10 +312,10 @@ Aggregate view across all linked family profiles — total household spend, per-
 # Cross-Feature Notes
 
 ## Data Privacy Principles (apply across all features)
-1. Raw source content (emails, SMS bodies) never persisted — only extracted structured fields
+1. Raw source content (emails, SMS bodies) never persisted - only extracted structured fields
 2. All integrations opt-in, off by default, individually toggleable
 3. OAuth tokens stored as references to a secrets store, never in plaintext in the primary DB
-4. CHILD profiles get maximum restriction by default — no integrations available at all, regardless of family settings
+4. CHILD profiles get maximum restriction by default - no integrations available at all, regardless of family settings
 
 ## Human-in-the-Loop Principle (applies to all AI-parsed data)
-Every automated extraction — whether from voice, text, email, or SMS — lands in the Review Queue first. Nothing AI-parsed hits the ledger without explicit user confirmation. This is the single most important trust mechanism in the entire product and should be mentioned prominently in your README and interview answers.
+Every automated extraction - whether from voice, text, email, or SMS - lands in the Review Queue first. Nothing AI-parsed hits the ledger without explicit user confirmation. This is the single most important trust mechanism in the entire product and should be mentioned prominently in your README and interview answers.

@@ -60,14 +60,14 @@ function monthsFromNow(months: number): string {
 }
 
 /**
- * Creates or edits a schedule — one modal for both.
+ * Creates or edits a schedule - one modal for both.
  *
  * Editing matters as much as creating: a salary changes, rent goes up, and a
  * schedule you cannot amend is one you delete and rebuild from memory.
  *
  * "Last day of the month" is its own choice rather than asking the user to
  * type 31 and trust the clamping. They give the same answer in a long month
- * and different answers to the question "what did you mean" — someone paid on
+ * and different answers to the question "what did you mean" - someone paid on
  * the 31st and someone paid at month end are describing different rules.
  */
 export function ScheduleModal({
@@ -211,7 +211,7 @@ export function ScheduleModal({
       open={open}
       onOpenChange={onOpenChange}
       title={editing ? "Edit schedule" : "Add a schedule"}
-      description="Entries arrive in your review queue on the day — never straight into the ledger."
+      description="Entries arrive in your review queue on the day - never straight into the ledger."
       footer={
         <>
           <Button variant="secondary" onClick={() => onOpenChange(false)}>
@@ -231,7 +231,7 @@ export function ScheduleModal({
         <Input
           label="Name"
           placeholder={direction === "CREDIT" ? "Salary" : "Rent"}
-          hint="Optional — but it is how you'll tell this apart from the rest"
+          hint="Optional - but it is how you'll tell this apart from the rest"
           value={label}
           onChange={(e) => setLabel(e.target.value)}
         />
@@ -293,7 +293,7 @@ export function ScheduleModal({
             hint={
               cadence === "YEARLY"
                 ? undefined
-                : `Then every three months — ${quarterMonths(Number(monthOfYear))}`
+                : `Then every three months - ${quarterMonths(Number(monthOfYear))}`
             }
           />
         )}
@@ -331,7 +331,7 @@ export function ScheduleModal({
           </>
         )}
 
-        {/* When it stops — an EMI has a count, a lease has a date. */}
+        {/* When it stops - an EMI has a count, a lease has a date. */}
         <div>
           <Eyebrow>Runs until</Eyebrow>
           <Segmented
@@ -359,7 +359,7 @@ export function ScheduleModal({
                 hint={
                   remaining !== null
                     ? `${remaining} of ${rule?.maxOccurrences} still to go`
-                    : "Counts only entries actually created — a repeated run doesn't use one up"
+                    : "Counts only entries actually created - a repeated run doesn't use one up"
                 }
                 error={
                   count && Number(count) < 1
@@ -386,7 +386,7 @@ export function ScheduleModal({
                 value={endsOn}
                 min={new Date().toISOString().slice(0, 10)}
                 onChange={(e) => setEndsOn(e.target.value)}
-                hint="Inclusive — an entry due on this date still arrives"
+                hint="Inclusive - an entry due on this date still arrives"
               />
               <div className="mt-2 flex flex-wrap gap-2">
                 {[6, 12, 24].map((n) => (
@@ -408,7 +408,7 @@ export function ScheduleModal({
               onValueChange={setAccountId}
               options={accounts.map((a) => ({ value: a.id, label: a.name }))}
               emptyAction={{
-                label: "No accounts yet — add one",
+                label: "No accounts yet - add one",
                 onSelect: () => router.push("/accounts"),
               }}
             />
@@ -430,7 +430,7 @@ export function ScheduleModal({
         {direction === "DEBIT" && (
           <Toggle
             label="Auto-debit"
-            description="Leaves the account on its own — you are told, not asked"
+            description="Leaves the account on its own - you are told, not asked"
             checked={autoDebit}
             onCheckedChange={setAutoDebit}
           />

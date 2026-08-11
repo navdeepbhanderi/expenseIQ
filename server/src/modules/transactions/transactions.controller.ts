@@ -42,7 +42,7 @@ export class TransactionsController {
     summary: 'Filtered, paginated transactions',
     description:
       'Returns the page, the totals strip ("42 results · ₹64,210") and the ' +
-      'facet counts beside each filter ("Groceries 18") in one round trip — ' +
+      'facet counts beside each filter ("Groceries 18") in one round trip - ' +
       'design 2e renders all three at once, and separate calls could ' +
       'disagree if a write landed between them.',
   })
@@ -97,7 +97,7 @@ export class TransactionsController {
 
   @Get(':transactionId')
   @RequireAction('transaction:view')
-  @ApiOperation({ summary: "One transaction — design 6g's detail panel" })
+  @ApiOperation({ summary: "One transaction - design 6g's detail panel" })
   findOne(
     @Param('profileId', ParseUUIDPipe) profileId: string,
     @Param('transactionId', ParseUUIDPipe) transactionId: string,
@@ -122,7 +122,7 @@ export class TransactionsController {
   @ApiOperation({
     summary: 'Delete a transaction',
     description:
-      'Soft delete — the design promises a 10-second undo after confirming a ' +
+      'Soft delete - the design promises a 10-second undo after confirming a ' +
       'parsed entry, and a physically removed row cannot be restored with its ' +
       'id and relations intact.',
   })

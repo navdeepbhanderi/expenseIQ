@@ -55,7 +55,7 @@ describe('computeBillingCycle', () => {
       asOf: new Date('2026-02-28T00:00:00.000Z'),
     });
 
-    // 2026 is not a leap year, so the statement lands on the 28th — it must
+    // 2026 is not a leap year, so the statement lands on the 28th - it must
     // not roll into 3 March, which naive date arithmetic does.
     expect(iso(cycle.lastStatementDate)).toBe('2026-02-28');
     expect(iso(cycle.dueDate)).toBe('2026-03-20');
@@ -72,7 +72,7 @@ describe('computeBillingCycle', () => {
   });
 
   it('rolls forward when clamping collapses the due date onto the statement', () => {
-    // Statement 28th, due 30th. Fine for eleven months — but in a non-leap
+    // Statement 28th, due 30th. Fine for eleven months - but in a non-leap
     // February the 30th clamps back to the 28th, and the bill would appear
     // due the very day it was generated. Found by the property test below.
     const cycle = computeBillingCycle({

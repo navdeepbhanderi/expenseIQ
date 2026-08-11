@@ -9,7 +9,7 @@ import { checkPassword, passwordStrength } from "./password";
  * disagrees is worse than no meter, because it teaches the user that the
  * app's feedback cannot be trusted.
  */
-describe("checkPassword — parity with the server policy", () => {
+describe("checkPassword - parity with the server policy", () => {
   it("accepts what the server accepts", () => {
     for (const password of ["Kirana@2026", "Brand@New2026", "a1!aaaaa"]) {
       expect(checkPassword(password).valid).toBe(true);
@@ -33,7 +33,7 @@ describe("checkPassword — parity with the server policy", () => {
     // "Password1!" passes every character-class rule ever written.
     expect(checkPassword("Password1!").valid).toBe(false);
     expect(checkPassword("password1!").failures).toContain(
-      "Too common — pick something less guessable",
+      "Too common - pick something less guessable",
     );
   });
 

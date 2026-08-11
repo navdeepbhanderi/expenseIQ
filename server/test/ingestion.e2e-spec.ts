@@ -8,7 +8,7 @@ import { createHarness, type Harness } from './app-harness';
  * Phase 5 acceptance: receipt scanning and recurrence detection.
  *
  * Runs with LLM_DRIVER=fake and QUEUE_DRIVER=inline, so the full ingestion
- * path — upload, store, enqueue, parse, stage in the review queue — executes
+ * path - upload, store, enqueue, parse, stage in the review queue - executes
  * end to end without a network call, an API key, or a Redis worker whose
  * timing would make the suite flaky.
  */
@@ -115,7 +115,7 @@ describe('Ingestion (e2e)', () => {
       });
       expect(receipt.status).toBe('PARSED');
 
-      // Candidates land in the review queue, not the ledger — the same rule
+      // Candidates land in the review queue, not the ledger - the same rule
       // that governs spoken input.
       const items = await harness.prisma.reviewQueueItem.findMany({
         where: { profileId },
@@ -150,7 +150,7 @@ describe('Ingestion (e2e)', () => {
     });
 
     it('accepts a PDF', async () => {
-      // Gemini reads PDF natively — design 6b promises "PDF, JPG".
+      // Gemini reads PDF natively - design 6b promises "PDF, JPG".
       const { token, profileId } = await setup();
 
       await request(server)
@@ -452,7 +452,7 @@ describe('Ingestion (e2e)', () => {
 
     it('re-labels transactions that arrive after the rule exists', async () => {
       // Confirming already labels the history, so this endpoint's remaining
-      // job is catching up on payments that landed since — it is a backfill,
+      // job is catching up on payments that landed since - it is a backfill,
       // not the primary path.
       const { token, profileId } = await setup();
       const merchant = await seedMonthly(
@@ -561,7 +561,7 @@ describe('Ingestion (e2e)', () => {
 
     it('stages a due rule in the review queue, never the ledger', async () => {
       // A confirmed rule is the user's own instruction for the *schedule*,
-      // but the amount is a prediction — design 2e's own example varies
+      // but the amount is a prediction - design 2e's own example varies
       // between ₹1,890 and ₹3,120, and writing a predicted figure into the
       // ledger would silently corrupt every downstream total.
       const { token, profileId } = await setup();

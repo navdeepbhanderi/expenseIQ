@@ -30,14 +30,14 @@ const MAX_JSON_BYTES = '256kb';
  * The one place the HTTP pipeline is configured.
  *
  * Both `main.ts` and the integration-test harness call this, rather than each
- * setting up its own prefix, pipes and middleware. That is not tidiness — it's
+ * setting up its own prefix, pipes and middleware. That is not tidiness - it's
  * correctness: when the two drift, tests stop describing production. It has
  * already bitten once here, when `cookieParser()` lived only in main.ts and
  * every cookie-based refresh silently failed under test while working in the
  * real app.
  *
  * Anything that changes how a request is parsed, validated or routed belongs
- * here. Things that are genuinely bootstrap-only — Swagger, `listen()` — stay
+ * here. Things that are genuinely bootstrap-only - Swagger, `listen()` - stay
  * in main.ts.
  */
 export function configureApp(
@@ -48,17 +48,17 @@ export function configureApp(
   app.enableVersioning({ type: VersioningType.URI, defaultVersion: '1' });
 
   // Security headers. contentSecurityPolicy is off because this process
-  // serves JSON, not documents — the one HTML surface is Swagger UI in
+  // serves JSON, not documents - the one HTML surface is Swagger UI in
   // development, which a default CSP breaks (it needs inline scripts). Every
-  // header that actually protects an API client — nosniff, frameguard,
-  // HSTS, referrer policy — stays on.
+  // header that actually protects an API client - nosniff, frameguard,
+  // HSTS, referrer policy - stays on.
   app.use(helmet({ contentSecurityPolicy: false }));
 
   // Explicit body ceiling. Without one, a request body is bounded only by
   // whatever the framework happens to default to, and the validation pipe
   // only runs *after* the whole body has been parsed into memory.
   //
-  // useBodyParser, not app.use(express.json()) — Nest registers its own parser
+  // useBodyParser, not app.use(express.json()) - Nest registers its own parser
   // during create(), so an added one never sees an unparsed body and silently
   // does nothing. This reconfigures the parser that actually runs.
   if (hasBodyParser(app)) {

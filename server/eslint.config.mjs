@@ -7,8 +7,8 @@ import prettierRecommended from 'eslint-plugin-prettier/recommended';
  * Type-aware linting is the point here.
  *
  * A plain syntactic linter on a NestJS + Prisma codebase catches almost
- * nothing worth catching. The rules that actually earn their keep —
- * no-floating-promises, no-misused-promises, require-await — need the type
+ * nothing worth catching. The rules that actually earn their keep -
+ * no-floating-promises, no-misused-promises, require-await - need the type
  * checker, and each of them maps to a real failure mode in this app: a
  * forgotten `await` on a Prisma write silently loses data, and an async
  * function passed where a sync one is expected swallows its rejection.

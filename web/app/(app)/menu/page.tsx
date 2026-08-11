@@ -7,7 +7,7 @@ import { Eyebrow } from "@/components/ui/display";
 import { NAV_ITEMS } from "@/components/app-shell/nav-items";
 
 /**
- * Mobile menu — the tab bar's fourth slot.
+ * Mobile menu - the tab bar's fourth slot.
  *
  * Exists because the tab bar carries four targets, not six: Reports and
  * Settings live here rather than shrinking every tab below a comfortable

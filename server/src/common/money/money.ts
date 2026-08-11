@@ -1,5 +1,5 @@
 /**
- * Money — integer minor units (paise), never float, never Prisma Decimal.
+ * Money - integer minor units (paise), never float, never Prisma Decimal.
  *
  * Why this exists at all:
  *
@@ -11,7 +11,7 @@
  * amounts are stored as Postgres `bigint` paise, wrapped by this class in the
  * domain, and exposed to clients as an integer `amountMinor`.
  *
- * Formatting (₹, lakh/crore grouping) is deliberately NOT here — that is a
+ * Formatting (₹, lakh/crore grouping) is deliberately NOT here - that is a
  * presentation concern and lives in the client.
  */
 
@@ -54,7 +54,7 @@ export class Money {
 
   /**
    * From a Prisma `BigInt` column. Asserts the value survives the conversion
-   * to `number` — at 2^53 paise that is ₹90 trillion, so this should never
+   * to `number` - at 2^53 paise that is ₹90 trillion, so this should never
    * fire in practice, but a silent precision loss on money is unacceptable.
    */
   static fromBigInt(value: bigint, currency: Currency = 'INR'): Money {
@@ -98,7 +98,7 @@ export class Money {
    * Scales by a factor, rounding once at the end.
    *
    * The factor may be fractional (an interest rate, a percentage). Rounding
-   * happens exactly once, here — callers must never chain multiplications and
+   * happens exactly once, here - callers must never chain multiplications and
    * round at each step, because that accumulates drift.
    */
   multiply(factor: number, rounding: Rounding = 'half-up'): Money {
@@ -157,14 +157,14 @@ export class Money {
     return result.map((minor) => Money.fromMinor(minor, this.currency));
   }
 
-  /** `percent` is a whole percentage — `percentOf(30)` is 30%, not 0.3. */
+  /** `percent` is a whole percentage - `percentOf(30)` is 30%, not 0.3. */
   percentOf(percent: number, rounding: Rounding = 'half-up'): Money {
     return this.multiply(percent / 100, rounding);
   }
 
   /**
    * This amount as a percentage of `total`, as a float.
-   * Returns 0 rather than NaN/Infinity when `total` is zero — callers are
+   * Returns 0 rather than NaN/Infinity when `total` is zero - callers are
    * rendering progress bars ("12% of ₹2,00,000 used") and a zero-limit card
    * should read as 0%, not blow up the response.
    */
@@ -173,7 +173,7 @@ export class Money {
     if (total.minor === 0) return 0;
 
     // Normalised through 12 significant digits because the raw division
-    // produces artefacts — ₹1,12,000 of a ₹1,00,000 budget is exactly 112%,
+    // produces artefacts - ₹1,12,000 of a ₹1,00,000 budget is exactly 112%,
     // but the float says 112.00000000000001, and that reaches the UI.
     // Twelve digits is far more precision than any percentage needs and far
     // less than float64's ~15-17, so it only ever removes noise.
@@ -210,7 +210,7 @@ export class Money {
 
   // ─── Conversion ────────────────────────────────────────────────────────────
 
-  /** Rupees as a float. For display and ratios only — never for arithmetic. */
+  /** Rupees as a float. For display and ratios only - never for arithmetic. */
   toMajor(): number {
     return this.minor / MINOR_UNITS_PER_MAJOR;
   }
@@ -268,7 +268,7 @@ function sameCurrency(a: Money, b: Money): boolean {
  * 1. Binary representation error. `1.005 * 100` is actually
  *    `100.49999999999999`, so a naive half-up rounds it *down* to 100 when
  *    ₹1.005 clearly ought to be 101 paise. Normalising through 15 significant
- *    digits — comfortably inside float64's ~15–17 digits of real precision —
+ *    digits - comfortably inside float64's ~15–17 digits of real precision -
  *    collapses that error before the rounding decision is made.
  *
  * 2. Negative ties. Finance rounds half *away from zero*, so −2.5 → −3.

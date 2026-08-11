@@ -4,7 +4,7 @@ import { downloadExport } from "./transactions";
 
 /**
  * The CSV export used to build its own request, and got two things wrong that
- * only show up with a filter applied or an aged-out token — neither of which
+ * only show up with a filter applied or an aged-out token - neither of which
  * a quick manual "does the button work" check would surface.
  */
 
@@ -47,7 +47,7 @@ describe("downloadExport", () => {
 
     /*
      * The server's toStringArray takes both `?ids=a&ids=b` and `?ids=a,b`, so
-     * either encoding is correct — what matters is that the ids reach the
+     * either encoding is correct - what matters is that the ids reach the
      * request at all. An export that quietly ignored the filters would look
      * fine on screen and hand back the whole ledger.
      */
@@ -84,7 +84,7 @@ describe("downloadExport", () => {
 
     await downloadExport("p1", {});
 
-    // Going through the shared client is what gets the token attached — and
+    // Going through the shared client is what gets the token attached - and
     // what makes a 401 refresh and retry rather than simply fail.
     expect(new Headers(seen[0]!.headers).get("Authorization")).toBe(
       "Bearer tok-123",

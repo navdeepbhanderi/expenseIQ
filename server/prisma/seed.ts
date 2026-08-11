@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
  * System categories, seeded once with `profileId: null`.
  *
  * Monograms and tints come straight from design 2f. The design deliberately
- * chose two-letter monograms over an icon set — there's no icon library to
+ * chose two-letter monograms over an icon set - there's no icon library to
  * maintain and it scales to whatever custom categories a user invents, which
  * an icon picker can't. The tints are the exact hex values used in the
  * category tag row.

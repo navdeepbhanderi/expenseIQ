@@ -1,5 +1,5 @@
 // Side-effect import: installs BigInt JSON serialisation before anything can
-// return a money field. Must be first — see the module for why it isn't in main.ts.
+// return a money field. Must be first - see the module for why it isn't in main.ts.
 import './common/money/bigint-serializer';
 
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
@@ -50,7 +50,7 @@ import { FamilyModule } from './modules/family/family.module';
     }),
 
     // A baseline ceiling on every route. Auth tightens this to 10/min with its
-    // own @Throttle, and NLU will do the same in Phase 4 — each call costs money.
+    // own @Throttle, and NLU will do the same in Phase 4 - each call costs money.
     ThrottlerModule.forRoot([{ name: 'default', ttl: 60_000, limit: 120 }]),
 
     LoggerModule,

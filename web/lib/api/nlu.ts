@@ -24,7 +24,7 @@ export interface ReviewQueueItem extends NluCandidate {
 }
 
 /**
- * The queue returns raw rows with `parsed*` names — a different shape from the
+ * The queue returns raw rows with `parsed*` names - a different shape from the
  * candidates POST /nlu/parse returns, even though both describe the same
  * thing. Normalising here rather than in the page means one component renders
  * both, and the difference stays at the API boundary where it belongs.
@@ -42,7 +42,7 @@ function toCandidate(row: ReviewItemRow): ReviewQueueItem {
     accountName: null,
     note: row.parsedNote,
     confidence: row.confidence ?? 0,
-    // A row with no band was never parsed by a model — extraction failed and
+    // A row with no band was never parsed by a model - extraction failed and
     // the raw text was kept. It needs a human, which is what NEEDS_FIELD says.
     confidenceBand: row.confidenceBand ?? "NEEDS_FIELD",
     missingFields: row.missingFields,
@@ -135,7 +135,7 @@ export function useConfirm(profileId: string | null) {
  *
  * Distinct from passing overrides to confirm, and the difference matters: the
  * server records every changed field here as a Correction, and those
- * corrections are the feedback loop — they drive the accuracy figure and the
+ * corrections are the feedback loop - they drive the accuracy figure and the
  * per-profile category learning. An amount fixed silently at confirm time
  * teaches the system nothing.
  *

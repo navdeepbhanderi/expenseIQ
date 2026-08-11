@@ -11,7 +11,7 @@ import { RecurrenceGeneratorService } from '@/modules/recurring/recurrence-gener
  *
  * 1. A rule ran forever. There was no way to express a six-month EMI or a
  *    lease with a known end, so the only way to stop one was to remember to
- *    delete it — and forgetting meant phantom entries in the review queue for
+ *    delete it - and forgetting meant phantom entries in the review queue for
  *    a loan that was already paid off.
  * 2. A day-of-month is the whole answer for MONTHLY and no answer at all for
  *    WEEKLY or YEARLY. "The 15th, every year" silently meant whichever month
@@ -112,7 +112,7 @@ describe('Recurring schedules (e2e)', () => {
       });
 
       expect(rule.occurrenceCount).toBe(3);
-      // Retired rather than deleted — a paid-off loan is still history.
+      // Retired rather than deleted - a paid-off loan is still history.
       expect(rule.enabled).toBe(false);
       expect(rule.nextDueDate).toBeNull();
 
@@ -145,7 +145,7 @@ describe('Recurring schedules (e2e)', () => {
        * The same date twice, as a retried job or a double-fired cron would.
        *
        * The second run hits the idempotency index and stages nothing, so it
-       * must not tick the counter — otherwise a scheduler hiccup silently
+       * must not tick the counter - otherwise a scheduler hiccup silently
        * ends a 6-EMI loan two instalments early.
        */
       await runOn(profileId, ['2026-01-05', '2026-01-05']);
@@ -210,7 +210,7 @@ describe('Recurring schedules (e2e)', () => {
         data: { enabled: false, nextDueDate: null },
       });
 
-      // Editing the schedule is the user saying "keep going" — a rule that
+      // Editing the schedule is the user saying "keep going" - a rule that
       // stayed disabled would make "extend by six months" do nothing at all.
       await request(server)
         .patch(`/api/v1/profiles/${profileId}/recurring/${created.body.id}`)

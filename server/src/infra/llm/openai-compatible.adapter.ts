@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import { AppLogger } from '@/common/logger/app-logger.service';
-import type { AppConfig } from '@/config/configuration';
 
 import {
   LlmError,
@@ -16,38 +15,25 @@ import {
   buildExtractionPrompt,
   EXTRACTION_JSON_SCHEMA,
 } from './prompts/extraction.prompt';
-import { isWorthAnotherModel, resolveChain } from './model-fallback';
-
-const ENDPOINT = 'https://openrouter.ai/api/v1/chat/completions';
-
-const DEFAULT_TIMEOUT_MS = 20_000;
+import { isWorthAnotherModel } from './model-fallback';
 
 /**
- * Free-tier chains, measured against this project's own extraction prompt on
- * Hindi, Hinglish, Gujarati, multi-expense and lakh-notation inputs.
+ * The shared base for every OpenAI chat-completions provider.
  *
- * gemma-4-26b leads on *repeated* measurement: 5/5 correct and a steady
- * 2.6-6.5s across runs. It is also the only free structured-output model that
- * accepts images, so it doubles as the receipt tier.
+ * Groq, OpenRouter and Gemini all speak this dialect — Google publishes a
+ * compatible endpoint alongside its native SDK — so one implementation covers
+ * the platform's provider and every key a user might bring.
  *
- * nemotron-3-super is last despite once answering in 280-405ms, and that gap
- * is the lesson. It is a reasoning model: it spends tokens thinking out loud
- * before answering, so under any real load it ran 21-26s and was repeatedly
- * observed queueing past OpenRouter's ~120s upstream timeout. The fast
- * reading was one idle moment, not its behaviour. A single flattering
- * benchmark is not evidence of a p50.
+ * Everything load-bearing lives here: the model chain walk, the retry rules,
+ * the JSON repair, and the timeout that stays armed across the body read.
+ * That last one is not a detail. A provider answers with headers immediately
+ * and then stalls mid-body while an upstream model queues, so a timer cleared
+ * when fetch() resolves guards nothing — measured, a 12s deadline that cleared
+ * too early produced 128-150 second parses.
  *
- * openai/gpt-oss-20b:free is absent entirely: it returned zero candidates on
- * all five cases.
+ * Subclasses supply four things and nothing else: the endpoint, a label, the
+ * credentials, and the model list.
  */
-const DEFAULT_TEXT_CHAIN = [
-  'google/gemma-4-26b-a4b-it:free',
-  'nvidia/nemotron-nano-9b-v2:free',
-  'nvidia/nemotron-3-super-120b-a12b:free',
-];
-
-/** Images need a vision model; only this one also does structured output. */
-const DEFAULT_VISION_CHAIN = ['google/gemma-4-26b-a4b-it:free'];
 
 interface ChatResponse {
   choices?: { message?: { content?: string } }[];
@@ -64,8 +50,8 @@ interface RawExtraction {
  * OpenRouter, used for its free tier.
  *
  * Same port as Gemini, so the NLU module cannot tell them apart. Chosen as the
- * default because the free allowance is per *account* rather than per model —
- * 50 requests/day, or 1000 once $10 of credits has been bought at any point —
+ * default because the free allowance is per *account* rather than per model -
+ * 50 requests/day, or 1000 once $10 of credits has been bought at any point -
  * where Gemini free meters roughly 20/day per model and zero on every Pro
  * model.
  *
@@ -74,36 +60,50 @@ interface RawExtraction {
  * hands off to Gemini, which can.
  */
 @Injectable()
-export class OpenRouterAdapter implements LlmPort {
-  readonly name: string = 'openrouter';
+export abstract class OpenAiCompatibleAdapter implements LlmPort {
+  abstract readonly name: string;
 
   /*
    * The four things that differ between OpenAI-compatible providers.
    *
    * Groq speaks the same chat-completions dialect, so it subclasses this
    * rather than duplicating the retry, timeout, chain-walking and
-   * JSON-repair logic — all of which was written against measured failures
+   * JSON-repair logic - all of which was written against measured failures
    * and would rot immediately in a second copy.
    */
-  protected readonly endpoint: string = ENDPOINT;
-  protected readonly providerLabel: string = 'OpenRouter';
+  protected abstract readonly endpoint: string;
+  protected abstract readonly providerLabel: string;
 
-  protected credentials(): { apiKey?: string; timeoutMs: number } {
-    const llm = this.config.get<AppConfig['llm']>('llm');
+  protected abstract credentials(): { apiKey?: string; timeoutMs: number };
+
+  /**
+   * How the response is constrained to JSON.
+   *
+   * `json_schema` is the strong form: the provider guarantees the shape, and
+   * the parse cannot come back malformed. Not every model implements it —
+   * llama-3.1-8b-instant answers "This model does not support response format
+   * `json_schema`" on every single call, which is a hard failure rather than
+   * a degraded one.
+   *
+   * `json_object` is the fallback: valid JSON is guaranteed, the shape is not.
+   * That is survivable here because the prompt states the schema and the
+   * response is validated and repaired afterwards anyway — a model returning
+   * the wrong shape was always a case this had to handle.
+   */
+  protected responseFormat(): Record<string, unknown> {
     return {
-      apiKey: llm?.openRouter.apiKey,
-      timeoutMs: llm?.openRouter.timeoutMs ?? DEFAULT_TIMEOUT_MS,
+      type: 'json_schema',
+      json_schema: {
+        name: 'extraction',
+        strict: true,
+        schema: EXTRACTION_JSON_SCHEMA,
+      },
     };
   }
 
+  /** Provider-specific attribution headers, if it has any. */
   protected extraHeaders(): Record<string, string> {
-    return {
-      // OpenRouter attributes usage to these; they are not required, but
-      // without them the account dashboard cannot tell this app apart from
-      // anything else sharing the key.
-      'HTTP-Referer': 'https://github.com/navdeepbhanderi/expenseIQ',
-      'X-Title': 'ExpenseIQ',
-    };
+    return {};
   }
 
   constructor(
@@ -140,14 +140,7 @@ export class OpenRouterAdapter implements LlmPort {
           // Deterministic: the same sentence must produce the same transaction
           // twice. Extraction is parsing, not composition.
           temperature: 0,
-          response_format: {
-            type: 'json_schema',
-            json_schema: {
-              name: 'extraction',
-              strict: true,
-              schema: EXTRACTION_JSON_SCHEMA,
-            },
-          },
+          response_format: this.responseFormat(),
         });
 
         const parsed = parseJson(payload.choices?.[0]?.message?.content ?? '');
@@ -172,9 +165,9 @@ export class OpenRouterAdapter implements LlmPort {
   /**
    * Streaming is not implemented here on purpose.
    *
-   * Rather than emit one final chunk dressed up as a stream — which would
+   * Rather than emit one final chunk dressed up as a stream - which would
    * make design 5b's mid-speech preview appear to work while actually
-   * arriving all at once, at the end — this declines outright, and the
+   * arriving all at once, at the end - this declines outright, and the
    * provider chain falls through to Gemini, which streams for real.
    */
   // eslint-disable-next-line @typescript-eslint/require-await, require-yield
@@ -241,7 +234,7 @@ export class OpenRouterAdapter implements LlmPort {
       // that is the whole point. OpenRouter answers with headers immediately
       // and then stalls mid-body while an upstream model queues, so a timer
       // cleared once fetch() resolves guards nothing: the request still hangs
-      // for their ~120s idle timeout inside response.json(). Measured — a
+      // for their ~120s idle timeout inside response.json(). Measured - a
       // 12s deadline that cleared too early produced 128-150s parses.
       const response = await fetch(this.endpoint, {
         signal: controller.signal,
@@ -277,7 +270,7 @@ export class OpenRouterAdapter implements LlmPort {
       return payload;
     } catch (error) {
       // Surfaced as a 504 so isWorthAnotherModel treats it as worth trying
-      // the next model — which is exactly what a contended queue deserves.
+      // the next model - which is exactly what a contended queue deserves.
       if (error instanceof Error && error.name === 'AbortError') {
         throw Object.assign(
           new Error(`${model} did not respond within ${timeoutMs}ms`),
@@ -321,21 +314,8 @@ export class OpenRouterAdapter implements LlmPort {
     throw wrapError(lastError);
   }
 
-  protected models(tier: 'text' | 'vision'): string[] {
-    const llm = this.config.get<AppConfig['llm']>('llm');
-    const configured =
-      tier === 'text'
-        ? llm?.openRouter.models.text
-        : llm?.openRouter.models.vision;
-
-    const chain = resolveChain(configured, 'pro');
-    // resolveChain's built-in default is Gemini's, which is meaningless here.
-    return configured?.trim()
-      ? chain
-      : tier === 'text'
-        ? [...DEFAULT_TEXT_CHAIN]
-        : [...DEFAULT_VISION_CHAIN];
-  }
+  /** The models to try, in order. Subclasses decide; no shared default. */
+  protected abstract models(tier: 'text' | 'vision'): string[];
 }
 
 function toContent(
@@ -375,7 +355,7 @@ function wrapError(error: unknown): LlmError {
   const retryable = typeof status === 'number' && status >= 500;
 
   /*
-   * No provider name here — the inner error already carries one.
+   * No provider name here - the inner error already carries one.
    *
    * This helper is shared by every OpenAI-compatible subclass, so hardcoding
    * "OpenRouter" produced "OpenRouter request failed: groq request failed: …"

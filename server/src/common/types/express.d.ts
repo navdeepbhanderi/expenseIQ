@@ -15,7 +15,7 @@ export interface ProfileAccess {
  *
  * `Express.User` rather than a `user?:` property on Request: @nestjs/passport
  * declares `Request.user` as `Express.User`, and a competing property
- * declaration loses to it — leaving every `request.user.id` a type error. The
+ * declaration loses to it - leaving every `request.user.id` a type error. The
  * supported extension point is the `User` interface itself.
  *
  * These stay optional because they're populated progressively: `requestId` by

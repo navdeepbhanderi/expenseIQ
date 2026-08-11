@@ -10,7 +10,7 @@ import {
 
 /**
  * The window that mattered: 00:00–05:30 IST, when UTC is still on the previous
- * day — and, on the 1st, in the previous month.
+ * day - and, on the 1st, in the previous month.
  */
 const IST_EARLY_HOURS = new Date('2026-08-31T19:30:00.000Z'); // 01:00 IST, 1 Sep
 const MIDDAY = new Date('2026-08-15T09:00:00.000Z'); // 14:30 IST, 15 Aug
@@ -19,7 +19,7 @@ describe('startOfMonth', () => {
   it('uses the local month during the early hours of the 1st', () => {
     /*
      * The bug in one assertion. At 01:00 IST on 1 September the UTC date is
-     * 31 August, so the UTC implementation answered 1 August — and every
+     * 31 August, so the UTC implementation answered 1 August - and every
      * "this month" total in the product was a month behind until 05:30.
      */
     expect(startOfMonth(IST_EARLY_HOURS).toISOString()).toBe(
@@ -35,7 +35,7 @@ describe('startOfMonth', () => {
   it('leaves a stored date-only value untouched', () => {
     /*
      * Postgres hands a `date` column back as UTC midnight. In IST that is
-     * 05:30 the same morning — still the same calendar day — so applying the
+     * 05:30 the same morning - still the same calendar day - so applying the
      * timezone-aware version to stored dates changes nothing. That is what
      * makes this a drop-in replacement rather than a data migration.
      */
@@ -44,7 +44,7 @@ describe('startOfMonth', () => {
   });
 
   it('handles a year boundary', () => {
-    // 00:30 IST on 1 January is 19:00 UTC on 31 December — a year out, not
+    // 00:30 IST on 1 January is 19:00 UTC on 31 December - a year out, not
     // just a month.
     const newYear = new Date('2025-12-31T19:00:00.000Z');
     expect(startOfMonth(newYear).toISOString()).toBe(
@@ -85,7 +85,7 @@ describe('monthKey', () => {
   });
 
   it('is what the allowance guard compares against', () => {
-    // Credited at 00:30 IST on the 1st, a UTC key recorded the month before —
+    // Credited at 00:30 IST on the 1st, a UTC key recorded the month before -
     // so the real first-of-month run saw no record and credited again.
     expect(monthKey(IST_EARLY_HOURS)).not.toBe(
       IST_EARLY_HOURS.toISOString().slice(0, 7),

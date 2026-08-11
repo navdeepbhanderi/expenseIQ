@@ -14,7 +14,7 @@ import {
 import { ApiError } from "@/lib/api/client";
 
 /**
- * Grants the monthly allowance — design 2c's "₹1,200 allowance · ₹740 left".
+ * Grants the monthly allowance - design 2c's "₹1,200 allowance · ₹740 left".
  *
  * The Family page could already show an allowance and credit one that was due,
  * but nothing could create it, so `allowance` was permanently null and the

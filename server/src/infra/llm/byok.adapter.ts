@@ -2,7 +2,7 @@ import type { ConfigService } from '@nestjs/config';
 
 import type { AppLogger } from '@/common/logger/app-logger.service';
 import { LlmError } from './llm.port';
-import { OpenRouterAdapter } from './openrouter.adapter';
+import { OpenAiCompatibleAdapter } from './openai-compatible.adapter';
 
 /**
  * Calls a provider with a key the user supplied, rather than one from config.
@@ -15,8 +15,8 @@ import { OpenRouterAdapter } from './openrouter.adapter';
  * **One adapter for all three providers.** Groq and OpenRouter speak
  * OpenAI's chat-completions dialect, and Google publishes an OpenAI-compatible
  * endpoint for Gemini alongside its native SDK. Using it here means one code
- * path — with the retry, timeout, chain-walking and JSON-repair logic that was
- * written against measured failures — instead of a second Gemini integration
+ * path - with the retry, timeout, chain-walking and JSON-repair logic that was
+ * written against measured failures - instead of a second Gemini integration
  * that would need all of it again.
  */
 
@@ -32,16 +32,16 @@ const ENDPOINTS: Record<string, string> = {
  *
  * A user's own key is usually on a paid or personal quota with far less
  * queueing than a shared free tier, so a long stall is more likely to mean
- * something is wrong than that it is merely busy — and every second spent
+ * something is wrong than that it is merely busy - and every second spent
  * waiting here is a second before the platform fallback can rescue the parse.
  */
 const TIMEOUT_MS = 15_000;
 
-export class ByokAdapter extends OpenRouterAdapter {
-  override readonly name: string;
+export class ByokAdapter extends OpenAiCompatibleAdapter {
+  readonly name: string;
 
-  protected override readonly endpoint: string;
-  protected override readonly providerLabel: string;
+  protected readonly endpoint: string;
+  protected readonly providerLabel: string;
 
   private readonly apiKey: string;
   private readonly model: string;
@@ -55,7 +55,7 @@ export class ByokAdapter extends OpenRouterAdapter {
     /*
      * No ConfigService.
      *
-     * Both methods that would reach for it — credentials() and models() — are
+     * Both methods that would reach for it - credentials() and models() - are
      * overridden below, so it is never touched. Passing a stub is honest about
      * that; wiring a real one would suggest this adapter reads configuration
      * when its whole purpose is not to.
@@ -76,7 +76,7 @@ export class ByokAdapter extends OpenRouterAdapter {
     this.model = model;
   }
 
-  protected override credentials(): { apiKey?: string; timeoutMs: number } {
+  protected credentials(): { apiKey?: string; timeoutMs: number } {
     return { apiKey: this.apiKey, timeoutMs: TIMEOUT_MS };
   }
 
@@ -86,8 +86,8 @@ export class ByokAdapter extends OpenRouterAdapter {
     return {};
   }
 
-  protected override models(): string[] {
-    // Exactly what the user chose — no chain. Falling through to a second
+  protected models(): string[] {
+    // Exactly what the user chose - no chain. Falling through to a second
     // model on their key would spend their quota on something they did not ask
     // for, and the platform is already the fallback.
     return [this.model];

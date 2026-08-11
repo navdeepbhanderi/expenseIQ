@@ -17,13 +17,13 @@ import { CandidateCard, HeardLine } from "./candidate-card";
 import { useVoiceEnabled } from "@/lib/voice-preference";
 
 /**
- * The always-present composer — design 5a/5b/5c.
+ * The always-present composer - design 5a/5b/5c.
  *
  * It stays on screen rather than living behind a button because the design's
  * whole argument is that logging an expense should cost one gesture. A modal
  * you have to open first is already two.
  *
- * Hold space to speak, ⏎ to add, Esc to dismiss — 5c states the shortcuts on
+ * Hold space to speak, ⏎ to add, Esc to dismiss - 5c states the shortcuts on
  * screen, so they have to actually work.
  */
 export function CaptureDock({
@@ -82,7 +82,7 @@ export function CaptureDock({
   const speech = useSpeech({ onFinal: (transcript) => void submit(transcript) });
 
   /*
-   * Hold space to speak — design 5a.
+   * Hold space to speak - design 5a.
    *
    * Ignored while any field has focus, or the shortcut would eat every space
    * the user types into the composer itself. Repeat events are ignored too,
@@ -211,7 +211,7 @@ export function CaptureDock({
             <div className="flex items-center justify-between">
               <p className="text-sm font-semibold text-ink">
                 {candidates.length === 1
-                  ? "Got it — check & confirm"
+                  ? "Got it - check & confirm"
                   : `Caught ${candidates.length} things`}
               </p>
               <button
@@ -248,7 +248,7 @@ export function CaptureDock({
                       size="sm"
                       onClick={() => void commit(candidate)}
                       isLoading={confirm.isPending}
-                      // Only amount blocks confirmation — the server says so,
+                      // Only amount blocks confirmation - the server says so,
                       // and a missing account is a suggestion, not an error.
                       disabled={candidate.amountMinor === null}
                     >
@@ -295,7 +295,7 @@ export function CaptureDock({
             />
 
             {/*
-             * The way out of the parser entirely — always here, whatever
+             * The way out of the parser entirely - always here, whatever
              * voice is set to. Some expenses are faster to type than to
              * describe, and the parser can be stubbornly wrong about a phrase.
              */}

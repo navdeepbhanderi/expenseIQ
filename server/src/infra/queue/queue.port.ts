@@ -1,14 +1,14 @@
 /**
  * Background work, behind a seam.
  *
- * The plan reserves queues for ingestion — Gmail, receipts, reminders — where
+ * The plan reserves queues for ingestion - Gmail, receipts, reminders - where
  * nobody is waiting on screen. Interactive parsing stays synchronous.
  *
  * Two drivers, same contract:
  *
- *   bull   — BullMQ on Redis. Survives a restart, retries, and can be worked
+ *   bull   - BullMQ on Redis. Survives a restart, retries, and can be worked
  *            by a separate process later.
- *   inline — runs the handler immediately, in-process. Used by integration
+ *   inline - runs the handler immediately, in-process. Used by integration
  *            tests, because a test that enqueues work and then polls for a
  *            worker to pick it up is slow and flaky, and it would be testing
  *            BullMQ rather than this application.
@@ -40,7 +40,7 @@ export interface QueuePort {
   /**
    * Schedules work.
    *
-   * Resolves when the job is *accepted*, not when it completes — except on
+   * Resolves when the job is *accepted*, not when it completes - except on
    * the inline driver, where those are the same moment. Callers must not
    * depend on completion; that is what the job's own status field is for.
    */

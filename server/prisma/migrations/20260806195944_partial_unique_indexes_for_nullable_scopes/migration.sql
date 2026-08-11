@@ -2,7 +2,7 @@
 --
 -- Prisma's @@unique([profileId, name]) becomes a plain composite index, and in
 -- Postgres a composite unique index does NOT constrain rows where one column
--- is NULL — because NULL is never equal to NULL. So every "global" or
+-- is NULL - because NULL is never equal to NULL. So every "global" or
 -- "overall" row in these four tables was silently unconstrained:
 --
 --   categories   profileId IS NULL  → two system "Groceries" could coexist
@@ -35,7 +35,7 @@ CREATE UNIQUE INDEX "spend_limits_overall_profileId_key"
 
 -- Same NULL semantics on the ingestion idempotency constraint. A NULL
 -- sourceRefId is legitimate (manual and voice entries have no external id),
--- so uniqueness must apply only where a reference actually exists — otherwise
+-- so uniqueness must apply only where a reference actually exists - otherwise
 -- the constraint is dead weight for exactly the EMAIL/SMS rows it exists for.
 CREATE UNIQUE INDEX "review_queue_source_ref_key"
   ON "review_queue_items" ("source", "sourceRefId")

@@ -25,7 +25,7 @@ export interface Harness {
  *
  * Deliberately not a mock: the point of these tests is to exercise the guards,
  * pipes, filters and actual SQL. The HTTP pipeline comes from the same
- * `configureApp()` that main.ts uses, so the two cannot drift — which they did
+ * `configureApp()` that main.ts uses, so the two cannot drift - which they did
  * once, when cookieParser lived only in main.ts and every cookie-based refresh
  * silently 401'd under test while working fine in the real app.
  */

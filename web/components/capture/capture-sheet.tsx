@@ -18,7 +18,7 @@ import { CandidateCard, HeardLine } from "./candidate-card";
 import { useVoiceEnabled } from "@/lib/voice-preference";
 
 /**
- * Mobile capture — design 5f/5g.
+ * Mobile capture - design 5f/5g.
  *
  * A sheet rather than the desktop dock, and deliberately a separate component:
  * 5g has it cover the tab bar, the actions are 58px and stacked at the bottom
@@ -35,7 +35,7 @@ export function CaptureSheet({
   open: boolean;
   onOpenChange: (open: boolean) => void;
   accounts: Account[];
-  /** Opens the typed form — always offered, whatever voice is set to. */
+  /** Opens the typed form - always offered, whatever voice is set to. */
   onManualEntry: () => void;
 }) {
   const [voiceEnabled] = useVoiceEnabled();
@@ -166,7 +166,7 @@ export function CaptureSheet({
         if (!next) {
           speech.stop();
           // Anything left unconfirmed stays in the review queue rather than
-          // being silently dropped — it is already persisted server-side.
+          // being silently dropped - it is already persisted server-side.
           reset();
         }
         onOpenChange(next);
@@ -175,7 +175,7 @@ export function CaptureSheet({
         candidates.length === 0
           ? "Add an expense"
           : candidates.length === 1
-            ? "Got it — check & confirm"
+            ? "Got it - check & confirm"
             : `Caught ${candidates.length} things`
       }
       footer={
@@ -264,7 +264,7 @@ export function CaptureSheet({
                       ? `Listening · 0:${String(speech.elapsed).padStart(2, "0")}`
                       : speech.supported
                         ? "Tap and say what you spent"
-                        : "Type it above — this browser can't listen"}
+                        : "Type it above - this browser can't listen"}
                   </p>
                 </>
               )}

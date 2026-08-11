@@ -11,13 +11,13 @@ import { Select } from "@/components/ui/select";
 import type { Account, Category, NluCandidate } from "@/lib/api/types";
 
 /**
- * One parsed candidate, as chips — design 5c and 3c.
+ * One parsed candidate, as chips - design 5c and 3c.
  *
  * Chips rather than a form, because the design's claim is that confirming
  * should take one tap. A form says "fill this in"; chips say "this is what I
  * heard, correct me if I'm wrong". Only the field that is actually missing
  * opens an editor, and it is marigold and dashed so it reads as the one thing
- * asked of the user — design 3d's "Account? →".
+ * asked of the user - design 3d's "Account? →".
  */
 export function CandidateCard({
   candidate,
@@ -49,7 +49,7 @@ export function CandidateCard({
   return (
     <div className={cn("flex flex-col gap-3", className)}>
       <div className="flex flex-wrap items-center gap-2">
-        {/* Amount is never a chip you can shrug at — it is the transaction. */}
+        {/* Amount is never a chip you can shrug at - it is the transaction. */}
         <Chip tone="mono">
           {candidate.amountMinor === null
             ? "Amount?"
@@ -111,7 +111,7 @@ export function CandidateCard({
             }}
             options={accounts.map((a) => ({ value: a.id, label: a.name }))}
             emptyAction={{
-              label: "No accounts yet — add one",
+              label: "No accounts yet - add one",
               onSelect: () => router.push("/accounts"),
             }}
           />
@@ -126,7 +126,7 @@ export function CandidateCard({
       </div>
 
       {/*
-       * The suggestion line — design 3d's "You usually put fuel on HDFC
+       * The suggestion line - design 3d's "You usually put fuel on HDFC
        * Millennia". Only shown when the account is the missing field, because
        * that is the moment the hint is useful rather than noise.
        */}
@@ -149,7 +149,7 @@ export function CandidateCard({
   );
 }
 
-/** The heard-it header — utterance plus confidence, per design 5c. */
+/** The heard-it header - utterance plus confidence, per design 5c. */
 export function HeardLine({
   text,
   band,

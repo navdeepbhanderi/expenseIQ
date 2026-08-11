@@ -18,7 +18,7 @@ import { useProfile } from "@/components/providers/profile-provider";
 import { useEffect } from "react";
 
 /**
- * The authenticated frame — sidebar at lg, tab bar below it.
+ * The authenticated frame - sidebar at lg, tab bar below it.
  *
  * Capture is owned here rather than by each page, because the mic is reachable
  * from every screen: the tab bar's FAB, the topbar button, and eventually the
@@ -62,7 +62,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
  * Inside ProfileProvider, so capture can reach the active profile's accounts.
  *
  * Capture is owned by the shell rather than by each page because the mic is
- * reachable from every screen — the tab bar FAB, the topbar button and the
+ * reachable from every screen - the tab bar FAB, the topbar button and the
  * space-bar shortcut all have to open the same thing.
  */
 function Frame({ children }: { children: React.ReactNode }) {
@@ -108,7 +108,7 @@ function Frame({ children }: { children: React.ReactNode }) {
         }}
       />
 
-      {/* Always mounted, never gated on the voice preference — switching
+      {/* Always mounted, never gated on the voice preference - switching
           voice off must not leave anyone unable to record an expense. */}
       <ManualEntry open={manualOpen} onOpenChange={setManualOpen} />
     </div>

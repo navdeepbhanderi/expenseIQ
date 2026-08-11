@@ -2,11 +2,11 @@
 // Copied omelette starter. Re-running copy_starter_component with this kind overwrites this file with the latest version (page content is unaffected).
 
 /* BEGIN USAGE */
-// Chrome.jsx — Simplified Chrome browser window (dark theme, macOS)
+// Chrome.jsx - Simplified Chrome browser window (dark theme, macOS)
 // No dependencies, no image assets. All inline styles + inline SVG.
 // Exports (to window): ChromeWindow, ChromeTabBar, ChromeToolbar, ChromeTab, ChromeTrafficLights
 //
-// Usage — wrap your page content in <ChromeWindow> to get the tab bar + URL bar:
+// Usage - wrap your page content in <ChromeWindow> to get the tab bar + URL bar:
 //
 //   <ChromeWindow width={1100} height={680} url="acme.design/pricing">
 //     ...your page content...
@@ -106,7 +106,7 @@ function ChromeWindow({
   width = 900, height = 600, children,
 }) {
   return (
-    // data-om-starter: inert presence marker — Claude Design's starter-usage
+    // data-om-starter: inert presence marker - Claude Design's starter-usage
     // probe reads it; it renders nothing. Keep it on this root element.
     <div data-om-starter="browser-window" style={{
       width, height, borderRadius: 10, overflow: 'hidden',

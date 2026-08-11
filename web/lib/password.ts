@@ -4,15 +4,15 @@
  * This is a deliberate duplication of
  * `server/src/modules/auth/domain/password-policy.ts`, and the duplication has
  * to stay exact. A strength meter that says "Strong" and then watches the
- * server reject the password is worse than no meter at all — it teaches the
+ * server reject the password is worse than no meter at all - it teaches the
  * user that the app's feedback cannot be trusted, at the exact moment they are
  * deciding whether to trust it with their money.
  *
  * `lib/password.test.ts` pins the rules against the same cases the server's
  * own tests use. If the server's policy changes, that test should fail here.
  *
- * Note the design's caption on screen 7b — "Strong · 10+ characters with a
- * number" — is softer than the real rule, which also demands a special
+ * Note the design's caption on screen 7b - "Strong · 10+ characters with a
+ * number" - is softer than the real rule, which also demands a special
  * character. The meter follows the server, not the caption.
  */
 
@@ -44,7 +44,7 @@ export interface PasswordCheck {
   failures: string[];
 }
 
-/** Byte length, because bcrypt truncates bytes — not character count. */
+/** Byte length, because bcrypt truncates bytes - not character count. */
 function byteLength(value: string): number {
   return new TextEncoder().encode(value).length;
 }
@@ -71,7 +71,7 @@ export function checkPassword(password: string): PasswordCheck {
   }
 
   if (COMMON_PASSWORDS.has(password.toLowerCase())) {
-    failures.push("Too common — pick something less guessable");
+    failures.push("Too common - pick something less guessable");
   }
 
   return { valid: failures.length === 0, failures };

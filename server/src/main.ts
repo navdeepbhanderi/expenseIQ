@@ -20,7 +20,7 @@ async function bootstrap(): Promise<void> {
   const webUrl = config.get<AppConfig['webUrl']>('webUrl');
   const isProduction = config.get<AppConfig['isProduction']>('isProduction');
 
-  // Shared with the test harness so the two can never drift — see bootstrap.ts.
+  // Shared with the test harness so the two can never drift - see bootstrap.ts.
   configureApp(app, { corsOrigin: webUrl });
 
   app.enableShutdownHooks();

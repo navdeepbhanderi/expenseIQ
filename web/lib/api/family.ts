@@ -12,7 +12,7 @@ import type {
 
 /*
  * Every type here is transcribed from the server's own interfaces rather than
- * inferred from a sample response — the reports bug came from shaping types
+ * inferred from a sample response - the reports bug came from shaping types
  * against arrays that happened to be empty.
  */
 
@@ -34,7 +34,7 @@ export interface LimitStatus {
   spent: Money;
   remaining: Money;
   usedPercent: number;
-  /** Past 80% — the nudge threshold, which never blocks. */
+  /** Past 80% - the nudge threshold, which never blocks. */
   isApproaching: boolean;
   isOver: boolean;
 }
@@ -226,12 +226,12 @@ function invalidate(
 
 
 /**
- * Sets the monthly limits. OWNER only — the server enforces it.
+ * Sets the monthly limits. OWNER only - the server enforces it.
  *
  * The read side has been on the Family page since it was built; this is the
  * half that was missing, so limits could be shown but never chosen.
  *
- * Zero removes a limit rather than setting one of nothing — that is what the
+ * Zero removes a limit rather than setting one of nothing - that is what the
  * API means by it, and what clearing a field has to send.
  */
 export function useSetSpendLimits(profileId: string | null) {
@@ -249,7 +249,7 @@ export function useSetSpendLimits(profileId: string | null) {
 /* ------------------------------------------------------------- allowance */
 
 /**
- * Grants the monthly allowance — OWNER only.
+ * Grants the monthly allowance - OWNER only.
  *
  * The read side and the "credit now" button both shipped, but nothing could
  * set the amount, so `allowance.data?.allowance` was always null and the whole
@@ -276,7 +276,7 @@ export function useRemoveAllowance(profileId: string | null) {
 
 /* ----------------------------------------------------------------- goals */
 
-/** Edits a goal — a target that moved, a date that slipped. */
+/** Edits a goal - a target that moved, a date that slipped. */
 export function useUpdateGoal(profileId: string | null) {
   const client = useQueryClient();
 
@@ -333,7 +333,7 @@ export interface ProfileInvite {
  *
  * Without this an invite was fire-and-forget: no way to see who had been
  * asked, whether it had expired, or to take it back after inviting the wrong
- * address — and re-inviting was the only feedback that anything had happened.
+ * address - and re-inviting was the only feedback that anything had happened.
  */
 export function usePendingInvites(profileId: string | null) {
   return useQuery({

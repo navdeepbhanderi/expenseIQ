@@ -89,7 +89,7 @@ export class CreateAccountDto {
 
   @ApiPropertyOptional({
     example: 42_150_00,
-    description: 'Paise. Optional — computed from the terms when omitted.',
+    description: 'Paise. Optional - computed from the terms when omitted.',
   })
   @IsOptional()
   @IsInt()

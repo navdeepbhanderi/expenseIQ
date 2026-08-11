@@ -100,13 +100,13 @@ export class BudgetsService {
   /**
    * Replaces the month's budgets wholesale.
    *
-   * PUT rather than PATCH because the design edits budgets as a set — the
+   * PUT rather than PATCH because the design edits budgets as a set - the
    * slider screen in `6c` shows every category at once, and a partial update
    * would leave a category the user just cleared still budgeted.
    *
    * An amount of 0 removes the budget rather than storing a zero, since
    * "budgeted ₹0" and "not budgeted" render identically but behave differently
-   * — the first reports 100% used the moment anything is spent.
+   * - the first reports 100% used the moment anything is spent.
    */
   async setForMonth(
     profileId: string,
@@ -148,7 +148,7 @@ export class BudgetsService {
   }
 
   /**
-   * Per-category "usual" spend — design 3e's "74% of your usual ₹25,000".
+   * Per-category "usual" spend - design 3e's "74% of your usual ₹25,000".
    *
    * Built from the months *before* the current one. Including a month still in
    * progress would drag every norm down as the month starts and up as it ends,
@@ -162,7 +162,7 @@ export class BudgetsService {
 
     // How many complete months this profile has actually been recording for.
     //
-    // Without this the window is always six buckets wide, zero-filled — so a
+    // Without this the window is always six buckets wide, zero-filled - so a
     // profile one month old reports six months of "history" and every norm
     // claims to be reliable. Reliability has to reflect real evidence, not the
     // size of the array we happened to allocate.

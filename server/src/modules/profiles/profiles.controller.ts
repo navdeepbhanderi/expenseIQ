@@ -55,7 +55,7 @@ export class ProfilesController {
 
   // Every route below is profile-scoped, so ProfileAccessGuard resolves the
   // caller's membership and role before the handler runs. Without a
-  // membership it answers 404, not 403 — see the guard for why.
+  // membership it answers 404, not 403 - see the guard for why.
   @Get(':id')
   @UseGuards(ProfileAccessGuard)
   @RequireAction('profile:view')

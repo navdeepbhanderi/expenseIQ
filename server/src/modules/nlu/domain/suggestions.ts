@@ -1,5 +1,5 @@
 /**
- * Ranked account guesses — design 3d's "You usually put fuel on HDFC Millennia"
+ * Ranked account guesses - design 3d's "You usually put fuel on HDFC Millennia"
  * and design 2b's "Usually: SBI Savings, Cash, HDFC Millennia".
  *
  * Pure history, no model involved. Which card someone puts petrol on is a fact
@@ -19,7 +19,7 @@ export interface SuggestionInput {
   categoryId: string | null;
   /** categoryId → accountId → times used together. */
   affinity: Map<string, Map<string, number>>;
-  /** The account already chosen, if any — no point suggesting it again. */
+  /** The account already chosen, if any - no point suggesting it again. */
   exclude: string | null;
 }
 

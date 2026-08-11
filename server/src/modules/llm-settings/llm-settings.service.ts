@@ -88,14 +88,14 @@ export class LlmSettingsService {
      * Shape-checked before anything is stored.
      *
      * A key pasted from the wrong provider is the commonest mistake, and
-     * without this it is only discovered at the next parse — several seconds
+     * without this it is only discovered at the next parse - several seconds
      * later, as an opaque 401 from a provider the user has to work out they
      * are even talking to.
      */
     const apiKey = dto.apiKey.trim();
     if (!provider.keyPattern.test(apiKey)) {
       throw new BadRequestException(
-        `That does not look like a ${provider.label} key — they start with "${provider.keyPlaceholder.replace('…', '')}"`,
+        `That does not look like a ${provider.label} key - they start with "${provider.keyPlaceholder.replace('…', '')}"`,
       );
     }
 
@@ -149,7 +149,7 @@ export class LlmSettingsService {
    * The decrypted key, for the moment of a call.
    *
    * The only place plaintext exists, and it is never returned to a controller
-   * — `LlmResolver` hands it straight to an adapter and lets it go.
+   * - `LlmResolver` hands it straight to an adapter and lets it go.
    */
   async reveal(
     profileId: string,
@@ -184,7 +184,7 @@ export class LlmSettingsService {
 
       await this.noteFailure(
         profileId,
-        'Stored key could not be read — please enter it again',
+        'Stored key could not be read - please enter it again',
       );
 
       return null;

@@ -53,13 +53,13 @@ export class ReceiptsController {
     },
   })
   @ApiOperation({
-    summary: 'Scan a bill — design 6b\'s "we\'ll read the total"',
+    summary: 'Scan a bill - design 6b\'s "we\'ll read the total"',
     description:
       `Accepts ${ACCEPTED_MIME_TYPES.join(', ')}. Returns as soon as the file ` +
       'is stored rather than waiting for the model: a vision call takes ' +
       'several seconds, and holding the request open means a slow phone ' +
       'upload times out having already succeeded. Watch the receipt status, ' +
-      'or just watch the review queue — that is where the result lands.',
+      'or just watch the review queue - that is where the result lands.',
   })
   upload(
     @Param('profileId', ParseUUIDPipe) profileId: string,

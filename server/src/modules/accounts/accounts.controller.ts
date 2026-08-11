@@ -47,7 +47,7 @@ export class AccountsController {
     summary: 'Add a bank account, card or loan',
     description:
       'Cards and loans additionally require `account:linkCredit`, which a ' +
-      'CHILD role does not have — enforced here, not just hidden in the UI.',
+      'CHILD role does not have - enforced here, not just hidden in the UI.',
   })
   create(
     @Param('profileId', ParseUUIDPipe) profileId: string,
@@ -56,7 +56,7 @@ export class AccountsController {
   ): Promise<Account> {
     // A second, narrower check than the route's @RequireAction, because
     // whether a credit product is involved depends on the request body rather
-    // than the route — which decorator metadata cannot see.
+    // than the route - which decorator metadata cannot see.
     this.accounts.assertMayCreate(access.role, dto.type);
     return this.accounts.create(profileId, dto);
   }
@@ -67,7 +67,7 @@ export class AccountsController {
     summary: 'Account detail with its derived position',
     description:
       'Cards return statement/due dates, available credit, minimum due and ' +
-      'utilisation. Loans return the amortisation position — EMIs paid, ' +
+      'utilisation. Loans return the amortisation position - EMIs paid, ' +
       'principal vs interest, and the closure date. All of design 2d.',
   })
   detail(
@@ -109,7 +109,7 @@ export class AccountsController {
   @ApiOperation({
     summary: 'Close or delete an account',
     description:
-      'An account with transactions is closed, not deleted — removing it ' +
+      'An account with transactions is closed, not deleted - removing it ' +
       'would rewrite past months of spending. An unused account is removed.',
   })
   remove(

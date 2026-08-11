@@ -24,32 +24,32 @@ import { Pill } from "@/components/ui/feedback";
 import { ParseDemo } from "@/components/marketing/parse-demo";
 
 export const metadata: Metadata = {
-  title: "ExpenseIQ — Just say what you spent",
+  title: "ExpenseIQ - Just say what you spent",
   description:
-    "Speak an expense in Hindi, Gujarati or Hinglish and ExpenseIQ turns it into a proper ledger entry — categorised, tied to the right account, and always shown to you before it's saved.",
+    "Speak an expense in Hindi, Gujarati or Hinglish and ExpenseIQ turns it into a proper ledger entry - categorised, tied to the right account, and always shown to you before it's saved.",
 };
 
 /*
- * Landing page — design 8a (web) and 8b (mobile).
+ * Landing page - design 8a (web) and 8b (mobile).
  *
  * Two structural things the design does that are easy to miss and change the
  * whole feel:
  *
  *   1. The features band and the closing CTA are DARK in both themes. They are
- *      a compositional device — an ink band breaking up warm paper — not a
+ *      a compositional device - an ink band breaking up warm paper - not a
  *      theme response. Hence literal Night Ledger colours rather than tokens.
  *   2. The hero sits on sunken paper, not paper, so the demo card floats
  *      *above* its surroundings rather than merging with them.
  *
  * Claims: anything the API cannot do yet carries a `Soon` pill. Two further
- * claims were corrected rather than tagged — see the trust row and the badge.
+ * claims were corrected rather than tagged - see the trust row and the badge.
  */
 
 const FEATURES = [
   {
     icon: Mic,
     title: "Speak it in your language",
-    body: "Hindi, Gujarati, Hinglish — or all of them in one sentence.",
+    body: "Hindi, Gujarati, Hinglish - or all of them in one sentence.",
   },
   {
     icon: Layers,
@@ -69,7 +69,7 @@ const FEATURES = [
   {
     icon: PiggyBank,
     title: "Budgets that know your habits",
-    body: "“74% of your usual ₹25,000 on groceries” — context, not a bare number.",
+    body: "“74% of your usual ₹25,000 on groceries” - context, not a bare number.",
   },
   {
     icon: Users,
@@ -150,7 +150,7 @@ const STEPS = [
   {
     step: "02",
     title: "We read it, you confirm",
-    body: "Amount, category, account, date — laid out plainly with how sure we are. One tap and it's in.",
+    body: "Amount, category, account, date - laid out plainly with how sure we are. One tap and it's in.",
   },
   {
     step: "03",
@@ -205,7 +205,7 @@ const PLANS = [
   },
 ];
 
-/** Ink band. Fixed Night Ledger colours — a device, not a theme response. */
+/** Ink band. Fixed Night Ledger colours - a device, not a theme response. */
 const DARK = "bg-[#17140F]";
 
 export default function LandingPage() {
@@ -238,7 +238,7 @@ export default function LandingPage() {
               <p className="mt-5 max-w-[560px] text-[17px] leading-[1.6] text-ink-muted sm:text-xl">
                 ExpenseIQ turns &ldquo;
                 <span className="text-ink">300 रुपये किराने पे खर्च किए</span>
-                &rdquo; into a proper ledger entry — categorised, tied to the
+                &rdquo; into a proper ledger entry - categorised, tied to the
                 right account, and always shown to you before it&rsquo;s saved.
               </p>
 
@@ -247,7 +247,7 @@ export default function LandingPage() {
                   asChild
                   className="h-auto rounded-[14px] px-[26px] py-4 text-base"
                 >
-                  <Link href="/signup">Start free — 2 minutes</Link>
+                  <Link href="/signup">Start free - 2 minutes</Link>
                 </Button>
                 <Button
                   asChild
@@ -408,7 +408,7 @@ export default function LandingPage() {
               <ul className="mt-6 flex flex-col gap-2.5 text-[15px] text-ink-soft">
                 {[
                   "Kid profiles see their own allowance and goals, not the family's card balances.",
-                  "Spend limits nudge at 80% and flag the owner when crossed — they never block an entry.",
+                  "Spend limits nudge at 80% and flag the owner when crossed - they never block an entry.",
                   "Credit products are refused on a child profile by the server, not just hidden.",
                 ].map((line) => (
                   <li key={line} className="flex gap-2.5">
@@ -478,7 +478,7 @@ export default function LandingPage() {
                 ],
                 [
                   "Read-only integrations",
-                  "Where an inbox or calendar is connected it is read-only and opt-in — raw email is never stored.",
+                  "Where an inbox or calendar is connected it is read-only and opt-in - raw email is never stored.",
                 ],
                 [
                   "Ten seconds to undo",
@@ -514,7 +514,7 @@ export default function LandingPage() {
             Free for one person. ₹99 for the household.
           </h2>
           <p className="mt-3 text-[15px] text-ink-muted">
-            Paid plans aren&rsquo;t live yet — every plan starts as a free
+            Paid plans aren&rsquo;t live yet - every plan starts as a free
             account, and nothing asks for a card.
           </p>
 
@@ -552,7 +552,7 @@ export default function LandingPage() {
                 <p className="mt-1 text-sm text-ink-faint">{plan.note}</p>
 
                 {/*
-                 * Plain lines, no tick icons — the design lists them as text.
+                 * Plain lines, no tick icons - the design lists them as text.
                  * A column of ticks reads as a comparison table and invites
                  * counting features rather than reading them.
                  */}

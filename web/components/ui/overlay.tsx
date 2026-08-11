@@ -7,12 +7,12 @@ import { cn } from "@/lib/cn";
 import { Button } from "./button";
 
 /**
- * Overlays — design 6g (modal, confirm dialog, side panel) and 6i (mobile
+ * Overlays - design 6g (modal, confirm dialog, side panel) and 6i (mobile
  * sheet).
  *
  * All four are the same Radix Dialog with different geometry, which is not
  * laziness: they share the behaviour that actually matters and is tedious to
- * get right — focus trapped inside, focus returned to the trigger on close,
+ * get right - focus trapped inside, focus returned to the trigger on close,
  * Escape closing, the rest of the page inert to screen readers.
  */
 
@@ -50,7 +50,7 @@ function Title({ title, hideTitle }: { title: string; hideTitle?: boolean }) {
   );
 }
 
-/** Centred modal — design 6g's "Modal — add account". */
+/** Centred modal - design 6g's "Modal - add account". */
 export function Modal({
   open,
   onOpenChange,
@@ -105,7 +105,7 @@ export function Modal({
 }
 
 /**
- * Bottom sheet — design 6i and 5g.
+ * Bottom sheet - design 6i and 5g.
  *
  * Mobile's answer to the modal, and deliberately a separate component rather
  * than a responsive modal: design 5g has the confirm sheet cover the tab bar,
@@ -136,7 +136,7 @@ export function Sheet({
             className,
           )}
         >
-          {/* Grab handle — signals "this drags/dismisses" without a label. */}
+          {/* Grab handle - signals "this drags/dismisses" without a label. */}
           <div className="flex justify-center pt-3" aria-hidden="true">
             <div className="h-1 w-9 rounded-full bg-line" />
           </div>
@@ -163,7 +163,7 @@ export function Sheet({
   );
 }
 
-/** Right-hand side panel — design 6g's "Side panel · transaction detail". */
+/** Right-hand side panel - design 6g's "Side panel · transaction detail". */
 export function SidePanel({
   open,
   onOpenChange,
@@ -217,7 +217,7 @@ export function SidePanel({
 }
 
 /**
- * Destructive confirm — design 6g.
+ * Destructive confirm - design 6g.
  *
  * Names what will happen in the button ("Delete 3 transactions") rather than
  * saying "OK". A confirm dialog whose button says OK is one the user clicks

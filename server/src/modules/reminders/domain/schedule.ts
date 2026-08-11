@@ -55,7 +55,7 @@ export function decideReminder(input: ScheduleInput): ScheduleDecision {
     return { fire: false, reason: 'too-early' };
   }
 
-  // A scan that runs late still fires — the reminder is useful right up to
+  // A scan that runs late still fires - the reminder is useful right up to
   // the due date, and dropping it because the exact minute passed while the
   // process was restarting would be the worst possible behaviour.
   if (daysUntilDue >= 0) {
@@ -78,7 +78,7 @@ export function cycleKeyFor(dueDate: Date): string {
  * The exact instant to send, as UTC.
  *
  * `timeOfDay` is local: a user who asks for 9 am means 9 am where they are,
- * not 9 am UTC — which in India would arrive at 2:30 pm. The zone offset is
+ * not 9 am UTC - which in India would arrive at 2:30 pm. The zone offset is
  * resolved through Intl rather than hardcoded, so it stays correct for a
  * region with daylight saving even though India has none.
  */

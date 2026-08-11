@@ -14,8 +14,8 @@ interface Health {
 /**
  * Phase 0 smoke test.
  *
- * Exists to prove the foundation end to end — tokens, both themes, all four
- * fonts, money formatting and a real typed call to the running API — before
+ * Exists to prove the foundation end to end - tokens, both themes, all four
+ * fonts, money formatting and a real typed call to the running API - before
  * any product screen depends on them. Replaced by nothing; it stays as the
  * place to check the plumbing when something looks off.
  */
@@ -55,7 +55,7 @@ function Foundation() {
           </button>
         </header>
 
-        {/* API — a real typed call against the running backend */}
+        {/* API - a real typed call against the running backend */}
         <section className="rounded-[var(--radius-card)] border border-line bg-paper p-5">
           <h2 className="font-mono text-[11px] uppercase tracking-[0.12em] text-ink-faint">
             API
@@ -65,7 +65,7 @@ function Foundation() {
             {health.isPending && <span className="text-ink-muted">Checking…</span>}
             {health.isError && (
               <span className="text-spend">
-                Unreachable — is the server running?
+                Unreachable - is the server running?
               </span>
             )}
             {health.data && (
@@ -76,7 +76,7 @@ function Foundation() {
           </div>
         </section>
 
-        {/* Type — all four families the design specifies */}
+        {/* Type - all four families the design specifies */}
         <section className="rounded-[var(--radius-card)] border border-line bg-paper p-5">
           <h2 className="font-mono text-[11px] uppercase tracking-[0.12em] text-ink-faint">
             Type
@@ -85,7 +85,7 @@ function Foundation() {
             Newsreader ₹64,210
           </p>
           <p className="mt-2 text-base text-ink">
-            IBM Plex Sans — the interface voice
+            IBM Plex Sans - the interface voice
           </p>
           <p className="mt-2 font-mono text-sm text-ink-muted">
             IBM Plex Mono · 1,24,860.00
@@ -95,7 +95,7 @@ function Foundation() {
           </p>
         </section>
 
-        {/* Money — the formatter every screen depends on */}
+        {/* Money - the formatter every screen depends on */}
         <section className="rounded-[var(--radius-card)] border border-line bg-paper p-5">
           <h2 className="font-mono text-[11px] uppercase tracking-[0.12em] text-ink-faint">
             Money
@@ -117,7 +117,7 @@ function Foundation() {
           </dl>
         </section>
 
-        {/* Palette — semantic names only; no component hardcodes a hex */}
+        {/* Palette - semantic names only; no component hardcodes a hex */}
         <section className="rounded-[var(--radius-card)] border border-line bg-paper p-5">
           <h2 className="font-mono text-[11px] uppercase tracking-[0.12em] text-ink-faint">
             Palette
@@ -142,7 +142,7 @@ function Foundation() {
             ))}
           </div>
           <p className="mt-4 text-[13px] leading-relaxed text-ink-muted">
-            Marigold is reserved for &ldquo;needs your eye&rdquo; only — the
+            Marigold is reserved for &ldquo;needs your eye&rdquo; only - the
             review queue and dues. It must never compete with spend red.
           </p>
         </section>

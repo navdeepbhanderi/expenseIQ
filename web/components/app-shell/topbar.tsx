@@ -11,7 +11,7 @@ import { useProfile } from "@/components/providers/profile-provider";
 import { useAuth } from "@/components/providers/auth-provider";
 import { useUnreadCount } from "@/lib/api/hooks";
 
-/** Top bar — design 2a's 62px header. */
+/** Top bar - design 2a's 62px header. */
 import { useVoiceEnabled } from "@/lib/voice-preference";
 
 export function Topbar({
@@ -90,7 +90,7 @@ export function Topbar({
        */}
       {/*
        * With voice on this opens the capture sheet, which offers both speech
-       * and typing. With voice off it goes straight to the manual form —
+       * and typing. With voice off it goes straight to the manual form -
        * otherwise the primary action leads to a sheet whose main affordance
        * the user has just switched off.
        */}

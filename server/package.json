@@ -1,7 +1,7 @@
 {
   "name": "expenseiq-server",
   "version": "0.1.0",
-  "description": "ExpenseIQ backend — AI-powered expense tracker",
+  "description": "ExpenseIQ backend - AI-powered expense tracker",
   "license": "UNLICENSED",
   "private": true,
   "type": "commonjs",

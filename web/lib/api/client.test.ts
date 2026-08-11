@@ -182,7 +182,7 @@ describe("token refresh", () => {
     /*
      * The reason single-flight exists. The backend rotates refresh tokens and
      * revokes the whole family on reuse, so five parallel refreshes would look
-     * exactly like a stolen token being replayed — and log the user out.
+     * exactly like a stolen token being replayed - and log the user out.
      */
     setAccessToken("stale");
 

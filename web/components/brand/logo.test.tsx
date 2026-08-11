@@ -7,7 +7,7 @@ describe("LogoMark", () => {
     const { container, rerender } = render(<LogoMark size={104} />);
     const big = container.firstElementChild as HTMLElement;
 
-    // 25% radius, 21% horizontal padding — the ratios the design's two
+    // 25% radius, 21% horizontal padding - the ratios the design's two
     // specimens agree on.
     expect(big.style.borderRadius).toBe("26px");
     expect(big.style.padding).toBe("0px 21.84px");
@@ -18,7 +18,7 @@ describe("LogoMark", () => {
   });
 
   it("never lets a rule round away to nothing at favicon size", () => {
-    // 9% of 16px is 1.44 — without the floor this rounds to 1 and at smaller
+    // 9% of 16px is 1.44 - without the floor this rounds to 1 and at smaller
     // sizes to 0, and the mark disappears exactly where it must still read.
     const { container } = render(<LogoMark size={12} />);
     const rules = container.querySelectorAll("span > span");
@@ -29,7 +29,7 @@ describe("LogoMark", () => {
     }
   });
 
-  it("keeps the third rule short and marigold — the waiting entry", () => {
+  it("keeps the third rule short and marigold - the waiting entry", () => {
     // This is the design's whole idea in one glyph, so it is worth pinning.
     const { container } = render(<LogoMark size={104} />);
     const rules = Array.from(container.querySelectorAll("span > span"));
@@ -48,7 +48,7 @@ describe("LogoMark", () => {
     expect(colours.size).toBe(1);
   });
 
-  it("is hidden from assistive tech — the wordmark does the naming", () => {
+  it("is hidden from assistive tech - the wordmark does the naming", () => {
     const { container } = render(<LogoMark size={32} />);
     expect(container.firstElementChild).toHaveAttribute("aria-hidden", "true");
   });

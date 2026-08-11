@@ -26,7 +26,7 @@ export interface CreateNotification {
   payload?: Record<string, unknown>;
   /**
    * Makes the notification unique. A second create with the same key is
-   * ignored rather than stacking a duplicate banner — "HDFC Card due in 7
+   * ignored rather than stacking a duplicate banner - "HDFC Card due in 7
    * days" must appear once, however many times the scan runs.
    */
   dedupeKey?: string;
@@ -41,7 +41,7 @@ export class NotificationsService {
    *
    * Deduplication is checked against *unread* notifications only. Once the
    * user has seen and dismissed "your bill is due", a later cycle legitimately
-   * raises it again — the key repeats across cycles by design, and only the
+   * raises it again - the key repeats across cycles by design, and only the
    * unread window should suppress it.
    */
   async raise(input: CreateNotification): Promise<Notification | null> {

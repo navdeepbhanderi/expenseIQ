@@ -26,7 +26,7 @@ export class HealthController {
    */
   @Get('ready')
   @ApiOperation({
-    summary: 'Readiness probe — verifies datastore reachability',
+    summary: 'Readiness probe - verifies datastore reachability',
   })
   async readiness(): Promise<{
     status: 'ok' | 'degraded';

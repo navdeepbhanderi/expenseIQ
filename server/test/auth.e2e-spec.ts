@@ -6,7 +6,7 @@ import { createHarness, type Harness } from './app-harness';
 /**
  * Phase 1 acceptance: identity and access.
  *
- * The security-relevant behaviours here are the ones worth asserting — a
+ * The security-relevant behaviours here are the ones worth asserting - a
  * signup flow that "works" is easy, one that doesn't leak which emails are
  * registered and revokes a whole token family on replay is not.
  */
@@ -40,7 +40,7 @@ describe('Auth (e2e)', () => {
     overrides: Partial<typeof credentials> = {},
   ): Promise<{
     accessToken: string;
-    /** `name=value` only — safe to send back as a Cookie header. */
+    /** `name=value` only - safe to send back as a Cookie header. */
     refreshCookie: string;
     /** The full Set-Cookie line, for asserting on attributes. */
     rawSetCookie: string;
@@ -76,7 +76,7 @@ describe('Auth (e2e)', () => {
 
   /**
    * A `Cookie` request header carries only `name=value` pairs. Passing the
-   * whole `Set-Cookie` line back — attributes and all — makes cookie-parser
+   * whole `Set-Cookie` line back - attributes and all - makes cookie-parser
    * read `Path`, `HttpOnly` and the `Expires` date as if they were cookies.
    */
   function extractRefreshCookie(response: {
@@ -135,7 +135,7 @@ describe('Auth (e2e)', () => {
         .send(credentials)
         .expect(202);
 
-      // Identical status and body — the response carries no signal.
+      // Identical status and body - the response carries no signal.
       expect(second.body).toEqual(first.body);
       expect(await harness.prisma.user.count()).toBe(1);
     });
@@ -309,7 +309,7 @@ describe('Auth (e2e)', () => {
 
       const newCookie = extractRefreshCookie(rotated);
 
-      // Replay the old one — this is the signal that the chain leaked.
+      // Replay the old one - this is the signal that the chain leaked.
       await request(server)
         .post('/api/v1/auth/refresh')
         .set('Cookie', refreshCookie)
@@ -406,7 +406,7 @@ describe('Auth (e2e)', () => {
       // Asserted against the environment rather than a fixed status, because
       // both outcomes are correct and which one applies depends on whether
       // .env carries a client id. The earlier version hardcoded 501 and
-      // started failing the moment real credentials were added — a test that
+      // started failing the moment real credentials were added - a test that
       // breaks on correct configuration is worse than no test.
       const configured = Boolean(process.env.GOOGLE_CLIENT_ID);
 
@@ -426,7 +426,7 @@ describe('Auth (e2e)', () => {
     it('throttles repeated login attempts', async () => {
       // Auth routes allow 10/min, far below the app-wide 120, because these
       // are the endpoints worth brute-forcing. Verified against the real
-      // limit — the suite clears counters between tests rather than raising
+      // limit - the suite clears counters between tests rather than raising
       // them, so this asserts production behaviour.
       const attempt = () =>
         request(server)
@@ -657,7 +657,7 @@ describe('Auth (e2e)', () => {
 
       harness.resetThrottle();
 
-      // Never verified by link, yet login works — controlling the inbox is
+      // Never verified by link, yet login works - controlling the inbox is
       // the same proof, so demanding it twice would be theatre.
       await request(server)
         .post('/api/v1/auth/login')

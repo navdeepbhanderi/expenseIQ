@@ -10,7 +10,7 @@ import { cn } from "@/lib/cn";
  * The heights are not arbitrary: 40px desktop / 58px mobile come straight off
  * the design, and the mobile size exists because 40px is below the comfortable
  * thumb target on a phone. `size="mobile"` is therefore a real variant, not a
- * responsive tweak — screens 6h and 5g use it deliberately.
+ * responsive tweak - screens 6h and 5g use it deliberately.
  */
 
 export type ButtonVariant =
@@ -33,7 +33,7 @@ const variants: Record<ButtonVariant, string> = {
     "border border-green/25 bg-green-soft text-green-hover font-semibold hover:border-green/40",
   ghost: "text-ink-muted hover:bg-paper-raised hover:text-ink",
   /*
-   * Marigold. Reserved for "needs your eye" — confirming a review item,
+   * Marigold. Reserved for "needs your eye" - confirming a review item,
    * acting on a due. The design is explicit that attention has exactly one
    * colour; using this for a general primary action breaks that language.
    */
@@ -53,7 +53,7 @@ export interface ButtonProps
   variant?: ButtonVariant;
   size?: ButtonSize;
   isLoading?: boolean;
-  /** Renders as the child element — for wrapping a Next <Link>. */
+  /** Renders as the child element - for wrapping a Next <Link>. */
   asChild?: boolean;
 }
 
@@ -71,7 +71,7 @@ export function Button({
 
   return (
     <Comp
-      // A loading button must not be clickable twice — the second click is a
+      // A loading button must not be clickable twice - the second click is a
       // duplicate transaction, not a faster save.
       disabled={disabled || isLoading}
       aria-busy={isLoading || undefined}
@@ -93,7 +93,7 @@ export function Button({
       {...props}
     >
       {/*
-       * With asChild, Slot must receive exactly one element child — even a
+       * With asChild, Slot must receive exactly one element child - even a
        * `false` from a short-circuit counts as a second one and throws. A
        * link cannot be "loading" anyway, so the spinner is simply not part
        * of that branch.
@@ -115,7 +115,7 @@ export function Button({
 /**
  * Square icon-only button.
  *
- * Requires an accessible name from the caller — an icon alone tells a screen
+ * Requires an accessible name from the caller - an icon alone tells a screen
  * reader nothing, and this is the component where that is easiest to forget.
  */
 export function IconButton({
@@ -144,7 +144,7 @@ export function IconButton({
 }
 
 /**
- * A primary action with an attached secondary trigger — design 6a's "Split".
+ * A primary action with an attached secondary trigger - design 6a's "Split".
  * Used where confirming has a dominant default plus alternatives (confirm and
  * next, confirm and edit).
  */

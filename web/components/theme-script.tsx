@@ -2,7 +2,7 @@
  * Sets the theme before first paint.
  *
  * This runs as a blocking inline script in <head> on purpose. Any approach
- * that waits for React — an effect, a provider, a client component — paints
+ * that waits for React - an effect, a provider, a client component - paints
  * the default theme first and then corrects it, which is a white flash on
  * every load for anyone using Night Ledger. The script is tiny and the block
  * is measured in microseconds; the flash is not.

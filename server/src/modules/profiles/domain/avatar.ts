@@ -1,7 +1,7 @@
 /**
  * Profile identity: the two-letter monogram and the tint behind it.
  *
- * Design 2c makes the avatar colour load-bearing — it "tints the greeting row
+ * Design 2c makes the avatar colour load-bearing - it "tints the greeting row
  * so you always know whose money you're looking at". So it's derived once at
  * creation and stored, never recomputed on read: renaming "Personal" to
  * "Household" must not silently change the user's colour.
@@ -33,14 +33,14 @@ export const AVATAR_PALETTE = [
  *   one letter per word  →  "Sharma family" = SF, but the design shows SH
  *   first two letters    →  "Aarav"         = AA, but the design shows AR
  *
- * Skipping the repeat satisfies every example — Groceries GR, Eating out EA,
- * EMI & loans EM, Utilities UT, Ishaan IS, Sharma family SH, Aarav AR — and
+ * Skipping the repeat satisfies every example - Groceries GR, Eating out EA,
+ * EMI & loans EM, Utilities UT, Ishaan IS, Sharma family SH, Aarav AR - and
  * has an independent justification: a monogram of two identical letters
  * carries less information and reads worse.
  *
  * Note this takes whatever string the caller hands it. The design's personal
  * profile shows AR for a profile *named* "Personal", because the monogram
- * comes from the user's name in that case — deciding which string to feed in
+ * comes from the user's name in that case - deciding which string to feed in
  * is the caller's job, not this function's.
  */
 export function deriveInitials(name: string): string {
@@ -76,7 +76,7 @@ export function deriveInitials(name: string): string {
  * Picks a stable colour from the palette.
  *
  * Deterministic on the seed rather than random, so the same profile gets the
- * same colour if it is ever recreated — and so tests don't have to stub a
+ * same colour if it is ever recreated - and so tests don't have to stub a
  * random source. `existing` lets the caller spread colours across a user's
  * profiles instead of handing two profiles the same tint.
  */

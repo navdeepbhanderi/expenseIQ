@@ -161,7 +161,7 @@ describe('Family (e2e)', () => {
       const profile = await harness.prisma.profile.findUniqueOrThrow({
         where: { id: owner.profileId },
       });
-      // Design 2c renders a shared profile differently — the kind has to keep
+      // Design 2c renders a shared profile differently - the kind has to keep
       // up with reality rather than being set once at creation.
       expect(profile.kind).toBe('SHARED');
 
@@ -174,7 +174,7 @@ describe('Family (e2e)', () => {
 
     it('refuses an invite sent to a different address', async () => {
       // A token alone cannot be the only credential for access to a family's
-      // finances — an intercepted link would otherwise be enough.
+      // finances - an intercepted link would otherwise be enough.
       const owner = await setup('aarav@example.com', 'Aarav');
       const meera = await setup('meera@example.com', 'Meera');
       const someoneElse = await setup('rahul@example.com', 'Rahul');
@@ -315,7 +315,7 @@ describe('Family (e2e)', () => {
 
       // Written out rather than dispatched dynamically: a loop indexing into
       // supertest by method name defeats its types, and these four calls are
-      // the phase's whole deliverable — worth reading literally.
+      // the phase's whole deliverable - worth reading literally.
       await request(server)
         .put(`${base}/spend-limits`)
         .set(auth)
@@ -442,7 +442,7 @@ describe('Family (e2e)', () => {
   });
 
   describe('allowance', () => {
-    it('credits once a month and reports what is left — design 2c', async () => {
+    it('credits once a month and reports what is left - design 2c', async () => {
       const { owner } = await household();
 
       await request(server)
@@ -470,7 +470,7 @@ describe('Family (e2e)', () => {
         .set('Authorization', `Bearer ${owner.token}`)
         .expect(200);
 
-      // "₹1,200 allowance · ₹1,200 left" — nothing spent yet.
+      // "₹1,200 allowance · ₹1,200 left" - nothing spent yet.
       expect(status.body.credited.amountMinor).toBe(1_200_00);
       expect(status.body.remaining.amountMinor).toBe(1_200_00);
     });
@@ -529,7 +529,7 @@ describe('Family (e2e)', () => {
       expect(goal.body.perMonthToHitTarget.amountMinor).toBe(15_000_00 / 4);
     });
 
-    it('records who contributed — design 6.5 lets an owner chip in', async () => {
+    it('records who contributed - design 6.5 lets an owner chip in', async () => {
       const { owner, child } = await household();
 
       const goal = await request(server)
@@ -596,7 +596,7 @@ describe('Family (e2e)', () => {
     });
   });
 
-  describe('family dashboard — design 6.6', () => {
+  describe('family dashboard - design 6.6', () => {
     it('aggregates across every profile the caller belongs to', async () => {
       const { owner, child } = await household();
 

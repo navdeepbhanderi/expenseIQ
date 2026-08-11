@@ -23,7 +23,7 @@ describe('password policy', () => {
 
   it('rejects passwords past bcrypt`s 72-byte truncation point', () => {
     // Beyond 72 bytes bcrypt ignores the rest, so two different long
-    // passwords can hash identically — a user typing 80 characters would get
+    // passwords can hash identically - a user typing 80 characters would get
     // less security than they believe they're buying.
     const tooLong = 'a1!'.repeat(30);
     expect(Buffer.byteLength(tooLong)).toBeGreaterThan(MAX_PASSWORD_BYTES);
@@ -33,7 +33,7 @@ describe('password policy', () => {
   });
 
   it('counts bytes, not characters, for the upper bound', () => {
-    // Devanagari is three bytes per character, so 30 characters is 90 bytes —
+    // Devanagari is three bytes per character, so 30 characters is 90 bytes -
     // over the limit despite looking short.
     const devanagari = 'क'.repeat(30) + '1!';
     expect(devanagari.length).toBeLessThan(MAX_PASSWORD_BYTES);

@@ -70,7 +70,7 @@ export class FamilyService {
    * Invites someone to a profile.
    *
    * The invite records the *role* the inviter chose, so accepting cannot
-   * escalate it — a CHILD invite stays a CHILD invite however the acceptance
+   * escalate it - a CHILD invite stays a CHILD invite however the acceptance
    * request is shaped.
    */
   async invite(
@@ -81,7 +81,7 @@ export class FamilyService {
     const email = dto.email.trim().toLowerCase();
 
     // An OWNER inviting a second OWNER is legitimate (two parents), but
-    // nothing may invite at a role above the inviter's own — otherwise ADULT
+    // nothing may invite at a role above the inviter's own - otherwise ADULT
     // could be granted the ability to remove the OWNER who invited them.
     const inviter = await this.prisma.profileMember.findUnique({
       where: { profileId_userId: { profileId, userId: invitedByUserId } },
@@ -136,7 +136,7 @@ export class FamilyService {
 
     this.logger.log('Invite sent', { profileId, role: invite.role });
 
-    // Deliberately not revealing whether the address has an account — the
+    // Deliberately not revealing whether the address has an account - the
     // same reasoning as signup.
     return { message: 'Invitation sent' };
   }
@@ -167,7 +167,7 @@ export class FamilyService {
    * Accepts an invite, joining the caller to the profile.
    *
    * The invited email must match the accepting account. Without that check an
-   * intercepted link would let anyone join a family's finances — the token
+   * intercepted link would let anyone join a family's finances - the token
    * alone cannot be the only credential for something this sensitive.
    */
   async acceptInvite(
@@ -312,7 +312,7 @@ export class FamilyService {
    * A profile must always have at least one owner.
    *
    * Without this, demoting or removing the last owner leaves a profile with
-   * live financial data that nobody can administer, invite to, or delete —
+   * live financial data that nobody can administer, invite to, or delete -
    * recoverable only by direct database access.
    */
   private async assertNotLastOwner(

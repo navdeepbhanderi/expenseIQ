@@ -43,7 +43,7 @@ export interface FamilyDashboard {
 /**
  * The cross-profile view from design 6.6.
  *
- * "Most personal finance apps don't do cross-profile aggregation well" — the
+ * "Most personal finance apps don't do cross-profile aggregation well" - the
  * spec's own words, and the reason this is a differentiator rather than a
  * nice-to-have. The hard part is not the arithmetic; it is that the caller
  * may hold a different role on each profile, so what they are allowed to see
@@ -125,7 +125,7 @@ export class FamilyDashboardService {
       householdIncome,
       members,
       // Sorted across the whole family, so the most urgent commitment leads
-      // regardless of whose profile it sits on — which is the entire point of
+      // regardless of whose profile it sits on - which is the entire point of
       // looking at a household view rather than four separate dashboards.
       upcomingDues: dues.sort((a, b) => a.daysUntilDue - b.daysUntilDue),
     };

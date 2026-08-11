@@ -20,7 +20,7 @@ export const TYPE_LABELS: Record<AccountType, string> = {
  * The account form, shared by add and edit.
  *
  * One component because the fields are identical and the API takes the same
- * shape either way — two forms drift, and the loan fields going missing from
+ * shape either way - two forms drift, and the loan fields going missing from
  * one of them is exactly how that shows up.
  *
  * Every field the API accepts is here. A loan without its interest rate and
@@ -150,7 +150,7 @@ export function AccountForm({
   onChange: (values: AccountFormValues) => void;
   /** CHILD profiles are refused credit products by the server. */
   allowCredit?: boolean;
-  /** Editing cannot change an account's type — the API has no path for it. */
+  /** Editing cannot change an account's type - the API has no path for it. */
   lockType?: boolean;
 }) {
   const set = <K extends keyof AccountFormValues>(

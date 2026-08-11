@@ -5,7 +5,7 @@ import { createHarness, type Harness } from './app-harness';
 /**
  * Phase 6 acceptance: reminders and notifications.
  *
- * The behaviour that matters is idempotence — a bill reminder that arrives
+ * The behaviour that matters is idempotence - a bill reminder that arrives
  * twice is worse than one that arrives a few hours late, and the spec calls
  * out the case where a user edits the offset after this cycle already fired.
  */
@@ -82,7 +82,7 @@ describe('Reminders (e2e)', () => {
   }
 
   describe('configuration', () => {
-    it('stores the offset, time and channels — design 6h', async () => {
+    it('stores the offset, time and channels - design 6h', async () => {
       const { token, profileId } = await setup();
       const account = await cardDueInDays(profileId, 3);
 
@@ -298,7 +298,7 @@ describe('Reminders (e2e)', () => {
       const { token, profileId } = await setup();
 
       // Anchored so the 99th EMI falls ten days from now. A fixed date would
-      // silently stop testing anything as the calendar moved past it — the
+      // silently stop testing anything as the calendar moved past it - the
       // first version of this test had a next-EMI date fifty days in the
       // past, which the scan correctly ignored as beyond the overdue grace.
       const emisPaid = 98;
@@ -468,7 +468,7 @@ describe('Reminders (e2e)', () => {
         .expect(200);
 
       // Filling the gaps with defaults would have reset "a week before, 8 pm"
-      // to "3 days before, 9 am" — a schedule the user never chose.
+      // to "3 days before, 9 am" - a schedule the user never chose.
       expect(off.body.offsetDays).toBe(7);
       expect(off.body.timeOfDay).toBe(1200);
       expect(off.body.enabled).toBe(false);
@@ -489,7 +489,7 @@ describe('Reminders (e2e)', () => {
         .set('Authorization', `Bearer ${token}`)
         .expect(200);
 
-      // An array, not an object — the web client read `.enabled` off this
+      // An array, not an object - the web client read `.enabled` off this
       // directly and got undefined, so the switch could never show as on.
       expect(Array.isArray(read.body)).toBe(true);
       expect(read.body[0].offsetDays).toBe(5);

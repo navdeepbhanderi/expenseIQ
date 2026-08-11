@@ -48,7 +48,7 @@ export function useTransactions(
           from: filters.from,
           to: filters.to,
           direction: filters.direction,
-          // The API's DTO accepts both `?ids=a&ids=b` and `?ids=a,b` — see
+          // The API's DTO accepts both `?ids=a&ids=b` and `?ids=a,b` - see
           // toStringArray in transaction.dto.ts. Comma is the compact form.
           ...arrayParam("categoryIds", filters.categoryIds),
           ...arrayParam("accountIds", filters.accountIds),
@@ -123,7 +123,7 @@ export function useDeleteTransaction(profileId: string | null) {
 /**
  * Puts a deleted transaction back.
  *
- * Deletion is soft precisely so this can exist, but nothing called it — the
+ * Deletion is soft precisely so this can exist, but nothing called it - the
  * only undo was the toast's short-lived token, and once that expired a
  * mis-tapped delete was permanent as far as the user could tell.
  */
@@ -162,7 +162,7 @@ export function useBulkDelete(profileId: string | null) {
  * Goes through the shared client rather than a bare fetch.
  *
  * The hand-rolled version read the access token directly, which skips the
- * single-flight refresh — so an export attempted after the token aged out
+ * single-flight refresh - so an export attempted after the token aged out
  * threw "Export failed" instead of refreshing and retrying like every other
  * call in the app. Since the token is short-lived and an export is exactly the
  * kind of thing done after reading a page for a while, that was easy to hit.
@@ -198,7 +198,7 @@ export async function downloadExport(
   anchor.download = `expenseiq-${new Date().toISOString().slice(0, 10)}.csv`;
   anchor.click();
 
-  // Released on a delay — revoking synchronously can cancel the download in
+  // Released on a delay - revoking synchronously can cancel the download in
   // some browsers before it has started reading the blob.
   setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
 }

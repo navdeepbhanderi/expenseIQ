@@ -11,7 +11,7 @@ export const metadata: Metadata = {
  *
  * Written plainly and kept short on purpose: a page nobody reads because it
  * is ten screens of boilerplate is not meaningful consent. It states what the
- * product actually does today — not what a template says a fintech does.
+ * product actually does today - not what a template says a fintech does.
  */
 export default function TermsPage() {
   return (
@@ -39,7 +39,7 @@ export default function TermsPage() {
           ],
           [
             "Integrations are opt-in",
-            "Gmail and Calendar connections are off by default, read-only, and revocable with one toggle. Raw email is never stored — only the transaction extracted from it.",
+            "Gmail and Calendar connections are off by default, read-only, and revocable with one toggle. Raw email is never stored - only the transaction extracted from it.",
           ],
           [
             "Sharing is explicit",

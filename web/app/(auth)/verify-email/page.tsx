@@ -13,7 +13,7 @@ import { api, ApiError } from "@/lib/api/client";
 /** The design shows 0:42; the server has no cooldown, so this is ours. */
 const RESEND_COOLDOWN_SECONDS = 42;
 
-/** Stop polling after five minutes — see the comment on `enabled` below. */
+/** Stop polling after five minutes - see the comment on `enabled` below. */
 const POLL_CEILING_MS = 5 * 60_000;
 
 function VerifyEmail() {
@@ -91,7 +91,7 @@ function VerifyEmail() {
         <>
           We sent a verification link to{" "}
           <span className="font-medium text-ink">{email || "your email"}</span>.
-          Open it on any device and you&rsquo;re in — nothing to type, no code
+          Open it on any device and you&rsquo;re in - nothing to type, no code
           to copy.
         </>
       }
@@ -159,7 +159,7 @@ function VerifyEmail() {
 
           {/*
            * The manual fallback. Polling can be blocked, throttled or simply
-           * stopped after the ceiling — a user who has clicked the link must
+           * stopped after the ceiling - a user who has clicked the link must
            * never be stranded on this page.
            */}
           {expired && (
@@ -169,13 +169,13 @@ function VerifyEmail() {
               isLoading={status.isFetching}
             >
               <CheckCircle2 className="size-4" aria-hidden="true" />
-              I&rsquo;ve verified — continue
+              I&rsquo;ve verified - continue
             </Button>
           )}
         </div>
 
         <p className="text-xs leading-relaxed text-ink-faint">
-          Nothing in the inbox after a minute? Check spam — the sender is
+          Nothing in the inbox after a minute? Check spam - the sender is
           hello@expenseiq.in.
         </p>
       </div>

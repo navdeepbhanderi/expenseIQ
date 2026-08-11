@@ -7,7 +7,7 @@ import { EmptyState } from "@/components/ui/feedback";
  * Route-level error boundary.
  *
  * Shows a recovery path rather than a stack trace. `reset` re-renders the
- * segment, which is usually enough — most failures here are a request that
+ * segment, which is usually enough - most failures here are a request that
  * did not come back rather than a broken component.
  */
 export default function AppError({
@@ -32,7 +32,7 @@ export default function AppError({
           </div>
         }
       >
-        Your data is safe — nothing was changed. {" "}
+        Your data is safe - nothing was changed. {" "}
         {/* The digest is what a support conversation can actually act on. */}
         {error.digest && (
           <span className="font-mono text-xs">Reference {error.digest}</span>

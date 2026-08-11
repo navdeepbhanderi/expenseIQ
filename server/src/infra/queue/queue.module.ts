@@ -35,7 +35,7 @@ import { InlineQueueAdapter } from './inline-queue.adapter';
 
         if (driver === 'inline') {
           logger.warn(
-            'Background jobs run inline — not durable across restarts',
+            'Background jobs run inline - not durable across restarts',
           );
           return inline;
         }

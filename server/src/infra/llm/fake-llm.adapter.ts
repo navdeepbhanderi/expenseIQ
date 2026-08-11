@@ -12,7 +12,7 @@ import type {
 /**
  * A deterministic stand-in for the model.
  *
- * Not a mock in the usual sense — it genuinely parses a useful subset of
+ * Not a mock in the usual sense - it genuinely parses a useful subset of
  * input, so integration tests can exercise the whole pipeline (validation,
  * banding, review queue, confirmation, undo) without a network call, an API
  * key, or a bill. Tests that mattered would otherwise be untestable in CI.
@@ -22,7 +22,7 @@ import type {
  *
  * It is deliberately *not* clever. Anything it can't read comes back with a
  * null amount and low confidence, which is exactly what a real low-confidence
- * parse looks like — so the review-queue paths get exercised too.
+ * parse looks like - so the review-queue paths get exercised too.
  */
 @Injectable()
 export class FakeLlmAdapter implements LlmPort {
@@ -34,7 +34,7 @@ export class FakeLlmAdapter implements LlmPort {
   ): Promise<ExtractionResult> {
     // Image and audio inputs get a plausible low-confidence result rather than
     // nothing. Real vision output is not reproducible offline, but the
-    // pipeline downstream — staging, banding, confirmation — is the same, and
+    // pipeline downstream - staging, banding, confirmation - is the same, and
     // it must be exercised without a network call.
     const text =
       input.kind === 'text' ? input.text : describeBinary(input.data);
@@ -95,7 +95,7 @@ export class FakeLlmAdapter implements LlmPort {
     context: ExtractionContext,
   ): ExtractionResult['candidates'][number] | null {
     // Only genuinely empty fragments are dropped. Anything a person typed is
-    // an attempt to log something — "paid rahul back" has no amount, but
+    // an attempt to log something - "paid rahul back" has no amount, but
     // design 3d shows exactly that case sitting in the queue asking for one.
     // Discarding it here would silently lose the user's input, which the spec
     // forbids outright.
@@ -116,7 +116,7 @@ export class FakeLlmAdapter implements LlmPort {
       category: category ? 0.92 : 0,
       merchant: 0,
       // An unstated date defaults to today and is scored high, not zero.
-      // For expense entry that inference is overwhelmingly right — design 2b
+      // For expense entry that inference is overwhelmingly right - design 2b
       // shows the date chip reading "Today" on an entry that never mentioned
       // one. Scoring it zero would drag every such entry to NEEDS_FIELD.
       date: statedDate ? 0.95 : 0.9,
@@ -188,7 +188,7 @@ function matchFromList(text: string, options: string[]): string | null {
 /**
  * Defers to the real resolver rather than keeping a second, weaker copy.
  *
- * The fake adapter exists so tests never call a live model — but it should
+ * The fake adapter exists so tests never call a live model - but it should
  * still behave like the production path does. Its own two-case regex handled
  * "yesterday" and nothing else, so every test written against it passed while
  * the real pipeline mishandled "on the 5th" and "3 din pehle".

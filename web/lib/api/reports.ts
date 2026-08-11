@@ -35,7 +35,7 @@ export interface ReportSummary {
  * One category's movement between periods.
  *
  * Flat, not nested under a `comparison` key, and it carries no monogram or
- * tint — those come from the categories list. Verified against
+ * tint - those come from the categories list. Verified against
  * reports.service.ts's CategoryComparison rather than assumed: the sample
  * response used to shape these types had an empty byCategory array, so the
  * item shape was invisible in it.
@@ -50,15 +50,15 @@ export interface ComparisonReport {
   previous: Omit<Period, "kind">;
   spend: Comparison;
   income: Comparison;
-  /** Biggest movers first — including categories that vanished this period. */
+  /** Biggest movers first - including categories that vanished this period. */
   byCategory: CategoryComparison[];
 }
 
 /**
  * Design 3e's "74% of your usual ₹25,000 on groceries".
  *
- * Field names follow the server's CategoryNormLine exactly — `categoryName`,
- * `currentMonth`, `sampleMonths` — and there is no monogram or tint here.
+ * Field names follow the server's CategoryNormLine exactly - `categoryName`,
+ * `currentMonth`, `sampleMonths` - and there is no monogram or tint here.
  * `percentOfUsual` is nullable: a category with no history has no "usual" to
  * be a percentage of.
  */
@@ -82,7 +82,7 @@ export interface BudgetStatusLine {
   budget: Money;
   spent: Money;
   remaining: Money;
-  /** `usedPercent`, not `percentUsed` — the server's spelling. */
+  /** `usedPercent`, not `percentUsed` - the server's spelling. */
   usedPercent: number;
   isApproaching: boolean;
   isOver: boolean;
@@ -167,7 +167,7 @@ export function useBudgets(profileId: string | null, month: string) {
 /**
  * Replaces the month's budgets.
  *
- * A PUT, not a PATCH — the endpoint takes the whole month at once, so the
+ * A PUT, not a PATCH - the endpoint takes the whole month at once, so the
  * caller must send every category it wants kept. Sending one category alone
  * would clear the rest.
  */

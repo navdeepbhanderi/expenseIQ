@@ -17,7 +17,7 @@ describe('deriveInitials', () => {
   });
 
   it('skips a repeated leading letter', () => {
-    // "Aarav" is AR in the design, not AA — the only one of the 19 monograms
+    // "Aarav" is AR in the design, not AA - the only one of the 19 monograms
     // that plain first-two-letters gets wrong.
     expect(deriveInitials('Aarav')).toBe('AR');
     expect(deriveInitials('Aaron')).toBe('AR');

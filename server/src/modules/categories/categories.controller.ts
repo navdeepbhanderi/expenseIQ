@@ -81,7 +81,7 @@ export class CategoriesController {
   @ApiOperation({
     summary: 'Archive a custom category',
     description:
-      'Archives rather than deletes — transactions reference categories, and ' +
+      'Archives rather than deletes - transactions reference categories, and ' +
       'a hard delete would either orphan historical spend or cascade it away.',
   })
   archive(

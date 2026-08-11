@@ -18,7 +18,7 @@ export class ConfirmRecurrenceDto {
     example: 'merchant:4e742687-b067-4f28-a6b2-138904da89c1',
     description:
       'The signature from GET /recurring/detected. Only names which pattern ' +
-      'to accept — the amounts and cadence are re-derived from history, so a ' +
+      'to accept - the amounts and cadence are re-derived from history, so a ' +
       'caller cannot invent a rule that was never in the data.',
   })
   @IsString()
@@ -36,7 +36,7 @@ export class ConfirmRecurrenceDto {
  *
  * Detection needs three occurrences before a pattern is visible, which is
  * three months for anything monthly. Someone who knows their salary lands on
- * the 1st should not have to wait a quarter for the app to notice — and
+ * the 1st should not have to wait a quarter for the app to notice - and
  * income in particular may never be "detected" at all if it is the only
  * credit on the account.
  */
@@ -67,7 +67,7 @@ export class CreateRecurringDto {
   @ApiPropertyOptional({
     default: false,
     description:
-      'Fires on the last day of the month — the 30th in April, the 28th or ' +
+      'Fires on the last day of the month - the 30th in April, the 28th or ' +
       '29th in February. A distinct intent from "the 31st", which only ' +
       'coincides with it in long months.',
   })
@@ -126,7 +126,7 @@ export class CreateRecurringDto {
     maximum: 12,
     description:
       'YEARLY and QUARTERLY only. 1 = January. The month the cycle is ' +
-      'anchored to — YEARLY is genuinely ambiguous without it, and for ' +
+      'anchored to - YEARLY is genuinely ambiguous without it, and for ' +
       'QUARTERLY it picks Jan/Apr/Jul/Oct over Feb/May/Aug/Nov.',
   })
   @IsOptional()
@@ -149,7 +149,7 @@ export class CreateRecurringDto {
     example: 6,
     minimum: 1,
     description:
-      'Stop after this many entries — the natural way to say "6 EMIs left". ' +
+      'Stop after this many entries - the natural way to say "6 EMIs left". ' +
       'Counted only on entries actually created, so a repeated run does not ' +
       'consume an instalment. Set with endsOn and whichever comes first wins.',
   })
@@ -225,7 +225,7 @@ export class UpdateRecurringDto {
     maximum: 12,
     description:
       'YEARLY and QUARTERLY only. 1 = January. The month the cycle is ' +
-      'anchored to — YEARLY is genuinely ambiguous without it, and for ' +
+      'anchored to - YEARLY is genuinely ambiguous without it, and for ' +
       'QUARTERLY it picks Jan/Apr/Jul/Oct over Feb/May/Aug/Nov.',
   })
   @IsOptional()
@@ -248,7 +248,7 @@ export class UpdateRecurringDto {
     example: 6,
     minimum: 1,
     description:
-      'Stop after this many entries — the natural way to say "6 EMIs left". ' +
+      'Stop after this many entries - the natural way to say "6 EMIs left". ' +
       'Counted only on entries actually created, so a repeated run does not ' +
       'consume an instalment. Set with endsOn and whichever comes first wins.',
   })

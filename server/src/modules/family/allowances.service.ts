@@ -99,7 +99,7 @@ export class AllowancesService {
    * Goes **straight into the ledger** rather than the review queue, unlike a
    * generated recurring payment. The distinction is certainty: a recurring
    * bill's amount is a prediction that may be wrong, whereas an allowance is
-   * a fixed figure an owner set — there is nothing for the child to verify,
+   * a fixed figure an owner set - there is nothing for the child to verify,
    * and asking them to confirm their own pocket money would be pure ceremony.
    *
    * `lastCreditedMonth` is the idempotency guard: a scheduler that fires
@@ -122,7 +122,7 @@ export class AllowancesService {
      *
      * This is the guard that stops an allowance being credited twice. Derived
      * in UTC, an allowance due on the 1st and credited at 00:30 IST was
-     * recorded against the previous month — so the real first-of-month run
+     * recorded against the previous month - so the real first-of-month run
      * saw no record and credited a second time.
      */
     const monthKey = monthKeyIn(asOf);

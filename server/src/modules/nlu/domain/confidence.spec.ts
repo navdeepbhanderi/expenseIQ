@@ -63,7 +63,7 @@ describe('canOneTapConfirm', () => {
 
   it('blocks a merely fairly-sure item', () => {
     // Design 2f: below the clear threshold the item "cannot be
-    // one-tap-confirmed — forces at least a glance".
+    // one-tap-confirmed - forces at least a glance".
     expect(canOneTapConfirm(ConfidenceBand.FAIRLY_SURE, [])).toBe(false);
     expect(canOneTapConfirm(ConfidenceBand.NEEDS_FIELD, [])).toBe(false);
   });
@@ -78,7 +78,7 @@ describe('findMissingFields', () => {
     expect(findMissingFields(candidate())).toEqual([]);
   });
 
-  it('reports a missing amount — design 3d`s "amount not found"', () => {
+  it('reports a missing amount - design 3d`s "amount not found"', () => {
     expect(findMissingFields(candidate({ amountMinor: null }))).toContain(
       'amount',
     );
@@ -90,7 +90,7 @@ describe('findMissingFields', () => {
     );
   });
 
-  it('reports a missing account — design 3d`s "Which account?"', () => {
+  it('reports a missing account - design 3d`s "Which account?"', () => {
     expect(findMissingFields(candidate({ account: null }))).toEqual([
       'account',
     ]);
@@ -132,7 +132,7 @@ describe('isConfirmable', () => {
   });
 
   it('refuses without an amount', () => {
-    // "paid rahul back" — nothing to write to the ledger.
+    // "paid rahul back" - nothing to write to the ledger.
     expect(isConfirmable(candidate({ amountMinor: null }))).toBe(false);
     expect(isConfirmable(candidate({ amountMinor: 0 }))).toBe(false);
   });
@@ -155,7 +155,7 @@ describe('uncertainFields', () => {
     expect(result).toEqual(['category', 'account']);
   });
 
-  it('is distinct from missing — a field can be present and still doubtful', () => {
+  it('is distinct from missing - a field can be present and still doubtful', () => {
     const doubtful = candidate({
       category: 'Utilities',
       fieldConfidence: {
@@ -174,7 +174,7 @@ describe('uncertainFields', () => {
 
 describe('overallConfidence', () => {
   it('takes the weakest field, not the average', () => {
-    // Averaging lets four confident fields hide one the model guessed —
+    // Averaging lets four confident fields hide one the model guessed -
     // exactly the case the review queue exists to catch.
     const result = overallConfidence(
       candidate({

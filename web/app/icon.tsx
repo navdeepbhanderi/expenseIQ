@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 /**
- * The favicon — the ledger stack mark alone, which design 7a states is the
+ * The favicon - the ledger stack mark alone, which design 7a states is the
  * app icon.
  *
  * Generated rather than shipped as a file so it stays in step with the

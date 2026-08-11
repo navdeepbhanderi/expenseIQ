@@ -11,7 +11,7 @@ import { Money } from '@/common/money/money';
  *      means 28 Jul → 12 Aug, not 12 Jul. Design 2d shows exactly this.
  *
  *   2. A statement day of 29, 30 or 31 doesn't exist in every month. It
- *      clamps to the last day — 31 Jan, then 28 Feb (29 in a leap year),
+ *      clamps to the last day - 31 Jan, then 28 Feb (29 in a leap year),
  *      then 31 Mar. It must not silently roll into the next month, which is
  *      what naive `new Date(y, m, 31)` arithmetic does.
  *
@@ -33,7 +33,7 @@ export interface BillingCycle {
   /** When the last statement's balance must be paid. */
   dueDate: Date;
   nextDueDate: Date;
-  /** Negative once overdue — design 2f renders "−2d · Overdue". */
+  /** Negative once overdue - design 2f renders "−2d · Overdue". */
   daysUntilDue: number;
   isOverdue: boolean;
 }
@@ -89,7 +89,7 @@ function dueDateFor(
   statementDay: number,
   dueDay: number,
 ): Date {
-  // Equal days roll forward — a balance cannot fall due the same instant the
+  // Equal days roll forward - a balance cannot fall due the same instant the
   // statement that created it is generated.
   const monthsAhead = dueDay > statementDay ? 0 : 1;
   const candidate = addMonthsClamped(statementDate, dueDay, monthsAhead);
@@ -178,7 +178,7 @@ export interface CardPosition {
   utilizationPercent: number;
   /**
    * The 30% line the design flags in red. It's a real financial-literacy
-   * signal — credit scoring models penalise utilisation above it — not an
+   * signal - credit scoring models penalise utilisation above it - not an
    * arbitrary threshold.
    */
   isHighUtilization: boolean;

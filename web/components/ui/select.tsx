@@ -7,7 +7,7 @@ import { cn } from "@/lib/cn";
 import { Field, type FieldProps } from "./input";
 
 /**
- * Select — design 6c ("Select · closed" / "Select · open").
+ * Select - design 6c ("Select · closed" / "Select · open").
  *
  * Radix underneath because a native <select> cannot be styled to the design's
  * open panel, and a hand-rolled listbox means owning typeahead, arrow-key
@@ -18,7 +18,7 @@ import { Field, type FieldProps } from "./input";
 export interface SelectOption {
   value: string;
   label: string;
-  /** Optional right-aligned detail — an amount, a count, a last-4. */
+  /** Optional right-aligned detail - an amount, a count, a last-4. */
   meta?: string;
   disabled?: boolean;
 }

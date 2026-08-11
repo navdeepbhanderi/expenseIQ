@@ -24,7 +24,7 @@ export interface RecurrenceSuggestion extends Omit<
   'typicalAmount'
 > {
   typicalAmount: { amountMinor: number; currency: string };
-  /** True once the user has accepted it — the suggestion is then a rule. */
+  /** True once the user has accepted it - the suggestion is then a rule. */
   alreadyConfirmed: boolean;
 }
 
@@ -53,7 +53,7 @@ export class RecurringService {
    *
    * Deliberately *not* auto-created as rules. A detected pattern that silently
    * started generating transactions would put rows in the ledger the user
-   * never entered — the same thing the review queue exists to prevent for
+   * never entered - the same thing the review queue exists to prevent for
    * parsed input. Detection proposes; the user disposes.
    */
   async detect(profileId: string): Promise<RecurrenceSuggestion[]> {
@@ -155,7 +155,7 @@ export class RecurringService {
 
     // Labelled here rather than left to a second call. The payments that
     // revealed the pattern are the ones the user is looking at when they
-    // accept it, and design 2e shows the pill on them — requiring an extra
+    // accept it, and design 2e shows the pill on them - requiring an extra
     // round trip to make that true invites it being forgotten.
     const { labelled } = await this.labelMatchingTransactions(
       profileId,
@@ -176,7 +176,7 @@ export class RecurringService {
    * Creates a rule the user described, rather than one the detector found.
    *
    * Detection needs three occurrences, which is a quarter for anything
-   * monthly — and income may never be detected at all if it is the only
+   * monthly - and income may never be detected at all if it is the only
    * credit on an account. Someone who knows their salary lands on the 1st
    * should be able to say so.
    *
@@ -212,7 +212,7 @@ export class RecurringService {
         ),
         autoDebit: dto.autoDebit ?? false,
         confidence: null,
-        // Stated by the user, so it is confirmed by definition — it never
+        // Stated by the user, so it is confirmed by definition - it never
         // passes through the suggestion stage.
         confirmed: true,
         enabled: true,
@@ -240,7 +240,7 @@ export class RecurringService {
      * Changing the day has to move the next due date with it.
      *
      * Without this, editing a salary from the 1st to the 5th leaves it still
-     * scheduled for the 1st until the following cycle — the user changed the
+     * scheduled for the 1st until the following cycle - the user changed the
      * thing they can see and the thing that matters stayed put.
      */
     const scheduleMoved =

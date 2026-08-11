@@ -12,7 +12,7 @@ import { useCallback, useSyncExternalStore } from "react";
  * answer: the server snapshot is null, so the first paint shows the neutral
  * default and hydration switches to the stored value without a mismatch.
  *
- * Also keeps tabs in step — a profile switched in one tab moves in the other,
+ * Also keeps tabs in step - a profile switched in one tab moves in the other,
  * which matters because the alternative is two tabs quietly writing to
  * different ledgers.
  */

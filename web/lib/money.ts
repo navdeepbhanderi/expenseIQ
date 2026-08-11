@@ -3,7 +3,7 @@
  *
  * The API speaks integer paise in a `Minor`-suffixed field and never a float,
  * for the reason every money system eventually learns: 0.1 + 0.2 is not 0.3.
- * The client keeps that discipline — paise stay integers until the moment
+ * The client keeps that discipline - paise stay integers until the moment
  * they become a string for a human, and that moment is here.
  *
  * Any component doing its own `/ 100` has just reintroduced the bug this
@@ -17,7 +17,7 @@ export interface Money {
 }
 
 /**
- * Indian digit grouping — ₹1,24,860, not ₹124,860.
+ * Indian digit grouping - ₹1,24,860, not ₹124,860.
  *
  * `en-IN` gives the lakh/crore grouping natively, which is why this defers to
  * Intl instead of grouping by threes and hoping. An Indian user reading
@@ -45,7 +45,7 @@ function formatterFor(currency: string, fractions: boolean): Intl.NumberFormat {
 export interface FormatOptions {
   /**
    * Show paise. Off by default because the design shows whole rupees
-   * everywhere it displays a total — ₹64,210, not ₹64,210.00. Turn it on for
+   * everywhere it displays a total - ₹64,210, not ₹64,210.00. Turn it on for
    * inputs and anywhere a user is reconciling against a statement.
    */
   paise?: boolean;
@@ -57,7 +57,7 @@ export function formatMoney(
   money: Money | null | undefined,
   options: FormatOptions = {},
 ): string {
-  if (!money) return "—";
+  if (!money) return "-";
 
   return formatMinor(money.amountMinor, money.currency, options);
 }
@@ -82,7 +82,7 @@ export function formatMinor(
 }
 
 /**
- * Compact form for tight spaces — ₹34.2L, ₹1.2Cr.
+ * Compact form for tight spaces - ₹34.2L, ₹1.2Cr.
  *
  * The design uses this for net worth (2a shows "₹−34.2L"), where the exact
  * rupee is noise and the magnitude is the message. Lakh and crore, because
@@ -110,14 +110,14 @@ export function formatCompact(
 }
 
 function trim(value: number): string {
-  // One decimal, but no trailing ".0" — "₹5L" reads better than "₹5.0L".
+  // One decimal, but no trailing ".0" - "₹5L" reads better than "₹5.0L".
   return value.toFixed(1).replace(/\.0$/, "");
 }
 
 /**
  * Parses what a human typed into paise.
  *
- * Accepts "300", "₹300", "1,24,860", "300.50", "3 lakh", "1.5cr", "5k" —
+ * Accepts "300", "₹300", "1,24,860", "300.50", "3 lakh", "1.5cr", "5k" -
  * because people type amounts the way they say them, and rejecting "2 lakh"
  * as invalid input is the app being pedantic at the user's expense.
  *

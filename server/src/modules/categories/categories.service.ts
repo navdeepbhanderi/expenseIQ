@@ -23,7 +23,7 @@ export class CategoriesService {
    * System rows carry `profileId: null` and are shared by every profile
    * rather than copied into each on creation. Copying would mean a fix to a
    * monogram or tint never reaches existing users, and would multiply one row
-   * by the number of profiles for no benefit — nothing about a system category
+   * by the number of profiles for no benefit - nothing about a system category
    * is per-profile.
    */
   async list(profileId: string): Promise<Category[]> {
@@ -40,7 +40,7 @@ export class CategoriesService {
     const name = dto.name.trim();
 
     // Checked explicitly rather than leaning on the unique constraint, because
-    // the constraint only covers this profile's own rows — it cannot see the
+    // the constraint only covers this profile's own rows - it cannot see the
     // system categories, which live under profileId: null.
     const clash = await this.prisma.category.findFirst({
       where: {
@@ -98,7 +98,7 @@ export class CategoriesService {
    * Archives rather than deletes.
    *
    * Transactions reference categories. A hard delete would either orphan
-   * historical spend or cascade it away — both lose ledger history the user
+   * historical spend or cascade it away - both lose ledger history the user
    * did not ask to lose. Archiving hides the category from pickers while
    * leaving past transactions correctly categorised.
    */

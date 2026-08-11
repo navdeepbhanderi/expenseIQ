@@ -23,7 +23,7 @@ interface AuthState {
    * True until the session has been restored (or found absent) on load.
    *
    * Routes must wait for this rather than treating "no user yet" as logged
-   * out — otherwise every reload of an authenticated page flashes the login
+   * out - otherwise every reload of an authenticated page flashes the login
    * screen before the refresh cookie has been redeemed.
    */
   isLoading: boolean;
@@ -111,7 +111,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await api.post("/auth/logout");
     } finally {
-      // Local state clears even if the call fails — a user who clicked log out
+      // Local state clears even if the call fails - a user who clicked log out
       // must end up logged out of this browser regardless of the network.
       setAccessToken(null);
       setUser(null);

@@ -52,7 +52,7 @@ export interface ComparisonReport {
   previous: { label: string; from: Date; to: Date };
   spend: Comparison;
   income: Comparison;
-  /** Biggest movers first — the interesting rows, not the alphabetical ones. */
+  /** Biggest movers first - the interesting rows, not the alphabetical ones. */
   byCategory: CategoryComparison[];
 }
 
@@ -120,7 +120,7 @@ export class ReportsService {
   }
 
   /**
-   * This period against the last — design 6f's "↓ 8% vs July".
+   * This period against the last - design 6f's "↓ 8% vs July".
    *
    * Compares like with like: a month against the previous month, a quarter
    * against the previous quarter. Comparing a part-elapsed August against a
@@ -165,7 +165,7 @@ export class ReportsService {
     }
 
     // Categories that vanished this period are the most interesting rows on
-    // the screen — a subscription that stopped, a habit that broke. Listing
+    // the screen - a subscription that stopped, a habit that broke. Listing
     // only what's present this month would hide exactly that.
     for (const slice of previousByCategory) {
       if (seen.has(slice.categoryId)) continue;

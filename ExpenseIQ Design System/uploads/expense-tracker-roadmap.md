@@ -1,27 +1,27 @@
-# ExpenseIQ — AI-Powered Expense Tracker
+# ExpenseIQ - AI-Powered Expense Tracker
 ## Full Build Roadmap & Documentation
 
-**Goal:** Build a production-quality, portfolio-worthy expense tracker with LLM-powered multilingual input, automated parsing, smart reminders, and cloud deployment — while learning DSA-adjacent system design, LLM app engineering, and cloud infra (GCP/AWS) along the way.
+**Goal:** Build a production-quality, portfolio-worthy expense tracker with LLM-powered multilingual input, automated parsing, smart reminders, and cloud deployment - while learning DSA-adjacent system design, LLM app engineering, and cloud infra (GCP/AWS) along the way.
 
-**Timeline:** Flexible. Target 6-10 weeks for Phases 0-4 (deployable core product). Phases 5-6 are stretch/future work — build them if time allows, document them as roadmap if not.
+**Timeline:** Flexible. Target 6-10 weeks for Phases 0-4 (deployable core product). Phases 5-6 are stretch/future work - build them if time allows, document them as roadmap if not.
 
-**Philosophy:** Each phase ends with something *working and demoable*, not half-finished. Deployment happens only after Phase 3 is stable — don't ship broken things to the cloud.
+**Philosophy:** Each phase ends with something *working and demoable*, not half-finished. Deployment happens only after Phase 3 is stable - don't ship broken things to the cloud.
 
 ---
 
-## Phase 0 — Foundation & Setup (Week 1)
+## Phase 0 - Foundation & Setup (Week 1)
 
 ### Sub-phase 0.1: Planning & Architecture
 - [ ] Finalize tech stack (see Appendix A)
-- [ ] Draw system architecture diagram (draw.io / excalidraw) — even a rough one now, refine later
-- [ ] Define DB schema v1 (see Appendix B) — users, profiles, accounts, transactions, categories
+- [ ] Draw system architecture diagram (draw.io / excalidraw) - even a rough one now, refine later
+- [ ] Define DB schema v1 (see Appendix B) - users, profiles, accounts, transactions, categories
 - [ ] Set up GitHub repo with proper structure (`/client`, `/server`, `/docs`)
 - [ ] Write initial README with project vision (you'll update this every phase)
 
 ### Sub-phase 0.2: Dev Environment
-- [ ] Node.js + TypeScript backend scaffold (NestJS recommended — you already know it, and it enforces good architecture patterns like modules/DI which show well in interviews)
+- [ ] Node.js + TypeScript backend scaffold (NestJS recommended - you already know it, and it enforces good architecture patterns like modules/DI which show well in interviews)
 - [ ] React + TypeScript frontend scaffold (Vite)
-- [ ] PostgreSQL local setup (via Docker — start learning containers now, pays off in Phase 6)
+- [ ] PostgreSQL local setup (via Docker - start learning containers now, pays off in Phase 6)
 - [ ] Prisma or TypeORM as ORM
 - [ ] Basic CI: GitHub Actions running lint + build on push
 
@@ -34,14 +34,14 @@
 
 ---
 
-## Phase 1 — Core MVP: Auth + Manual Expense Tracking (Weeks 2-3)
+## Phase 1 - Core MVP: Auth + Manual Expense Tracking (Weeks 2-3)
 
 ### Sub-phase 1.1: Authentication
 - [ ] Email/password signup with bcrypt hashing
 - [ ] Email verification flow (send link via nodemailer/Resend, verify token, activate account)
 - [ ] Google Sign-In (OAuth 2.0)
 - [ ] JWT-based session handling (access + refresh tokens)
-- [ ] Basic rate limiting on auth endpoints (prevent brute force — good interview talking point)
+- [ ] Basic rate limiting on auth endpoints (prevent brute force - good interview talking point)
 
 ### Sub-phase 1.2: Profiles & Accounts
 - [ ] Multi-profile support (one user → multiple profiles)
@@ -62,20 +62,20 @@
 - Chart libraries (Recharts)
 - Postgres relational modeling (foreign keys, indexes)
 
-**Deliverable:** Fully working manual expense tracker. Someone could use this daily even without any AI features. This is your safety-net MVP — if nothing else gets built, this alone is demoable.
+**Deliverable:** Fully working manual expense tracker. Someone could use this daily even without any AI features. This is your safety-net MVP - if nothing else gets built, this alone is demoable.
 
 ---
 
-## Phase 2 — LLM-Powered Natural Language Input (Weeks 4-5)
+## Phase 2 - LLM-Powered Natural Language Input (Weeks 4-5)
 
 ### Sub-phase 2.1: Basic NLU Pipeline
 - [ ] Text input box: "spent 300 rs on groceries today"
-- [ ] Claude/OpenAI API integration — prompt engineered to extract structured JSON (amount, category, merchant, date)
+- [ ] Claude/OpenAI API integration - prompt engineered to extract structured JSON (amount, category, merchant, date)
 - [ ] Map extracted category to existing categories (fuzzy match or LLM-assisted)
 - [ ] Insert into a **review queue** table, not directly into transactions
 
 ### Sub-phase 2.2: Review & Confirm UI
-- [ ] "Pending Review" screen — shows parsed fields, editable before confirming
+- [ ] "Pending Review" screen - shows parsed fields, editable before confirming
 - [ ] Confidence score display (low-confidence entries visually flagged)
 - [ ] Confirm → moves to transactions table; Edit → user corrects then confirms; Discard → removed
 - [ ] Log corrections separately (for your "feedback loop" interview story)
@@ -100,7 +100,7 @@
 
 ---
 
-## Phase 3 — Integrations: Calendar, Reminders, Email Parsing (Weeks 6-7)
+## Phase 3 - Integrations: Calendar, Reminders, Email Parsing (Weeks 6-7)
 
 ### Sub-phase 3.1: Reminders System (build first, no external deps)
 - [ ] User sets reminder offset per account (e.g., "3 days before due date")
@@ -108,7 +108,7 @@
 - [ ] In-app notification + email reminder
 
 ### Sub-phase 3.2: Google Calendar Integration
-- [ ] OAuth consent screen for Calendar access (separate, explicit toggle — off by default)
+- [ ] OAuth consent screen for Calendar access (separate, explicit toggle - off by default)
 - [ ] Create calendar events for bill due dates via Calendar API
 - [ ] Update/delete events when due dates change
 - [ ] Google Tasks API integration as an alternative reminder surface (this is the modern replacement for the old standalone "Google Reminders" app)
@@ -117,7 +117,7 @@
 - [ ] OAuth consent for Gmail read-only scope, explicit toggle
 - [ ] Background job: fetch relevant transactional emails (filtered by sender patterns)
 - [ ] Extract structured data via LLM → same review queue as Phase 2
-- [ ] **Do not store raw email body** — extract fields, discard source text (privacy-by-design, a strong talking point)
+- [ ] **Do not store raw email body** - extract fields, discard source text (privacy-by-design, a strong talking point)
 - [ ] Idempotency: track processed email IDs so re-runs don't duplicate entries
 
 ### Sub-phase 3.4: Platform-Aware Feature Flags
@@ -131,11 +131,11 @@
 - Idempotency keys and dedup strategies
 - Webhook vs polling tradeoffs (Gmail push notifications vs periodic fetch)
 
-**Deliverable:** Bills auto-appear on your Google Calendar, reminders fire before due dates, and transactional emails get parsed into your review queue — all fully opt-in and toggleable.
+**Deliverable:** Bills auto-appear on your Google Calendar, reminders fire before due dates, and transactional emails get parsed into your review queue - all fully opt-in and toggleable.
 
 ---
 
-## Phase 4 — Polish, Testing & Deployment Prep (Week 8)
+## Phase 4 - Polish, Testing & Deployment Prep (Week 8)
 
 ### Sub-phase 4.1: Testing
 - [ ] Unit tests for LLM parsing logic (mock API responses)
@@ -153,17 +153,17 @@
 - [ ] Mobile-responsive pass
 - [ ] Undo window (10 sec) after confirming parsed entries
 
-**Deliverable:** A tested, secure, polished app — ready to deploy, not just "working on my machine."
+**Deliverable:** A tested, secure, polished app - ready to deploy, not just "working on my machine."
 
 ---
 
-## Phase 5 — Cloud Deployment: Learning GCP or AWS (Weeks 9-10)
+## Phase 5 - Cloud Deployment: Learning GCP or AWS (Weeks 9-10)
 
-This is deliberately its own phase, not a footnote — treat it as a learning project in itself.
+This is deliberately its own phase, not a footnote - treat it as a learning project in itself.
 
 ### Sub-phase 5.1: Choose & Learn Fundamentals
-- [ ] Pick one: **GCP** (natural fit since you're already using Gmail/Calendar APIs — same ecosystem, unified IAM) or **AWS** (more universally expected in job postings)
-  - Recommendation: **GCP** for this project specifically (tighter integration story with your Gmail/Calendar features — "I deployed the same platform I integrated with" is a nice narrative), but learn AWS basics separately since it's asked about more often in interviews
+- [ ] Pick one: **GCP** (natural fit since you're already using Gmail/Calendar APIs - same ecosystem, unified IAM) or **AWS** (more universally expected in job postings)
+  - Recommendation: **GCP** for this project specifically (tighter integration story with your Gmail/Calendar features - "I deployed the same platform I integrated with" is a nice narrative), but learn AWS basics separately since it's asked about more often in interviews
 - [ ] Learn core concepts: compute (Cloud Run / EC2), managed DB (Cloud SQL / RDS), storage, IAM basics
 
 ### Sub-phase 5.2: Containerize
@@ -172,7 +172,7 @@ This is deliberately its own phase, not a footnote — treat it as a learning pr
 - [ ] Push images to a container registry (Artifact Registry / ECR)
 
 ### Sub-phase 5.3: Deploy
-- [ ] Backend → Cloud Run (GCP) or ECS/Fargate (AWS) — serverless containers, low ops overhead, good for a solo project
+- [ ] Backend → Cloud Run (GCP) or ECS/Fargate (AWS) - serverless containers, low ops overhead, good for a solo project
 - [ ] Frontend → Cloud Storage + CDN, or Firebase Hosting (GCP) / S3 + CloudFront (AWS)
 - [ ] Managed Postgres → Cloud SQL or RDS
 - [ ] Secrets management → Secret Manager (GCP) or Secrets Manager (AWS), not `.env` files in production
@@ -180,21 +180,21 @@ This is deliberately its own phase, not a footnote — treat it as a learning pr
 ### Sub-phase 5.4: Observability
 - [ ] Basic logging (Cloud Logging / CloudWatch)
 - [ ] Uptime monitoring (simple health check endpoint + alert)
-- [ ] Error tracking (Sentry — free tier is enough)
+- [ ] Error tracking (Sentry - free tier is enough)
 
 ### Learning focus this phase
 - Docker → container registries → orchestration basics
 - IAM and least-privilege access
 - CI/CD: GitHub Actions deploying automatically on merge to main
-- Cost management (set budget alerts — real cloud costs money, this matters)
+- Cost management (set budget alerts - real cloud costs money, this matters)
 
 **Deliverable:** Live URL, running on real cloud infrastructure, with CI/CD auto-deploying on push. This is what goes in your portfolio link.
 
 ---
 
-## Phase 6 — Future Roadmap (Document, Build If Time Allows)
+## Phase 6 - Future Roadmap (Document, Build If Time Allows)
 
-Not required for the 2-month core build — but document these in your README as "planned" to show product vision.
+Not required for the 2-month core build - but document these in your README as "planned" to show product vision.
 
 ### 6.1: Family Accounts & Parental Controls
 - Family group creation, member invites
@@ -230,7 +230,7 @@ Not required for the 2-month core build — but document these in your README as
 
 ---
 
-## Appendix B: Initial DB Schema (v1 — expand as you go)
+## Appendix B: Initial DB Schema (v1 - expand as you go)
 
 ```
 users
@@ -269,6 +269,6 @@ integrations
 ## How to Use This Document
 
 - Treat each **Phase** as a milestone, each **Sub-phase** as a sprint (roughly 3-5 days)
-- Check off tasks as you go — don't move to the next sub-phase with half-done items
-- Update the README after every phase completion — this becomes your portfolio narrative *and* your interview prep material simultaneously
-- If a sub-phase is taking too long, it's fine to descope — mark it "Phase 6 / Future" instead of rushing a broken version
+- Check off tasks as you go - don't move to the next sub-phase with half-done items
+- Update the README after every phase completion - this becomes your portfolio narrative *and* your interview prep material simultaneously
+- If a sub-phase is taking too long, it's fine to descope - mark it "Phase 6 / Future" instead of rushing a broken version

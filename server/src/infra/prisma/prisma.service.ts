@@ -36,7 +36,7 @@ export class PrismaService
   }
 
   /**
-   * Truncates every table. Integration tests only — guarded so a misconfigured
+   * Truncates every table. Integration tests only - guarded so a misconfigured
    * DATABASE_URL can never wipe a real database.
    */
   async truncateAll(): Promise<void> {

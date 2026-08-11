@@ -42,7 +42,7 @@ import {
   UpdateGoalDto,
 } from './dto/family.dto';
 
-/** Accepting an invite is not profile-scoped — you aren't a member yet. */
+/** Accepting an invite is not profile-scoped - you aren't a member yet. */
 @ApiTags('family')
 @ApiBearerAuth()
 @Controller('family')
@@ -57,7 +57,7 @@ export class FamilyInviteController {
     summary: 'Join a profile you were invited to',
     description:
       'The invited address must match the accepting account. A token alone ' +
-      "cannot be the only credential for access to a family's finances — an " +
+      "cannot be the only credential for access to a family's finances - an " +
       'intercepted link would otherwise be enough.',
   })
   accept(
@@ -69,7 +69,7 @@ export class FamilyInviteController {
 
   @Get('dashboard')
   @ApiOperation({
-    summary: 'Every profile you belong to, aggregated — design 6.6',
+    summary: 'Every profile you belong to, aggregated - design 6.6',
     description:
       'Household totals, per-member breakdown, and commitments across the ' +
       'whole family sorted by urgency regardless of whose profile they sit ' +
@@ -144,7 +144,7 @@ export class FamilyController {
     summary: 'Change a member`s role',
     description:
       'Refuses to demote the last owner, and refuses to change your own ' +
-      'role — either would leave a profile holding live financial data that ' +
+      'role - either would leave a profile holding live financial data that ' +
       'nobody can administer.',
   })
   changeRole(
@@ -182,7 +182,7 @@ export class FamilyController {
   @Put('spend-limits')
   @RequireAction('spendLimit:set')
   @ApiOperation({
-    summary: 'Set monthly limits — OWNER only',
+    summary: 'Set monthly limits - OWNER only',
     description:
       'Limits nudge, they never block. The spec is explicit: refusing a ' +
       'transaction outright pushes kids to stop logging, which destroys the ' +
@@ -202,7 +202,7 @@ export class FamilyController {
   @ApiOperation({
     summary: 'Re-check limits and raise any nudges',
     description:
-      'Nudges the child at 80% and tells the owners when a limit is passed — ' +
+      'Nudges the child at 80% and tells the owners when a limit is passed - ' +
       'two audiences, because "you are getting close" is guidance and "they ' +
       'have gone over" is oversight.',
   })
@@ -225,7 +225,7 @@ export class FamilyController {
 
   @Put('allowance')
   @RequireAction('allowance:set')
-  @ApiOperation({ summary: 'Grant a monthly allowance — OWNER only' })
+  @ApiOperation({ summary: 'Grant a monthly allowance - OWNER only' })
   setAllowance(
     @Param('profileId', ParseUUIDPipe) profileId: string,
     @CurrentUser() user: AuthenticatedUser,
@@ -266,7 +266,7 @@ export class FamilyController {
   @ApiOperation({
     summary: 'Savings goals with progress',
     description:
-      'Each goal reports what it takes per month to arrive on time — the ' +
+      'Each goal reports what it takes per month to arrive on time - the ' +
       'number that turns a goal from a wish into a plan.',
   })
   listGoals(

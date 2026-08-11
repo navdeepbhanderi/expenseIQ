@@ -1,7 +1,7 @@
 /**
  * Period boundaries for the Month / Quarter / Year control in design 6c.
  *
- * All UTC and all half-open [from, to) — the end is exclusive. Inclusive end
+ * All UTC and all half-open [from, to) - the end is exclusive. Inclusive end
  * dates are where off-by-one bugs live: "up to 31 August" has to mean up to
  * the last millisecond of the 31st, and every caller gets that subtly wrong
  * in a different way. A half-open range composes correctly and the previous

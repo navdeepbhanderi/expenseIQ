@@ -11,7 +11,7 @@ import { useProfile } from "@/components/providers/profile-provider";
 import type { ProfileSummary } from "@/lib/api/types";
 
 /**
- * Profile switcher — design 2c.
+ * Profile switcher - design 2c.
  *
  * Every row carries its own rollup: month spend, account count, pending
  * reviews. Switching profile is a context change big enough that the user
@@ -116,7 +116,7 @@ export function ProfileSwitcher({ className }: { className?: string }) {
           {/*
            * Points at Family, where profiles are actually managed. A link to
            * a "new profile" screen that does not exist is worse than one more
-           * click — a dead link teaches the user not to trust the menu.
+           * click - a dead link teaches the user not to trust the menu.
            */}
           <DropdownMenu.Item asChild>
             <Link
@@ -133,7 +133,7 @@ export function ProfileSwitcher({ className }: { className?: string }) {
   );
 }
 
-/** "Shared with Meera · 3 accounts" — design 2c's second line. */
+/** "Shared with Meera · 3 accounts" - design 2c's second line. */
 function describe(profile: ProfileSummary): string {
   const accounts = `${profile.accountCount} account${profile.accountCount === 1 ? "" : "s"}`;
 

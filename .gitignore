@@ -9,7 +9,7 @@ build/
 # Test output
 coverage/
 
-# Secrets — .env holds real JWT signing keys and API keys.
+# Secrets - .env holds real JWT signing keys and API keys.
 # .env.example is committed and is the documented template.
 .env
 .env.*

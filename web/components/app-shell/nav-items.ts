@@ -14,12 +14,12 @@ export interface NavItem {
   href: string;
   label: string;
   icon: LucideIcon;
-  /** Shows the pending-review count — the only badge in the nav. */
+  /** Shows the pending-review count - the only badge in the nav. */
   badge?: "review";
 }
 
 /**
- * The sidebar — design 2a's six, plus Recurring and Family.
+ * The sidebar - design 2a's six, plus Recurring and Family.
  *
  * The design predates both pages existing as destinations, and burying them
  * behind Settings made them undiscoverable on desktop: a feature reachable
@@ -38,7 +38,7 @@ export const NAV_ITEMS: NavItem[] = [
 ];
 
 /**
- * Design 4c/5e's tab bar — four tabs with the mic between the middle pair.
+ * Design 4c/5e's tab bar - four tabs with the mic between the middle pair.
  *
  * A deliberate subset, not a squeeze of all six. Reports and Settings are
  * reached from Menu, because five tabs plus a FAB leaves each target under

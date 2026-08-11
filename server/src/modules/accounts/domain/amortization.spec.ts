@@ -8,7 +8,7 @@ import {
   type LoanTerms,
 } from './amortization';
 
-/** ₹60 L home loan at 8.4% over 20 years — the design 2d loan. */
+/** ₹60 L home loan at 8.4% over 20 years - the design 2d loan. */
 const homeLoan: LoanTerms = {
   principal: Money.fromMajor(60_00_000),
   annualRatePercent: 8.4,
@@ -53,7 +53,7 @@ describe('buildSchedule', () => {
     expect(buildSchedule(homeLoan)).toHaveLength(240);
   });
 
-  it('repays the principal exactly — no more, no less', () => {
+  it('repays the principal exactly - no more, no less', () => {
     // The invariant that matters: rounding each EMI up accumulates a small
     // overpayment, so without adjusting the final instalment the loan would
     // repay more than was borrowed.
@@ -117,7 +117,7 @@ describe('buildSchedule', () => {
 
   it('refuses an EMI too small to ever repay the loan', () => {
     // Below the monthly interest the balance grows forever and the loop would
-    // never terminate — a hang, not an error, without this guard.
+    // never terminate - a hang, not an error, without this guard.
     expect(() =>
       buildSchedule({ ...homeLoan, emi: Money.fromMajor(100) }),
     ).toThrow(AmortizationError);
@@ -158,7 +158,7 @@ describe('summariseLoan', () => {
   });
 
   it('reports the closure date', () => {
-    // 240 monthly payments from April 2018 ends in March 2038 —
+    // 240 monthly payments from April 2018 ends in March 2038 -
     // design 2d's "Closes Mar 2038".
     const summary = summariseLoan(homeLoan, 98);
     expect(summary.closureDate.toISOString().slice(0, 7)).toBe('2038-03');

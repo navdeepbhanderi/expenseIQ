@@ -20,7 +20,7 @@ export interface RecurrenceSuggestion {
   lastSeen: string;
   nextExpected?: string;
   confidence?: number;
-  /** True once accepted — the suggestion has become a rule. */
+  /** True once accepted - the suggestion has become a rule. */
   alreadyConfirmed: boolean;
 }
 
@@ -67,7 +67,7 @@ export function useConfirmRecurring(profileId: string | null) {
 }
 
 /**
- * Creates a schedule the user already knows — a salary on the 1st, rent on
+ * Creates a schedule the user already knows - a salary on the 1st, rent on
  * the 5th. Detection needs three occurrences, so without this a monthly
  * income would take a quarter to appear, if it ever did.
  */
@@ -107,7 +107,7 @@ export function useGenerateDue(profileId: string | null) {
   });
 }
 
-/** Edits a rule — a salary that changed, a schedule that moved. */
+/** Edits a rule - a salary that changed, a schedule that moved. */
 export function useUpdateRecurring(profileId: string | null) {
   const client = useQueryClient();
 
@@ -171,7 +171,7 @@ export function useMarkRead(profileId: string | null) {
 /**
  * Uploads a receipt.
  *
- * FormData, not JSON — and deliberately not through `api.post`, which sets a
+ * FormData, not JSON - and deliberately not through `api.post`, which sets a
  * JSON content type. The browser must set multipart's boundary itself, so the
  * header is left unset here on purpose.
  */

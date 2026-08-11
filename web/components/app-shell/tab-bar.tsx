@@ -8,7 +8,7 @@ import { TAB_ITEMS } from "./nav-items";
 import { useProfile } from "@/components/providers/profile-provider";
 
 /**
- * Mobile tab bar with the centre mic — design 4c/5e.
+ * Mobile tab bar with the centre mic - design 4c/5e.
  *
  * The mic is the centre action because voice is the product's main verb, and
  * design 5f is built around thumb reach. It overhangs the bar by 34px with a

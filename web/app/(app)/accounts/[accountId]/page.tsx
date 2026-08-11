@@ -17,7 +17,7 @@ import { cn } from "@/lib/cn";
 import type { CardPosition, LoanPosition } from "@/lib/api/types";
 
 /**
- * Account detail — design 2d.
+ * Account detail - design 2d.
  *
  * Every computed figure here (cycle dates, minimum due, amortisation, prepay
  * saving) comes from the server. Recomputing them client-side would mean two
@@ -180,7 +180,7 @@ function CardPanel({ card }: { card: CardPosition }) {
          * Without it, a card whose statement day has not arrived this month
          * shows the *previous* cycle's due date and looks wrong: "statement
          * on the 15th, due on the 5th" reads as the 5th of the same month
-         * unless the app says otherwise. It does not — a due day earlier in
+         * unless the app says otherwise. It does not - a due day earlier in
          * the month than the statement day always falls in the month after.
          */}
         <p className="mt-3 border-t border-current/10 pt-3 text-[13px] text-ink-muted">

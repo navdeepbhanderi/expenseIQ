@@ -28,7 +28,7 @@ describe('permission matrix', () => {
     // a hidden button is not a restriction.
     it('cannot link a credit card or loan', () => {
       // The spec restricts "card and loan linking" specifically, not accounts
-      // as a concept — a kid tracking cash is exactly the manual entry it does
+      // as a concept - a kid tracking cash is exactly the manual entry it does
       // allow. So account:create is granted and account:linkCredit is not;
       // AccountsService gates the credit types on the latter.
       expect(can(ProfileRole.CHILD, 'account:linkCredit')).toBe(false);

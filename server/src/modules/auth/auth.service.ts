@@ -55,7 +55,7 @@ export class AuthService {
    * Signup always reports success, whether or not the email was already taken.
    *
    * The spec requires not leaking which addresses are registered. That means
-   * the duplicate case must be indistinguishable from the new-account case —
+   * the duplicate case must be indistinguishable from the new-account case -
    * so an existing user gets no new account and no new verification mail, and
    * the caller sees the same response either way.
    */
@@ -91,7 +91,7 @@ export class AuthService {
 
     // The default profile is created immediately, so the moment the user
     // verifies they have somewhere to put money. Its monogram comes from
-    // their name rather than the word "Personal" — design 2c shows AR for
+    // their name rather than the word "Personal" - design 2c shows AR for
     // Aarav's profile named "Personal".
     await this.profiles.create(
       user.id,
@@ -112,7 +112,7 @@ export class AuthService {
       await this.sendVerificationEmail(user);
     }
 
-    // Same response regardless — an unverified, verified and non-existent
+    // Same response regardless - an unverified, verified and non-existent
     // address must be indistinguishable from outside.
     return { message: GENERIC_SIGNUP_MESSAGE };
   }
@@ -184,7 +184,7 @@ export class AuthService {
     }
 
     // Same policy as signup, returning every failure at once rather than the
-    // first — a user retyping a password should learn all of what is wrong.
+    // first - a user retyping a password should learn all of what is wrong.
     const check = checkPassword(newPassword);
     if (!check.valid) {
       throw new BadRequestException({
@@ -258,7 +258,7 @@ export class AuthService {
 
     if (!user?.passwordHash) {
       // Burn comparable time so response latency doesn't reveal whether the
-      // account exists — otherwise the careful generic error message above is
+      // account exists - otherwise the careful generic error message above is
       // undone by a stopwatch.
       await this.passwords.burnTime();
       throw new UnauthorizedException('Invalid email or password');
@@ -301,7 +301,7 @@ export class AuthService {
    * Linking by verified email is the subtle one: it's what stops a user who
    * signed up with a password from being handed a second, separate account
    * the first time they click "Continue with Google". The `emailVerified`
-   * requirement is load-bearing — linking on an unverified address would let
+   * requirement is load-bearing - linking on an unverified address would let
    * someone claim an account by signing up with an email they don't own and
    * waiting for the real owner to use Google.
    */
@@ -348,7 +348,7 @@ export class AuthService {
     }
 
     // Google has already verified the address, so there's nothing for us to
-    // verify — the account starts active.
+    // verify - the account starts active.
     const created = await this.prisma.user.create({
       data: {
         email,
@@ -430,7 +430,7 @@ export class AuthService {
         `Someone asked to reset the password for this ExpenseIQ account.\n\n` +
         `Set a new one here:\n${link}\n\n` +
         `This link expires in 30 minutes and can be used once. If this ` +
-        `wasn't you, ignore this email — your password has not changed.`,
+        `wasn't you, ignore this email - your password has not changed.`,
     });
   }
 }

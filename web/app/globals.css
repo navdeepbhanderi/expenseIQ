@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /*
- * Ledger Warm — the design system's palette, verbatim from screens 2a–6i.
+ * Ledger Warm - the design system's palette, verbatim from screens 2a–6i.
  *
  * Every colour is a CSS variable rather than a Tailwind literal so that one
  * `data-theme="dark"` on <html> repaints the whole app into Night Ledger (2g)
@@ -9,7 +9,7 @@
  * for #1F6F5C directly is a component that will be wrong in dark mode.
  */
 :root {
-  /* Surfaces — ivory paper stock, the ledger metaphor the design is built on */
+  /* Surfaces - ivory paper stock, the ledger metaphor the design is built on */
   --paper: #faf6ef;
   --paper-raised: #f1ebe0;
   --paper-sunken: #f3ede2;
@@ -18,13 +18,13 @@
   /* Form fields sit a shade below paper, so an input reads as a well */
   --field: #f8f4ec;
 
-  /* Ink. `soft` is the design's body/label ink — one step off pure ink. */
+  /* Ink. `soft` is the design's body/label ink - one step off pure ink. */
   --ink: #1b1815;
   --ink-soft: #3b352e;
   --ink-muted: #6b6459;
   --ink-faint: #8a8378;
 
-  /* Disabled is its own pair, not an opacity — opacity muddies the border */
+  /* Disabled is its own pair, not an opacity - opacity muddies the border */
   --disabled: #e7e0d3;
   --disabled-ink: #a79c89;
 
@@ -37,13 +37,13 @@
   --line-soft: #e7dfd1;
   --line-strong: #e2d9ca;
 
-  /* Brand — green carries trust without the blue-bank cliché */
+  /* Brand - green carries trust without the blue-bank cliché */
   --green: #1f6f5c;
   --green-hover: #12503f;
   --green-soft: #e7f0ea;
 
   /*
-   * Attention. Marigold is reserved ONLY for "needs your eye" — the review
+   * Attention. Marigold is reserved ONLY for "needs your eye" - the review
    * queue and upcoming dues. The design is explicit that attention gets one
    * colour and must never compete with spend red. Using this for anything
    * else is the single easiest way to break the visual language.
@@ -53,7 +53,7 @@
   --attention-line: #efd9ae;
   --attention-ink: #8a6a1e;
 
-  /* Money. Direction only — never decoration. */
+  /* Money. Direction only - never decoration. */
   --spend: #b5442f;
   --income: #3e8e5a;
 
@@ -63,7 +63,7 @@
 }
 
 /*
- * Night Ledger (2g) — "same semantics, warm charcoal surfaces, brass for
+ * Night Ledger (2g) - "same semantics, warm charcoal surfaces, brass for
  * attention". Note this is a warm dark, not a grey one: the charcoals carry
  * the same paper warmth, and red/green are lightened so they read as status
  * rather than alarm on a dark field.
@@ -84,7 +84,7 @@
   --disabled: #262220;
   --disabled-ink: #5f584f;
 
-  /* Elevation on dark is warmth, not shadow — but overlays still need depth */
+  /* Elevation on dark is warmth, not shadow - but overlays still need depth */
   --shadow-popover: 0 20px 50px -28px rgba(0, 0, 0, 0.85);
   --shadow-raise: 0 6px 14px -8px rgba(217, 164, 65, 0.5);
 
@@ -143,7 +143,7 @@
 
   /*
    * Newsreader for headline money, IBM Plex Sans for UI, Mono for tabular
-   * figures and eyebrow labels. Devanagari is not optional — users type
+   * figures and eyebrow labels. Devanagari is not optional - users type
    * "300 रुपये किराने पे खर्च किए" and the fallback renders it badly.
    */
   --font-display: var(--font-newsreader), ui-serif, Georgia, serif;
@@ -215,7 +215,7 @@ body {
   }
 }
 
-/* The mic's listening bars — a height wave, not Tailwind's opacity pulse. */
+/* The mic's listening bars - a height wave, not Tailwind's opacity pulse. */
 @keyframes wave {
   0%,
   100% {

@@ -48,8 +48,8 @@ export class AccountsService {
    * The credit-product gate.
    *
    * Separate from the route's `@RequireAction` because the restriction depends
-   * on the request *body* — a CHILD may add a cash account but not a credit
-   * card — and route metadata is evaluated before the body is in scope.
+   * on the request *body* - a CHILD may add a cash account but not a credit
+   * card - and route metadata is evaluated before the body is in scope.
    *
    * The spec is explicit that this is a server-side rule: "Attempting to link
    * a credit card on a CHILD profile → 403 Forbidden".
@@ -119,7 +119,7 @@ export class AccountsService {
   }
 
   /**
-   * The account plus its derived position — the whole of design 2d in one call.
+   * The account plus its derived position - the whole of design 2d in one call.
    *
    * Computed on read rather than stored. Statement dates, utilisation and the
    * amortisation position are all pure functions of the account's terms and
@@ -232,7 +232,7 @@ export class AccountsService {
 
     const position = computeCardPosition({
       // A card's balance is money owed, so it's held as a positive outstanding
-      // rather than a negative balance — otherwise every utilisation and
+      // rather than a negative balance - otherwise every utilisation and
       // minimum-due calculation would need a sign flip.
       outstanding: Money.fromBigInt(account.balanceMinor).abs(),
       creditLimit: Money.fromBigInt(account.creditLimitMinor ?? 0n),
@@ -252,7 +252,7 @@ export class AccountsService {
    * Type-specific required fields.
    *
    * Enforced here rather than in the DTO because the requirement is
-   * conditional — `creditLimit` is mandatory for a card and meaningless for a
+   * conditional - `creditLimit` is mandatory for a card and meaningless for a
    * bank account, which class-validator can't express without a discriminated
    * union per type.
    */
@@ -296,7 +296,7 @@ export class AccountsService {
  *
  * Takes `unknown` deliberately. The DTO types say these are `X | undefined`,
  * but `@IsOptional()` lets an explicit JSON `null` through without touching
- * it, so null genuinely reaches here at runtime — typing it narrowly would
+ * it, so null genuinely reaches here at runtime - typing it narrowly would
  * make the null branch look like dead code it isn't.
  */
 function requiredFields(entries: [string, unknown][]): string[] {

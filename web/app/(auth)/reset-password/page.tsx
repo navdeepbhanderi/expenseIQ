@@ -12,7 +12,7 @@ import { api, ApiError } from "@/lib/api/client";
 import { checkPassword } from "@/lib/password";
 
 /**
- * Set a new password — design 7e.
+ * Set a new password - design 7e.
  *
  * The server revokes every session on success, so after this the user is
  * signed out everywhere including here. Sending them to login rather than the
@@ -116,7 +116,7 @@ function ResetPassword() {
         </Button>
 
         <p className="text-xs leading-relaxed text-ink-faint">
-          Saving this signs you out on every other device — if someone else
+          Saving this signs you out on every other device - if someone else
           knew the old password, they lose access too.
         </p>
       </form>

@@ -47,7 +47,7 @@ describe('statusOf', () => {
 
   it('does not mistake an echoed amount for a status', () => {
     // The regression this regex was tightened for. Gemini echoes the failing
-    // request in some errors, and "300 रुपये" must not read as HTTP 300 —
+    // request in some errors, and "300 रुपये" must not read as HTTP 300 -
     // that would classify an unrelated failure as retryable and burn the
     // whole chain on it.
     expect(statusOf(new Error('failed to parse: 300 रुपये किराने पे'))).toBe(
@@ -64,7 +64,7 @@ describe('statusOf', () => {
 });
 
 describe('isWorthAnotherModel', () => {
-  it('retries quota exhaustion — the case the chain exists for', () => {
+  it('retries quota exhaustion - the case the chain exists for', () => {
     expect(isWorthAnotherModel(quota429)).toBe(true);
   });
 
@@ -77,7 +77,7 @@ describe('isWorthAnotherModel', () => {
     expect(isWorthAnotherModel({ status: 503 })).toBe(true);
   });
 
-  it('does not retry an auth failure — every model would reject it', () => {
+  it('does not retry an auth failure - every model would reject it', () => {
     expect(isWorthAnotherModel(badKey403)).toBe(false);
     expect(isWorthAnotherModel({ status: 401 })).toBe(false);
   });
@@ -94,7 +94,7 @@ describe('isThinkingConfigRejection', () => {
 
   it('treats a generic 400 as a suspected rejection', () => {
     // The real gemini-3.6-flash error says only "Request contains an invalid
-    // argument." — no mention of thinking. Matching on the word made this
+    // argument." - no mention of thinking. Matching on the word made this
     // never fire against the live API.
     expect(isThinkingConfigRejection(genericBad400)).toBe(true);
   });
@@ -125,7 +125,7 @@ describe('resolveChain', () => {
   });
 
   it('never returns a chain containing a Pro model by default', () => {
-    // Every Pro model has a free-tier quota of zero — verified against a real
+    // Every Pro model has a free-tier quota of zero - verified against a real
     // key for 2.5-pro, 3-pro-preview and 3.1-pro-preview. Defaulting to one
     // would make the whole chain fail for anyone without billing.
     for (const tier of ['pro', 'flash'] as const) {

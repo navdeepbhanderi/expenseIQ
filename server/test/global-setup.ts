@@ -22,7 +22,7 @@ export default function globalSetup(): void {
   // Guard against a copy-paste accident pointing the test DB at the dev DB.
   if (testUrl === process.env.DATABASE_URL) {
     throw new Error(
-      'TEST_DATABASE_URL must not equal DATABASE_URL — integration tests ' +
+      'TEST_DATABASE_URL must not equal DATABASE_URL - integration tests ' +
         'truncate every table.',
     );
   }

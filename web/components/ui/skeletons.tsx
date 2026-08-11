@@ -8,7 +8,7 @@ import { cn } from "@/lib/cn";
  *
  * A generic grey box tells the user "something is loading" and then the layout
  * jumps when the real content lands, which reads as a glitch. These mirror the
- * real component's structure — same card, same rows, same rhythm — so the page
+ * real component's structure - same card, same rows, same rhythm - so the page
  * settles instead of rearranging itself.
  *
  * Every one is aria-hidden, and the container carries `aria-busy`: a screen
@@ -61,7 +61,7 @@ export function DashboardSkeleton() {
         <Skeleton className="h-4 w-72" />
       </div>
 
-      {/* attention rail — two dues plus the review tile */}
+      {/* attention rail - two dues plus the review tile */}
       <div className="grid gap-3 lg:grid-cols-[1fr_1fr_1.2fr]">
         {[0, 1, 2].map((i) => (
           <Card key={i} className="flex items-center gap-3.5 p-4">
@@ -145,7 +145,7 @@ export function ListSkeleton({
       <Skeleton className="h-10 w-full rounded-[var(--radius-control)]" />
 
       <div className="flex gap-6">
-        {/* filter sidebar, desktop only — mirrors the real layout */}
+        {/* filter sidebar, desktop only - mirrors the real layout */}
         <div className="hidden w-56 shrink-0 flex-col gap-5 lg:flex">
           {[0, 1].map((i) => (
             <div key={i} className="flex flex-col gap-2.5">

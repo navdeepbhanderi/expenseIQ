@@ -28,7 +28,7 @@ export class SetReminderDto {
     default: 540,
     description:
       'Minutes past *local* midnight. Design 6h: "9 am" is 540. Interpreted ' +
-      'in the profile timezone — 9 am UTC would arrive at 2:30 pm in India.',
+      'in the profile timezone - 9 am UTC would arrive at 2:30 pm in India.',
   })
   @IsOptional()
   @IsInt()

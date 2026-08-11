@@ -37,7 +37,7 @@ export class ReviewQueueController {
   @ApiOperation({
     summary: 'Entries waiting to be confirmed',
     description:
-      'Oldest first — design 6e nudges about entries that have been waiting.',
+      'Oldest first - design 6e nudges about entries that have been waiting.',
   })
   list(
     @Param('profileId', ParseUUIDPipe) profileId: string,
@@ -50,7 +50,7 @@ export class ReviewQueueController {
   @RequireAction('reviewQueue:manage')
   @ApiOperation({
     summary:
-      'Design 2b\'s header — "3 waiting · 2 look clear · 1 needs an account"',
+      'Design 2b\'s header - "3 waiting · 2 look clear · 1 needs an account"',
   })
   summary(@Param('profileId', ParseUUIDPipe) profileId: string) {
     return this.queue.summary(profileId);
@@ -72,7 +72,7 @@ export class ReviewQueueController {
     summary: 'Correct a parsed entry',
     description:
       'Every changed field is recorded as a Correction. Those corrections ' +
-      'are the feedback loop — they drive the accuracy stat and, later, ' +
+      'are the feedback loop - they drive the accuracy stat and, later, ' +
       'per-profile category learning.',
   })
   edit(
@@ -130,7 +130,7 @@ export class ReviewQueueController {
   @ApiOperation({
     summary: 'Take back a confirmation within 10 seconds',
     description:
-      'The window is enforced server-side — a client timer alone would let a ' +
+      'The window is enforced server-side - a client timer alone would let a ' +
       'stale tab undo a transaction from last week.',
   })
   undo(

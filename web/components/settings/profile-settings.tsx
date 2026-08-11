@@ -15,7 +15,7 @@ import { cn } from "@/lib/cn";
  *
  * Both were fixed at creation with no way to change them, so a household
  * created as "Personal" stayed "Personal" and every profile in the switcher
- * got whatever colour it was given on day one — which matters most when there
+ * got whatever colour it was given on day one - which matters most when there
  * are several, since the colour is how you tell them apart at a glance.
  */
 
@@ -46,7 +46,7 @@ export function ProfileSettings() {
    * Remounted per profile.
    *
    * useState only reads its initial value on the first render, and the
-   * profile list arrives from a query — so the form mounted before the data
+   * profile list arrives from a query - so the form mounted before the data
    * landed and showed an empty name for a profile that has one. Switching
    * profiles had the same problem in reverse: the form kept the previous
    * profile's name and would have renamed the wrong one on save.
@@ -79,7 +79,7 @@ function ProfileForm({
   /*
    * Whatever the profile already has, even if it is not in the palette.
    *
-   * A colour set before the palette changed — or by an API call — would
+   * A colour set before the palette changed - or by an API call - would
    * otherwise vanish from the row, leaving nothing selected and no way to tell
    * what the current colour even is.
    */

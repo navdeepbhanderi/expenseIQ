@@ -19,7 +19,7 @@ import { checkPassword } from "@/lib/password";
 import { cn } from "@/lib/cn";
 
 /**
- * Sign up — design 7b (web) and 7f (mobile).
+ * Sign up - design 7b (web) and 7f (mobile).
  *
  * 7f drops the name field on mobile. Rather than render two forms, the field
  * is optional in both: the API already treats displayName as optional, and a
@@ -102,7 +102,7 @@ export default function SignupPage() {
             onChange={(e) => setName(e.target.value)}
             // Optional, and the label says so rather than a lone asterisk
             // elsewhere meaning "everything else is required".
-            hint="Optional — used to greet you"
+            hint="Optional - used to greet you"
             className="hidden sm:block"
           />
 

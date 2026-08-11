@@ -28,7 +28,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Readiness probe — verifies datastore reachability */
+        /** Readiness probe - verifies datastore reachability */
         get: operations["HealthController_readiness_v1"];
         put?: never;
         post?: never;
@@ -276,7 +276,7 @@ export interface paths {
         post?: never;
         /**
          * Archive a custom category
-         * @description Archives rather than deletes — transactions reference categories, and a hard delete would either orphan historical spend or cascade it away.
+         * @description Archives rather than deletes - transactions reference categories, and a hard delete would either orphan historical spend or cascade it away.
          */
         delete: operations["CategoriesController_archive_v1"];
         options?: never;
@@ -317,7 +317,7 @@ export interface paths {
         put?: never;
         /**
          * Add a bank account, card or loan
-         * @description Cards and loans additionally require `account:linkCredit`, which a CHILD role does not have — enforced here, not just hidden in the UI.
+         * @description Cards and loans additionally require `account:linkCredit`, which a CHILD role does not have - enforced here, not just hidden in the UI.
          */
         post: operations["AccountsController_create_v1"];
         delete?: never;
@@ -335,14 +335,14 @@ export interface paths {
         };
         /**
          * Account detail with its derived position
-         * @description Cards return statement/due dates, available credit, minimum due and utilisation. Loans return the amortisation position — EMIs paid, principal vs interest, and the closure date. All of design 2d.
+         * @description Cards return statement/due dates, available credit, minimum due and utilisation. Loans return the amortisation position - EMIs paid, principal vs interest, and the closure date. All of design 2d.
          */
         get: operations["AccountsController_detail_v1"];
         put?: never;
         post?: never;
         /**
          * Close or delete an account
-         * @description An account with transactions is closed, not deleted — removing it would rewrite past months of spending. An unused account is removed.
+         * @description An account with transactions is closed, not deleted - removing it would rewrite past months of spending. An unused account is removed.
          */
         delete: operations["AccountsController_remove_v1"];
         options?: never;
@@ -401,7 +401,7 @@ export interface paths {
         };
         /**
          * Filtered, paginated transactions
-         * @description Returns the page, the totals strip ("42 results · ₹64,210") and the facet counts beside each filter ("Groceries 18") in one round trip — design 2e renders all three at once, and separate calls could disagree if a write landed between them.
+         * @description Returns the page, the totals strip ("42 results · ₹64,210") and the facet counts beside each filter ("Groceries 18") in one round trip - design 2e renders all three at once, and separate calls could disagree if a write landed between them.
          */
         get: operations["TransactionsController_list_v1"];
         put?: never;
@@ -460,13 +460,13 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** One transaction — design 6g's detail panel */
+        /** One transaction - design 6g's detail panel */
         get: operations["TransactionsController_findOne_v1"];
         put?: never;
         post?: never;
         /**
          * Delete a transaction
-         * @description Soft delete — the design promises a 10-second undo after confirming a parsed entry, and a physically removed row cannot be restored with its id and relations intact.
+         * @description Soft delete - the design promises a 10-second undo after confirming a parsed entry, and a physically removed row cannot be restored with its id and relations intact.
          */
         delete: operations["TransactionsController_remove_v1"];
         options?: never;
@@ -593,7 +593,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Days in a month that carry a bill — design 6d's popover markers */
+        /** Days in a month that carry a bill - design 6d's popover markers */
         get: operations["DashboardController_calendar_v1"];
         put?: never;
         post?: never;
@@ -617,7 +617,7 @@ export interface paths {
         get: operations["BudgetsController_overview_v1"];
         /**
          * Replace the month`s budgets
-         * @description PUT rather than PATCH because the design edits budgets as a set — a partial update would leave a category the user just cleared still budgeted. An amount of 0 removes a budget rather than storing a zero.
+         * @description PUT rather than PATCH because the design edits budgets as a set - a partial update would leave a category the user just cleared still budgeted. An amount of 0 removes a budget rather than storing a zero.
          */
         put: operations["BudgetsController_set_v1"];
         post?: never;
@@ -638,7 +638,7 @@ export interface paths {
         put?: never;
         /**
          * Parse natural language into candidate transactions
-         * @description Synchronous, not queued — design 5c shows the result inline about a second after the user stops speaking. One input can yield several candidates ("groceries 300, uber 640, bijli 2400" is three). Nothing reaches the ledger: every candidate is staged in the review queue.
+         * @description Synchronous, not queued - design 5c shows the result inline about a second after the user stops speaking. One input can yield several candidates ("groceries 300, uber 640, bijli 2400" is three). Nothing reaches the ledger: every candidate is staged in the review queue.
          */
         post: operations["NluController_parse_v1"];
         delete?: never;
@@ -657,8 +657,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Parse spoken audio directly — the fallback path
-         * @description Use POST /parse with the browser transcript by default: measured here, the text path is 2.2s against 4.9s for audio, costs a fraction as much, and is just as accurate — Gemini reconstructs "teen so rupee kirana pay kharch kiya" as ₹300 Groceries without difficulty. Send audio when the browser produces no transcript at all, which is its real failure mode on Gujarati and heavy code-mixing.
+         * Parse spoken audio directly - the fallback path
+         * @description Use POST /parse with the browser transcript by default: measured here, the text path is 2.2s against 4.9s for audio, costs a fraction as much, and is just as accurate - Gemini reconstructs "teen so rupee kirana pay kharch kiya" as ₹300 Groceries without difficulty. Send audio when the browser produces no transcript at all, which is its real failure mode on Gujarati and heavy code-mixing.
          */
         post: operations["NluController_parseAudio_v1"];
         delete?: never;
@@ -676,7 +676,7 @@ export interface paths {
         };
         /**
          * Partial readings while the user is still speaking
-         * @description Drives design 5b and 3b — "Reading as ₹300 · Groceries · today" appearing mid-sentence. Previews only; nothing here is authoritative and nothing is written. Call POST /parse to actually stage an entry.
+         * @description Drives design 5b and 3b - "Reading as ₹300 · Groceries · today" appearing mid-sentence. Previews only; nothing here is authoritative and nothing is written. Call POST /parse to actually stage an entry.
          */
         get: operations["NluController_stream_v1"];
         put?: never;
@@ -696,7 +696,7 @@ export interface paths {
         };
         /**
          * Which account this expense probably belongs on
-         * @description Design 2b's "Usually: SBI Savings, Cash, HDFC Millennia". Pure transaction history, no model call — which card someone puts petrol on is a database question, answered better and for free.
+         * @description Design 2b's "Usually: SBI Savings, Cash, HDFC Millennia". Pure transaction history, no model call - which card someone puts petrol on is a database question, answered better and for free.
          */
         get: operations["NluController_suggestAccounts_v1"];
         put?: never;
@@ -716,7 +716,7 @@ export interface paths {
         };
         /**
          * How often parses are right first time
-         * @description Design 2b: "21 of 23 entries read correctly on the first try". Returns null accuracy on an empty window rather than 0% — a user who has not used the feature is not 0% accurate.
+         * @description Design 2b: "21 of 23 entries read correctly on the first try". Returns null accuracy on an empty window rather than 0% - a user who has not used the feature is not 0% accurate.
          */
         get: operations["NluController_accuracy_v1"];
         put?: never;
@@ -736,7 +736,7 @@ export interface paths {
         };
         /**
          * Entries waiting to be confirmed
-         * @description Oldest first — design 6e nudges about entries that have been waiting.
+         * @description Oldest first - design 6e nudges about entries that have been waiting.
          */
         get: operations["ReviewQueueController_list_v1"];
         put?: never;
@@ -754,7 +754,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Design 2b's header — "3 waiting · 2 look clear · 1 needs an account" */
+        /** Design 2b's header - "3 waiting · 2 look clear · 1 needs an account" */
         get: operations["ReviewQueueController_summary_v1"];
         put?: never;
         post?: never;
@@ -780,7 +780,7 @@ export interface paths {
         head?: never;
         /**
          * Correct a parsed entry
-         * @description Every changed field is recorded as a Correction. Those corrections are the feedback loop — they drive the accuracy stat and, later, per-profile category learning.
+         * @description Every changed field is recorded as a Correction. Those corrections are the feedback loop - they drive the accuracy stat and, later, per-profile category learning.
          */
         patch: operations["ReviewQueueController_edit_v1"];
         trace?: never;
@@ -853,7 +853,7 @@ export interface paths {
         put?: never;
         /**
          * Take back a confirmation within 10 seconds
-         * @description The window is enforced server-side — a client timer alone would let a stale tab undo a transaction from last week.
+         * @description The window is enforced server-side - a client timer alone would let a stale tab undo a transaction from last week.
          */
         post: operations["ReviewQueueController_undo_v1"];
         delete?: never;
@@ -871,7 +871,7 @@ export interface paths {
         };
         /**
          * Totals for a month, quarter or year
-         * @description The per-day average divides by days *elapsed*, not days in the period — dividing August by 31 on the 5th under-reports it six-fold.
+         * @description The per-day average divides by days *elapsed*, not days in the period - dividing August by 31 on the 5th under-reports it six-fold.
          */
         get: operations["ReportsController_summary_v1"];
         put?: never;
@@ -890,7 +890,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * This period against the last — design 6f's "↓ 8% vs July"
+         * This period against the last - design 6f's "↓ 8% vs July"
          * @description Includes categories that disappeared this period. A subscription that stopped is the most interesting row on the screen, and listing only what is present this month would hide exactly that.
          */
         get: operations["ReportsController_comparison_v1"];
@@ -911,7 +911,7 @@ export interface paths {
         };
         /**
          * Per-category "usual" spend
-         * @description Design 3e's "74% of your usual ₹25,000 on groceries". Median of the complete months on record — a mean would let one wedding month redefine normal for the rest of the year. Returns isReliable: false below three months so the UI can stay quiet rather than sound sure.
+         * @description Design 3e's "74% of your usual ₹25,000 on groceries". Median of the complete months on record - a mean would let one wedding month redefine normal for the rest of the year. Returns isReliable: false below three months so the UI can stay quiet rather than sound sure.
          */
         get: operations["ReportsController_norms_v1"];
         put?: never;
@@ -933,8 +933,8 @@ export interface paths {
         get: operations["ReceiptsController_list_v1"];
         put?: never;
         /**
-         * Scan a bill — design 6b's "we'll read the total"
-         * @description Accepts image/jpeg, image/png, image/webp, image/heic, application/pdf. Returns as soon as the file is stored rather than waiting for the model: a vision call takes several seconds, and holding the request open means a slow phone upload times out having already succeeded. Watch the receipt status, or just watch the review queue — that is where the result lands.
+         * Scan a bill - design 6b's "we'll read the total"
+         * @description Accepts image/jpeg, image/png, image/webp, image/heic, application/pdf. Returns as soon as the file is stored rather than waiting for the model: a vision call takes several seconds, and holding the request open means a slow phone upload times out having already succeeded. Watch the receipt status, or just watch the review queue - that is where the result lands.
          */
         post: operations["ReceiptsController_upload_v1"];
         delete?: never;
@@ -987,7 +987,7 @@ export interface paths {
         };
         /**
          * Patterns found in history, as suggestions
-         * @description Never auto-created. A detected pattern that silently started generating transactions would put rows in the ledger the user never entered — the same thing the review queue exists to prevent. Detection proposes; the user disposes. Amount variance does not disqualify a pattern: an electricity bill is recurring and is a different number every month.
+         * @description Never auto-created. A detected pattern that silently started generating transactions would put rows in the ledger the user never entered - the same thing the review queue exists to prevent. Detection proposes; the user disposes. Amount variance does not disqualify a pattern: an electricity bill is recurring and is a different number every month.
          */
         get: operations["RecurringController_detected_v1"];
         put?: never;
@@ -1029,7 +1029,7 @@ export interface paths {
         put?: never;
         /**
          * Stage entries for rules that have come due
-         * @description Generated entries land in the review queue, not the ledger. A confirmed rule is the user's own instruction, but only for the *schedule* — the amount is a prediction, and design 2e's own example varies between ₹1,890 and ₹3,120. They arrive fully pre-filled, and a rule with a steady amount is marked CLEAR so it confirms in one tap. Idempotent per rule per due date, so a scheduler firing twice cannot double someone's recorded spending. Phase 6 puts this on a cron.
+         * @description Generated entries land in the review queue, not the ledger. A confirmed rule is the user's own instruction, but only for the *schedule* - the amount is a prediction, and design 2e's own example varies between ₹1,890 and ₹3,120. They arrive fully pre-filled, and a rule with a steady amount is marked CLEAR so it confirms in one tap. Idempotent per rule per due date, so a scheduler firing twice cannot double someone's recorded spending. Phase 6 puts this on a cron.
          */
         post: operations["RecurringController_generateDue_v1"];
         delete?: never;
@@ -1134,7 +1134,7 @@ export interface paths {
         /** Reminder settings for an account */
         get: operations["RemindersController_list_v1"];
         /**
-         * Set the reminder — design 6h's "3 days ahead, 9 am"
+         * Set the reminder - design 6h's "3 days ahead, 9 am"
          * @description Editing preserves which cycle has already been notified, so changing the offset mid-cycle cannot send a duplicate.
          */
         put: operations["RemindersController_set_v1"];
@@ -1177,7 +1177,7 @@ export interface paths {
         put?: never;
         /**
          * Join a profile you were invited to
-         * @description The invited address must match the accepting account. A token alone cannot be the only credential for access to a family's finances — an intercepted link would otherwise be enough.
+         * @description The invited address must match the accepting account. A token alone cannot be the only credential for access to a family's finances - an intercepted link would otherwise be enough.
          */
         post: operations["FamilyInviteController_accept_v1"];
         delete?: never;
@@ -1194,7 +1194,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Every profile you belong to, aggregated — design 6.6
+         * Every profile you belong to, aggregated - design 6.6
          * @description Household totals, per-member breakdown, and commitments across the whole family sorted by urgency regardless of whose profile they sit on. Each row carries canSeeDetail, because an ADULT may see another member's totals but not the transactions behind them.
          */
         get: operations["FamilyInviteController_familyDashboard_v1"];
@@ -1290,7 +1290,7 @@ export interface paths {
         head?: never;
         /**
          * Change a member`s role
-         * @description Refuses to demote the last owner, and refuses to change your own role — either would leave a profile holding live financial data that nobody can administer.
+         * @description Refuses to demote the last owner, and refuses to change your own role - either would leave a profile holding live financial data that nobody can administer.
          */
         patch: operations["FamilyController_changeRole_v1"];
         trace?: never;
@@ -1305,7 +1305,7 @@ export interface paths {
         /** Limits and how much of each is used */
         get: operations["FamilyController_spendLimits_v1"];
         /**
-         * Set monthly limits — OWNER only
+         * Set monthly limits - OWNER only
          * @description Limits nudge, they never block. The spec is explicit: refusing a transaction outright pushes kids to stop logging, which destroys the data the feature exists to produce. Exceeding a limit flags it and tells the owner; the spend is still recorded.
          */
         put: operations["FamilyController_setSpendLimits_v1"];
@@ -1327,7 +1327,7 @@ export interface paths {
         put?: never;
         /**
          * Re-check limits and raise any nudges
-         * @description Nudges the child at 80% and tells the owners when a limit is passed — two audiences, because "you are getting close" is guidance and "they have gone over" is oversight.
+         * @description Nudges the child at 80% and tells the owners when a limit is passed - two audiences, because "you are getting close" is guidance and "they have gone over" is oversight.
          */
         post: operations["FamilyController_evaluate_v1"];
         delete?: never;
@@ -1345,7 +1345,7 @@ export interface paths {
         };
         /** Design 2c's "₹1,200 allowance · ₹740 left" */
         get: operations["FamilyController_allowance_v1"];
-        /** Grant a monthly allowance — OWNER only */
+        /** Grant a monthly allowance - OWNER only */
         put: operations["FamilyController_setAllowance_v1"];
         post?: never;
         /** Stop the allowance */
@@ -1384,7 +1384,7 @@ export interface paths {
         };
         /**
          * Savings goals with progress
-         * @description Each goal reports what it takes per month to arrive on time — the number that turns a goal from a wish into a plan.
+         * @description Each goal reports what it takes per month to arrive on time - the number that turns a goal from a wish into a plan.
          */
         get: operations["FamilyController_listGoals_v1"];
         put?: never;
@@ -1555,7 +1555,7 @@ export interface components {
              */
             principalMinor?: number;
             /**
-             * @description Paise. Optional — computed from the terms when omitted.
+             * @description Paise. Optional - computed from the terms when omitted.
              * @example 4215000
              */
             emiAmountMinor?: number;
@@ -1706,7 +1706,7 @@ export interface components {
         };
         ConfirmRecurrenceDto: {
             /**
-             * @description The signature from GET /recurring/detected. Only names which pattern to accept — the amounts and cadence are re-derived from history, so a caller cannot invent a rule that was never in the data.
+             * @description The signature from GET /recurring/detected. Only names which pattern to accept - the amounts and cadence are re-derived from history, so a caller cannot invent a rule that was never in the data.
              * @example merchant:4e742687-b067-4f28-a6b2-138904da89c1
              */
             signature: string;
@@ -1731,7 +1731,7 @@ export interface components {
              */
             offsetDays: number;
             /**
-             * @description Minutes past *local* midnight. Design 6h: "9 am" is 540. Interpreted in the profile timezone — 9 am UTC would arrive at 2:30 pm in India.
+             * @description Minutes past *local* midnight. Design 6h: "9 am" is 540. Interpreted in the profile timezone - 9 am UTC would arrive at 2:30 pm in India.
              * @default 540
              * @example 540
              */
@@ -1754,7 +1754,7 @@ export interface components {
             /** @example meera@example.com */
             email: string;
             /**
-             * @description Recorded on the invite, so accepting cannot escalate it — a CHILD invite stays a CHILD invite however the acceptance is shaped.
+             * @description Recorded on the invite, so accepting cannot escalate it - a CHILD invite stays a CHILD invite however the acceptance is shaped.
              * @default ADULT
              * @enum {string}
              */

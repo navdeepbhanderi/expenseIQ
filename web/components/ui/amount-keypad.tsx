@@ -5,7 +5,7 @@ import { cn } from "@/lib/cn";
 import { formatMinor } from "@/lib/money";
 
 /**
- * Numeric keypad — design 6i.
+ * Numeric keypad - design 6i.
  *
  * A real keypad rather than `inputMode="numeric"` because the design shows one,
  * and the reason it shows one is sound: the OS numeric keyboard on Android
@@ -14,7 +14,7 @@ import { formatMinor } from "@/lib/money";
  * consistent, thumb-sized targets and can never emit a character we cannot
  * handle.
  *
- * Digits accumulate as *paise* — pressing 3, 0, 0 makes ₹3.00, exactly like a
+ * Digits accumulate as *paise* - pressing 3, 0, 0 makes ₹3.00, exactly like a
  * card terminal. There is no decimal point to mis-place.
  */
 
@@ -30,7 +30,7 @@ export function AmountKeypad({
   className?: string;
 }) {
   const press = (key: string) => {
-    // Capped so a stuck thumb can't build a number beyond ₹99,99,99,999.99 —
+    // Capped so a stuck thumb can't build a number beyond ₹99,99,99,999.99 -
     // past that the display breaks and the value is certainly a mistake.
     const next = Number(`${valueMinor}${key}`);
     if (Number.isSafeInteger(next) && next <= 99_99_99_999_99) onChange(next);

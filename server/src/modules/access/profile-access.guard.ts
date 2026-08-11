@@ -24,8 +24,8 @@ import { REQUIRE_ACTION } from './require-action.decorator';
  *      indistinguishable from one that doesn't exist.
  *
  *   2. It resolves the role from the database on every request rather than
- *      trusting a claim in the JWT. Roles change — a member gets demoted, a
- *      child grows up — and a 15-minute access token would otherwise carry
+ *      trusting a claim in the JWT. Roles change - a member gets demoted, a
+ *      child grows up - and a 15-minute access token would otherwise carry
  *      stale authority for 15 minutes after the change.
  */
 @Injectable()
@@ -77,7 +77,7 @@ export class ProfileAccessGuard implements CanActivate {
 
 /**
  * Routes name the parameter differently depending on whether the profile is
- * the resource or the scope — `/profiles/:id` versus
+ * the resource or the scope - `/profiles/:id` versus
  * `/profiles/:profileId/accounts`.
  *
  * Express types params as `string | string[]`, because a repeated wildcard

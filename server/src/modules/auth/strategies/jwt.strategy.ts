@@ -26,7 +26,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   /**
    * Re-reads the user on every request rather than trusting the claims alone.
    *
-   * The token is signed, so its contents are authentic — but they're a
+   * The token is signed, so its contents are authentic - but they're a
    * snapshot from up to 15 minutes ago. A deleted account or an email that
    * has since been unverified would otherwise keep working until expiry.
    */

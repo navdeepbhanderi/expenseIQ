@@ -19,12 +19,12 @@ import { GoogleAuthGuard } from './guards/google-auth.guard';
 import type { GoogleIdentity } from './strategies/google.strategy';
 import type { TokenPair } from './token.service';
 
-/** Must match auth.controller.ts — the same cookie serves both flows. */
+/** Must match auth.controller.ts - the same cookie serves both flows. */
 const REFRESH_COOKIE = 'eiq_refresh';
 
 /**
  * Google OAuth lives in its own controller because its routes are browser
- * redirects rather than JSON endpoints — different shape, different error
+ * redirects rather than JSON endpoints - different shape, different error
  * handling, and they must not inherit the JSON controller's throttle.
  */
 @ApiTags('auth')
@@ -67,7 +67,7 @@ export class GoogleAuthController {
 
     /*
      * This route ends in a browser, not a fetch, so a thrown exception would
-     * render the API's JSON error envelope as a bare page — which is what a
+     * render the API's JSON error envelope as a bare page - which is what a
      * user actually saw: a wall of {"statusCode":403,...} where a sign-in
      * screen should have been.
      *
@@ -117,7 +117,7 @@ export class GoogleAuthController {
   }
 
   private setRefreshCookie(response: Response, tokens: TokenPair): void {
-    // Mirrors auth.controller.ts — a readable hint that a session exists.
+    // Mirrors auth.controller.ts - a readable hint that a session exists.
     response.cookie('eiq_session', '1', {
       httpOnly: false,
       secure:
