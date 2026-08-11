@@ -874,4 +874,110 @@ describe('Money core (e2e)', () => {
         .expect(400);
     });
   });
+
+  describe('balances follow the ledger', () => {
+    it('spending on a card raises what is owed', async () => {
+      const { token, profileId } = await createUser('aarav@example.com');
+
+      const card = await harness.prisma.account.create({
+        data: {
+          profileId,
+          type: 'CREDIT_CARD',
+          name: 'Flipkart Axis',
+          balanceMinor: 0n,
+          creditLimitMinor: 28_000_00n,
+        },
+      });
+
+      for (const _ of [1, 2]) {
+        await request(server)
+          .post(`/api/v1/profiles/${profileId}/transactions`)
+          .set('Authorization', `Bearer ${token}`)
+          .send({
+            amountMinor: 5_000_00,
+            date: '2026-08-11',
+            accountId: card.id,
+            merchant: 'Flipkart',
+          })
+          .expect(201);
+      }
+
+      /*
+       * The reported bug. Both rows appeared in the ledger while the card
+       * still read ₹0 outstanding and "0% of limit used", because nothing
+       * ever moved the balance.
+       */
+      const after = await harness.prisma.account.findUniqueOrThrow({
+        where: { id: card.id },
+      });
+      expect(after.balanceMinor).toBe(10_000_00n);
+    });
+
+    it('spending from a bank lowers what is held', async () => {
+      const { token, profileId } = await createUser('aarav@example.com');
+      const bank = await harness.prisma.account.create({
+        data: {
+          profileId,
+          type: 'BANK',
+          name: 'BOB',
+          balanceMinor: 24_405_00n,
+        },
+      });
+
+      const created = await request(server)
+        .post(`/api/v1/profiles/${profileId}/transactions`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ amountMinor: 405_00, date: '2026-08-11', accountId: bank.id })
+        .expect(201);
+
+      expect(
+        (await harness.prisma.account.findUniqueOrThrow({
+          where: { id: bank.id },
+        })).balanceMinor,
+      ).toBe(24_000_00n);
+
+      // Deleting has to give the money back, or the balance keeps an effect
+      // whose cause is gone from the ledger.
+      await request(server)
+        .delete(
+          `/api/v1/profiles/${profileId}/transactions/${created.body.id}`,
+        )
+        .set('Authorization', `Bearer ${token}`)
+        .expect(204);
+
+      expect(
+        (await harness.prisma.account.findUniqueOrThrow({
+          where: { id: bank.id },
+        })).balanceMinor,
+      ).toBe(24_405_00n);
+    });
+
+    it('an edit reverses the old effect before applying the new one', async () => {
+      const { token, profileId } = await createUser('aarav@example.com');
+      const card = await harness.prisma.account.create({
+        data: { profileId, type: 'CREDIT_CARD', name: 'Card', balanceMinor: 0n },
+      });
+
+      const created = await request(server)
+        .post(`/api/v1/profiles/${profileId}/transactions`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ amountMinor: 5_000_00, date: '2026-08-11', accountId: card.id })
+        .expect(201);
+
+      await request(server)
+        .patch(
+          `/api/v1/profiles/${profileId}/transactions/${created.body.id}`,
+        )
+        .set('Authorization', `Bearer ${token}`)
+        .send({ amountMinor: 3_000_00 })
+        .expect(200);
+
+      // Not 8,000 — the original effect is undone, not added to.
+      expect(
+        (await harness.prisma.account.findUniqueOrThrow({
+          where: { id: card.id },
+        })).balanceMinor,
+      ).toBe(3_000_00n);
+    });
+  });
 });

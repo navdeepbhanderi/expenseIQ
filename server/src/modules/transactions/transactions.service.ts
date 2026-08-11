@@ -24,6 +24,7 @@ import {
   TRANSACTION_RELATIONS,
   type TransactionWithRelations,
 } from './transaction-view';
+import { balanceDelta } from './domain/balance-effect';
 
 /** One entry in the filter sidebar - design 6c's "Groceries 18". */
 export interface Facet {
@@ -141,21 +142,73 @@ export class TransactionsService {
         ).id
       : null;
 
-    return this.prisma.transaction.create({
-      data: {
-        profileId,
-        // Stored as a positive magnitude with the direction alongside, so a
-        // query never has to reason about signs to separate spend from income.
-        amountMinor: BigInt(Math.abs(dto.amountMinor)),
-        direction: dto.direction ?? Direction.DEBIT,
-        date: new Date(dto.date),
-        categoryId: dto.categoryId ?? null,
-        accountId: dto.accountId ?? null,
-        merchantId,
-        note: dto.note ?? null,
-        source: dto.source ?? TransactionSource.MANUAL,
-      },
-      include: TRANSACTION_RELATIONS,
+    /*
+     * The row and the balance move together, or neither does.
+     *
+     * Before this, transactions were written and account balances were never
+     * touched — so `balanceMinor` stayed whatever was typed when the account
+     * was created. Two ₹5,000 purchases left a card reading ₹0 outstanding
+     * and "0% of limit used" with both rows visible underneath.
+     */
+    return this.prisma.$transaction(async (tx) => {
+      const created = await tx.transaction.create({
+        data: {
+          profileId,
+          // Stored as a positive magnitude with the direction alongside, so a
+          // query never has to reason about signs to separate spend from
+          // income.
+          amountMinor: BigInt(Math.abs(dto.amountMinor)),
+          direction: dto.direction ?? Direction.DEBIT,
+          date: new Date(dto.date),
+          categoryId: dto.categoryId ?? null,
+          accountId: dto.accountId ?? null,
+          merchantId,
+          note: dto.note ?? null,
+          source: dto.source ?? TransactionSource.MANUAL,
+        },
+        include: TRANSACTION_RELATIONS,
+      });
+
+      await this.applyToBalance(tx, created, 1);
+      return created;
+    });
+  }
+
+  /**
+   * Moves the account balance by one transaction's effect.
+   *
+   * `sign` is 1 to apply and -1 to reverse, which is what lets a delete undo
+   * a create and an edit reverse-then-reapply without a second code path that
+   * could disagree about the direction.
+   *
+   * A transaction with no account has nowhere to land — that is a legitimate
+   * state here, since the account is one of the fields the parser is allowed
+   * to leave for the user to fill in later.
+   */
+  private async applyToBalance(
+    tx: Prisma.TransactionClient,
+    row: {
+      accountId: string | null;
+      amountMinor: bigint;
+      direction: Direction;
+    },
+    sign: 1 | -1,
+  ): Promise<void> {
+    if (!row.accountId) return;
+
+    const account = await tx.account.findUnique({
+      where: { id: row.accountId },
+      select: { id: true, type: true },
+    });
+
+    if (!account) return;
+
+    const delta =
+      balanceDelta(account.type, row.direction, row.amountMinor) * BigInt(sign);
+
+    await tx.account.update({
+      where: { id: account.id },
+      data: { balanceMinor: { increment: delta } },
     });
   }
 
@@ -164,7 +217,7 @@ export class TransactionsService {
     transactionId: string,
     dto: UpdateTransactionDto,
   ): Promise<TransactionWithRelations> {
-    await this.findById(profileId, transactionId);
+    const existing = await this.findById(profileId, transactionId);
 
     const data: Prisma.TransactionUpdateInput = {};
     if (dto.amountMinor !== undefined) {
@@ -191,10 +244,25 @@ export class TransactionsService {
       data.merchant = { connect: { id: merchant.id } };
     }
 
-    return this.prisma.transaction.update({
-      where: { id: transactionId },
-      data,
-      include: TRANSACTION_RELATIONS,
+    /*
+     * Reverse the old effect, then apply the new one.
+     *
+     * An edit can change the amount, the direction *and* the account at once,
+     * so computing a delta from the difference would need every combination
+     * handled separately. Undoing and redoing is one rule that cannot
+     * disagree with itself.
+     */
+    return this.prisma.$transaction(async (tx) => {
+      await this.applyToBalance(tx, existing, -1);
+
+      const updated = await tx.transaction.update({
+        where: { id: transactionId },
+        data,
+        include: TRANSACTION_RELATIONS,
+      });
+
+      await this.applyToBalance(tx, updated, 1);
+      return updated;
     });
   }
 
@@ -207,11 +275,17 @@ export class TransactionsService {
    * altering a historical month's totals with no way back.
    */
   async remove(profileId: string, transactionId: string): Promise<void> {
-    await this.findById(profileId, transactionId);
+    const existing = await this.findById(profileId, transactionId);
 
-    await this.prisma.transaction.update({
-      where: { id: transactionId },
-      data: { deletedAt: new Date() },
+    await this.prisma.$transaction(async (tx) => {
+      await tx.transaction.update({
+        where: { id: transactionId },
+        data: { deletedAt: new Date() },
+      });
+
+      // Deleting has to give the money back, or the balance keeps an effect
+      // whose cause is no longer in the ledger.
+      await this.applyToBalance(tx, existing, -1);
     });
   }
 
@@ -226,12 +300,23 @@ export class TransactionsService {
     profileId: string,
     transactionIds: string[],
   ): Promise<{ deleted: number }> {
-    const result = await this.prisma.transaction.updateMany({
-      where: { id: { in: transactionIds }, profileId, deletedAt: null },
-      data: { deletedAt: new Date() },
-    });
+    return this.prisma.$transaction(async (tx) => {
+      // Read first: once they are marked deleted their effects still have to
+      // be reversed, and the rows would no longer match the filter.
+      const rows = await tx.transaction.findMany({
+        where: { id: { in: transactionIds }, profileId, deletedAt: null },
+        select: { accountId: true, amountMinor: true, direction: true },
+      });
 
-    return { deleted: result.count };
+      const result = await tx.transaction.updateMany({
+        where: { id: { in: transactionIds }, profileId, deletedAt: null },
+        data: { deletedAt: new Date() },
+      });
+
+      for (const row of rows) await this.applyToBalance(tx, row, -1);
+
+      return { deleted: result.count };
+    });
   }
 
   async restore(
@@ -246,9 +331,15 @@ export class TransactionsService {
       throw new NotFoundException('Transaction not found');
     }
 
-    return this.prisma.transaction.update({
-      where: { id: transactionId },
-      data: { deletedAt: null },
+    return this.prisma.$transaction(async (tx) => {
+      const restored = await tx.transaction.update({
+        where: { id: transactionId },
+        data: { deletedAt: null },
+      });
+
+      // Putting it back puts its effect back.
+      await this.applyToBalance(tx, restored, 1);
+      return restored;
     });
   }
 
