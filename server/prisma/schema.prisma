@@ -133,6 +133,7 @@ model Profile {
   goals         SavingsGoal[]
   allowance     Allowance?
   notifications Notification[]
+  llmCredential LlmCredential?
 
   @@map("profiles")
 }
@@ -733,4 +734,40 @@ enum IntegrationType {
   GOOGLE_CALENDAR
   GOOGLE_TASKS
   SMS
+}
+
+/// A user-supplied LLM key, encrypted at rest.
+///
+/// The platform ships with its own provider so the product works out of the
+/// box, but ExpenseIQ is open source and self-hostable, and anyone running it
+/// — or anyone who simply wants their own quota, model or provider — should
+/// not have to depend on ours.
+///
+/// The ciphertext, nonce and auth tag are stored separately because AES-GCM
+/// needs all three, and the plaintext key is never written anywhere: not to
+/// this table, not to the logs, and not to any API response. `keyHint` is the
+/// only part ever shown back, and it is four characters and a prefix.
+model LlmCredential {
+  id         String    @id @default(uuid())
+  profileId  String    @unique
+  /// "groq", "openrouter", "gemini" — validated against the registry.
+  provider   String
+  /// The model id as that provider names it.
+  model      String
+  ciphertext String
+  iv         String
+  authTag    String
+  /// "gsk_…NCwF". Enough to recognise, not enough to guess.
+  keyHint    String
+  /// Set when a call with this key last succeeded, so the UI can say whether
+  /// the key has ever actually worked rather than only that it was saved.
+  lastUsedAt DateTime?
+  /// The last provider error, so a key that has started failing says why.
+  lastError  String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@map("llm_credentials")
 }

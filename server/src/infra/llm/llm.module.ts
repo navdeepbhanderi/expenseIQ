@@ -6,13 +6,19 @@ import type { AppConfig } from '@/config/configuration';
 import { LLM_PORT, type LlmPort } from './llm.port';
 import { GeminiAdapter } from './gemini.adapter';
 import { OpenRouterAdapter } from './openrouter.adapter';
+import { GroqAdapter } from './groq.adapter';
 import { FakeLlmAdapter } from './fake-llm.adapter';
 import { ChainLlmAdapter } from './chain.adapter';
 
 /**
  * Builds the provider chain at boot.
  *
- * `LLM_DRIVER` is a comma-separated order — the default, `openrouter,gemini`,
+ * `LLM_DRIVER` is a comma-separated order. The default is `groq,openrouter,
+ * gemini`: Groq leads because its free tier allows 14,400 requests a day
+ * against OpenRouter's 50 and Gemini's ~20 per model, and a product whose core
+ * interaction is one parse per expense stops working entirely at those lower
+ * ceilings rather than merely slowing down. The older reasoning below still
+ * explains the relative order of the two behind it —
  * puts OpenRouter first because its free tier is metered per *account*
  * (50 requests/day, 1000 once $10 of credits has ever been bought) while
  * Gemini free meters roughly 20/day per model and zero on every Pro model.
@@ -33,6 +39,7 @@ import { ChainLlmAdapter } from './chain.adapter';
   providers: [
     GeminiAdapter,
     OpenRouterAdapter,
+    GroqAdapter,
     FakeLlmAdapter,
     {
       provide: LLM_PORT,
@@ -40,6 +47,7 @@ import { ChainLlmAdapter } from './chain.adapter';
         ConfigService,
         GeminiAdapter,
         OpenRouterAdapter,
+        GroqAdapter,
         FakeLlmAdapter,
         AppLogger,
       ],
@@ -47,6 +55,7 @@ import { ChainLlmAdapter } from './chain.adapter';
         config: ConfigService,
         gemini: GeminiAdapter,
         openRouter: OpenRouterAdapter,
+        groq: GroqAdapter,
         fake: FakeLlmAdapter,
         logger: AppLogger,
       ): LlmPort => {
@@ -60,6 +69,7 @@ import { ChainLlmAdapter } from './chain.adapter';
         }
 
         const available: Record<string, { port: LlmPort; keyed: boolean }> = {
+          groq: { port: groq, keyed: Boolean(llm?.groq.apiKey) },
           openrouter: {
             port: openRouter,
             keyed: Boolean(llm?.openRouter.apiKey),
@@ -72,7 +82,7 @@ import { ChainLlmAdapter } from './chain.adapter';
         const order =
           driver !== undefined && driver.length > 0
             ? driver
-            : 'openrouter,gemini';
+            : 'groq,openrouter,gemini';
 
         const requested = order
           .split(',')
@@ -88,8 +98,8 @@ import { ChainLlmAdapter } from './chain.adapter';
 
         if (chain.length === 0) {
           logger.warn(
-            'Using the deterministic fake LLM adapter — set OPENROUTER_API_KEY ' +
-              'or GEMINI_API_KEY for real extraction',
+            'Using the deterministic fake LLM adapter — set GROQ_API_KEY, ' +
+              'OPENROUTER_API_KEY or GEMINI_API_KEY for real extraction',
           );
           return fake;
         }

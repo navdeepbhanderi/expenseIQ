@@ -20,6 +20,8 @@ import { isWorthAnotherModel, resolveChain } from './model-fallback';
 
 const ENDPOINT = 'https://openrouter.ai/api/v1/chat/completions';
 
+const DEFAULT_TIMEOUT_MS = 20_000;
+
 /**
  * Free-tier chains, measured against this project's own extraction prompt on
  * Hindi, Hinglish, Gujarati, multi-expense and lakh-notation inputs.
@@ -73,11 +75,40 @@ interface RawExtraction {
  */
 @Injectable()
 export class OpenRouterAdapter implements LlmPort {
-  readonly name = 'openrouter';
+  readonly name: string = 'openrouter';
+
+  /*
+   * The four things that differ between OpenAI-compatible providers.
+   *
+   * Groq speaks the same chat-completions dialect, so it subclasses this
+   * rather than duplicating the retry, timeout, chain-walking and
+   * JSON-repair logic — all of which was written against measured failures
+   * and would rot immediately in a second copy.
+   */
+  protected readonly endpoint: string = ENDPOINT;
+  protected readonly providerLabel: string = 'OpenRouter';
+
+  protected credentials(): { apiKey?: string; timeoutMs: number } {
+    const llm = this.config.get<AppConfig['llm']>('llm');
+    return {
+      apiKey: llm?.openRouter.apiKey,
+      timeoutMs: llm?.openRouter.timeoutMs ?? DEFAULT_TIMEOUT_MS,
+    };
+  }
+
+  protected extraHeaders(): Record<string, string> {
+    return {
+      // OpenRouter attributes usage to these; they are not required, but
+      // without them the account dashboard cannot tell this app apart from
+      // anything else sharing the key.
+      'HTTP-Referer': 'https://github.com/navdeepbhanderi/expenseIQ',
+      'X-Title': 'ExpenseIQ',
+    };
+  }
 
   constructor(
-    private readonly config: ConfigService,
-    private readonly logger: AppLogger,
+    protected readonly config: ConfigService,
+    protected readonly logger: AppLogger,
   ) {
     this.logger.setContext('OpenRouter');
   }
@@ -189,20 +220,19 @@ export class OpenRouterAdapter implements LlmPort {
     }
   }
 
-  private async post(
+  protected async post(
     model: string,
     body: Record<string, unknown>,
   ): Promise<ChatResponse> {
-    const llm = this.config.get<AppConfig['llm']>('llm');
-    const apiKey = llm?.openRouter.apiKey;
+    const { apiKey, timeoutMs } = this.credentials();
 
     if (!apiKey) {
-      throw new LlmError('OPENROUTER_API_KEY is not configured', false);
+      throw new LlmError(
+        `No API key configured for ${this.providerLabel}`,
+        false,
+      );
     }
 
-    // No fallback needed: the apiKey guard above narrowed `llm` to defined,
-    // and OPENROUTER_TIMEOUT_MS carries its own default.
-    const timeoutMs = llm.openRouter.timeoutMs;
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
 
@@ -213,17 +243,13 @@ export class OpenRouterAdapter implements LlmPort {
       // cleared once fetch() resolves guards nothing: the request still hangs
       // for their ~120s idle timeout inside response.json(). Measured — a
       // 12s deadline that cleared too early produced 128-150s parses.
-      const response = await fetch(ENDPOINT, {
+      const response = await fetch(this.endpoint, {
         signal: controller.signal,
         method: 'POST',
         headers: {
           Authorization: `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
-          // OpenRouter attributes usage to these; they are not required, but
-          // without them the account dashboard cannot tell this app apart
-          // from anything else sharing the key.
-          'HTTP-Referer': 'https://github.com/navdeepbhanderi/expenseIQ',
-          'X-Title': 'ExpenseIQ',
+          ...this.extraHeaders(),
         },
         body: JSON.stringify({ model, ...body }),
       });
@@ -233,7 +259,7 @@ export class OpenRouterAdapter implements LlmPort {
       if (!response.ok) {
         throw Object.assign(
           new Error(
-            `OpenRouter request failed: ${payload.error?.message ?? response.statusText}`,
+            `${this.providerLabel} request failed: ${payload.error?.message ?? response.statusText}`,
           ),
           { status: response.status },
         );
@@ -295,7 +321,7 @@ export class OpenRouterAdapter implements LlmPort {
     throw wrapError(lastError);
   }
 
-  private models(tier: 'text' | 'vision'): string[] {
+  protected models(tier: 'text' | 'vision'): string[] {
     const llm = this.config.get<AppConfig['llm']>('llm');
     const configured =
       tier === 'text'
@@ -348,8 +374,16 @@ function wrapError(error: unknown): LlmError {
   const status = (error as { status?: unknown }).status;
   const retryable = typeof status === 'number' && status >= 500;
 
+  /*
+   * No provider name here — the inner error already carries one.
+   *
+   * This helper is shared by every OpenAI-compatible subclass, so hardcoding
+   * "OpenRouter" produced "OpenRouter request failed: groq request failed: …"
+   * on a Groq call, which is confusing in a log and actively misleading in the
+   * settings panel where a user reads it to work out which key is broken.
+   */
   return new LlmError(
-    `OpenRouter request failed: ${error instanceof Error ? error.message : String(error)}`,
+    error instanceof Error ? error.message : String(error),
     retryable,
     error,
   );

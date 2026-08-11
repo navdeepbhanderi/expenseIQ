@@ -51,6 +51,35 @@ export const envSchema = z.object({
   // speak-to-confirmed flow. Raise it if extraction quality ever needs it.
   GEMINI_THINKING_BUDGET: z.coerce.number().int().min(0).default(0),
 
+  /*
+   * Groq — the platform default.
+   *
+   * Chosen for the free tier's shape rather than for raw quality:
+   * llama-3.1-8b-instant allows 14,400 requests a day at 30/minute, where
+   * OpenRouter's free tier is 50/day per account and Gemini's is roughly
+   * 20/day per model. For a product whose core interaction is "say a
+   * sentence, get a parse", a daily cap measured in tens is not a free tier,
+   * it is a demo. Groq also serves an 8B model fast enough for the design's
+   * four-second budget.
+   */
+  /**
+   * Encrypts user-supplied provider keys at rest. `openssl rand -hex 32`.
+   *
+   * Optional so the app still boots without it — the bring-your-own-key
+   * feature is then simply unavailable rather than the whole server refusing
+   * to start over a feature most deployments will not use.
+   */
+  CREDENTIAL_ENCRYPTION_KEY: z
+    .string()
+    .regex(/^[0-9a-fA-F]{64}$/, 'must be 64 hex characters')
+    .optional(),
+
+  GROQ_API_KEY: z.string().optional(),
+  GROQ_MODELS_TEXT: z.string().optional(),
+  // Llama 3.1 8B has no vision. Receipts fall through to a provider that does.
+  GROQ_MODELS_VISION: z.string().optional(),
+  GROQ_TIMEOUT_MS: z.coerce.number().int().min(1000).default(20_000),
+
   OPENROUTER_API_KEY: z.string().optional(),
   // Comma-separated chains, same convention as the Gemini ones. Left empty,
   // the adapter's measured defaults apply — see openrouter.adapter.ts.

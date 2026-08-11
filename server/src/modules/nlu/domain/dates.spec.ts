@@ -1,4 +1,4 @@
-import { addDays, resolveDate, todayIn } from './dates';
+import { addDays, countDateExpressions, resolveDate, todayIn } from './dates';
 
 /**
  * A Monday, deliberately: it makes "last Tuesday" a six-day step rather than
@@ -198,5 +198,34 @@ describe('resolveDate — precedence', () => {
 
   it('prefers "day before yesterday" over the "yesterday" inside it', () => {
     expect(on('day before yesterday spent 500')?.date).toBe('2026-08-08');
+  });
+});
+
+describe('countDateExpressions', () => {
+  it('finds one date shared across several expenses', () => {
+    // The case that used to be skipped, leaving both entries dated today.
+    expect(countDateExpressions('kal groceries 300 aur petrol 1200')).toBe(1);
+  });
+
+  it('finds two when the sentence names two days', () => {
+    // Attributing each to the right clause needs real parsing, so the
+    // override has to stand down here.
+    expect(countDateExpressions('kal groceries 300 aur aaj petrol 1200')).toBe(
+      2,
+    );
+  });
+
+  it('finds none when no date is spoken', () => {
+    expect(countDateExpressions('groceries 300 and petrol 1200')).toBe(0);
+  });
+
+  it('counts a repeated word once', () => {
+    // Saying "kal" twice is still one day.
+    expect(countDateExpressions('kal 300 aur kal 1200')).toBe(1);
+  });
+
+  it('splits on English and Hindi conjunctions alike', () => {
+    expect(countDateExpressions('yesterday 300 and today 1200')).toBe(2);
+    expect(countDateExpressions('ગઈકાલે 300, આજે 1200')).toBe(2);
   });
 });

@@ -36,6 +36,7 @@ import { ReceiptsModule } from './modules/receipts/receipts.module';
 import { RecurringModule } from './modules/recurring/recurring.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { RemindersModule } from './modules/reminders/reminders.module';
+import { LlmSettingsModule } from './modules/llm-settings/llm-settings.module';
 import { SchedulerModule } from './modules/scheduler/scheduler.module';
 import { FamilyModule } from './modules/family/family.module';
 
@@ -75,6 +76,7 @@ import { FamilyModule } from './modules/family/family.module';
     RecurringModule,
     NotificationsModule,
     RemindersModule,
+    LlmSettingsModule,
     SchedulerModule,
     FamilyModule,
   ],

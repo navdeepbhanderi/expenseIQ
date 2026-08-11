@@ -130,6 +130,42 @@ export function useConfirm(profileId: string | null) {
   });
 }
 
+/**
+ * Corrects a parsed entry before it is confirmed.
+ *
+ * Distinct from passing overrides to confirm, and the difference matters: the
+ * server records every changed field here as a Correction, and those
+ * corrections are the feedback loop — they drive the accuracy figure and the
+ * per-profile category learning. An amount fixed silently at confirm time
+ * teaches the system nothing.
+ *
+ * It is also the only way to fix an amount, a date, a merchant or a note; the
+ * inline chips only ever covered category and account.
+ */
+export function useEditReviewItem(profileId: string | null) {
+  const client = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      itemId,
+      patch,
+    }: {
+      itemId: string;
+      patch: {
+        amountMinor?: number;
+        direction?: "DEBIT" | "CREDIT";
+        categoryId?: string;
+        accountId?: string;
+        merchant?: string;
+        date?: string;
+        note?: string;
+      };
+    }) =>
+      api.patch(`/profiles/${profileId}/review-queue/${itemId}`, patch),
+    onSuccess: () => invalidateLedger(client, profileId),
+  });
+}
+
 export function useDiscard(profileId: string | null) {
   const client = useQueryClient();
 

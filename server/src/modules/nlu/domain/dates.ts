@@ -426,3 +426,34 @@ function clamp(year: number, month: number, day: number): string {
 }
 
 export const _internals = { DAY_MS };
+
+/**
+ * How many distinct date expressions the utterance contains.
+ *
+ * Used to decide whether one resolved date may be applied to several
+ * candidates. "kal groceries 300 aur petrol 1200" names one day and means it
+ * for both; "kal groceries 300 aur aaj petrol 1200" names two, and attributing
+ * them to the right clause needs real sentence parsing rather than a guess.
+ */
+export function countDateExpressions(utterance: string): number {
+  const text = utterance.toLowerCase();
+
+  /*
+   * Counted by scanning windows rather than by matching the whole string,
+   * because the resolvers deliberately return only the first hit. Splitting on
+   * the common conjunctions is enough to tell "one date, several expenses"
+   * from "several dates" — which is the only distinction that matters here.
+   */
+  // Punctuation needs no leading space — "300, આજે" is one of the commonest
+  // ways to list two expenses, and requiring one meant it never split.
+  const clauses = text.split(/\s+(?:and|aur|ane|અને|और|ane)\s+|\s*[,;।|]\s*/);
+
+  const dates = new Set<string>();
+  for (const clause of clauses) {
+    // Any date at all in this clause; the year is irrelevant to the count.
+    const found = resolveDate(clause, '2000-01-01');
+    if (found) dates.add(found.matched);
+  }
+
+  return dates.size;
+}

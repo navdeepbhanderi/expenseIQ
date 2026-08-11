@@ -39,6 +39,7 @@ export const configuration = (): AppConfig => {
     },
     // Model IDs are pinned per task here and never hardcoded at call sites,
     // so the Pro/Flash routing split stays a config decision.
+    credentialEncryptionKey: env.CREDENTIAL_ENCRYPTION_KEY,
     llm: {
       apiKey: env.GEMINI_API_KEY,
       models: {
@@ -46,6 +47,14 @@ export const configuration = (): AppConfig => {
         flash: env.GEMINI_MODEL_FLASH,
       },
       thinkingBudget: Number(env.GEMINI_THINKING_BUDGET),
+      groq: {
+        apiKey: env.GROQ_API_KEY,
+        models: {
+          text: env.GROQ_MODELS_TEXT,
+          vision: env.GROQ_MODELS_VISION,
+        },
+        timeoutMs: Number(env.GROQ_TIMEOUT_MS ?? 20_000),
+      },
       openRouter: {
         apiKey: env.OPENROUTER_API_KEY,
         models: {
@@ -75,10 +84,17 @@ export interface AppConfig {
   };
   google: { clientId?: string; clientSecret?: string };
   mail: { from: string; resendApiKey?: string };
+  /** 64 hex chars. Encrypts user-supplied provider keys at rest. */
+  credentialEncryptionKey?: string;
   llm: {
     apiKey?: string;
     models: { pro: string; flash: string };
     thinkingBudget: number;
+    groq: {
+      apiKey?: string;
+      models: { text?: string; vision?: string };
+      timeoutMs: number;
+    };
     openRouter: {
       apiKey?: string;
       models: { text?: string; vision?: string };

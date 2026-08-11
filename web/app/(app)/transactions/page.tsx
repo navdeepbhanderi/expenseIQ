@@ -7,6 +7,7 @@ import { useCategories, useDashboard } from "@/lib/api/hooks";
 import {
   downloadExport,
   useBulkDelete,
+  useRestoreTransaction,
   useTransactions,
   type TransactionFilters,
 } from "@/lib/api/transactions";
@@ -32,7 +33,7 @@ export default function TransactionsPage() {
   const { activeId } = useProfile();
   const { data: categories = [] } = useCategories(activeId);
   const { data: dashboard } = useDashboard(activeId);
-  const { toast } = useToast();
+  const { toast, undoToast } = useToast();
 
   const [filters, setFilters] = useState<TransactionFilters>({});
   const [search, setSearch] = useState("");
@@ -42,6 +43,7 @@ export default function TransactionsPage() {
 
   const query = useTransactions(activeId, filters);
   const bulkDelete = useBulkDelete(activeId);
+  const restore = useRestoreTransaction(activeId);
 
   // Derived from query.data directly: `?? []` creates a new array identity on
   // every render, which would defeat the memo it feeds.
@@ -304,13 +306,37 @@ export default function TransactionsPage() {
         open={confirmDelete}
         onOpenChange={setConfirmDelete}
         title={`Delete ${selected.length} transaction${selected.length === 1 ? "" : "s"}?`}
-        description="They leave your ledger and the month's totals change. This cannot be undone from here."
+        description="They leave your ledger and the month's totals change. You'll get a moment to undo it."
         confirmLabel={`Delete ${selected.length}`}
         isLoading={bulkDelete.isPending}
         onConfirm={() => {
-          void bulkDelete.mutateAsync(selected).then(() => {
+          const deleted = selected;
+
+          void bulkDelete.mutateAsync(deleted).then(() => {
             setSelected([]);
             setConfirmDelete(false);
+
+            /*
+             * Deletion is soft, so this is a real restore rather than a
+             * cosmetic undo. The endpoint existed from the start precisely so
+             * a mis-tap would be recoverable, and nothing had ever called it —
+             * which is why the dialog used to claim it could not be undone.
+             */
+            undoToast(
+              `Deleted ${deleted.length} transaction${deleted.length === 1 ? "" : "s"}`,
+              () => {
+                void Promise.all(
+                  deleted.map((id) => restore.mutateAsync(id)),
+                ).then(
+                  () => toast({ title: "Put back", tone: "success" }),
+                  () =>
+                    toast({
+                      title: "Couldn't restore those",
+                      tone: "error",
+                    }),
+                );
+              },
+            );
           });
         }}
       />

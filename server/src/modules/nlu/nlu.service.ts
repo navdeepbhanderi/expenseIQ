@@ -31,8 +31,10 @@ import {
   uncertainFields,
 } from './domain/confidence';
 import { suggestAccounts } from './domain/suggestions';
-import { resolveDate, todayIn } from './domain/dates';
+import { countDateExpressions, resolveDate, todayIn } from './domain/dates';
+import { resolveAmount } from './domain/amounts';
 import { matchAccount, matchCategory } from './domain/matching';
+import { LlmResolver } from '@/modules/llm-settings/llm-resolver.service';
 
 export interface ParsedCandidate {
   reviewItemId: string;
@@ -66,6 +68,7 @@ export class NluService {
   constructor(
     private readonly prisma: PrismaService,
     @Inject(LLM_PORT) private readonly llm: LlmPort,
+    private readonly resolver: LlmResolver,
     private readonly logger: AppLogger,
   ) {
     this.logger.setContext('NLU');
@@ -97,7 +100,7 @@ export class NluService {
 
     let extraction;
     try {
-      extraction = await this.callWithRetry(input, context.forLlm);
+      extraction = await this.callWithRetry(profileId, input, context.forLlm);
     } catch (error) {
       // Never silently drop a user's input. A failed parse still becomes a
       // review item carrying the raw text, so the user can complete it by
@@ -132,6 +135,7 @@ export class NluService {
         : TransactionSource.NLU_TEXT);
 
     const affinity = await this.accountAffinity(profileId);
+    const learnedCategory = await this.categoryByMerchant(profileId);
 
     const candidates: ParsedCandidate[] = [];
 
@@ -150,10 +154,33 @@ export class NluService {
      * sentence properly, and applying one date to all of them would be
      * confidently wrong rather than usefully right.
      */
+    const today = todayIn(context.forLlm.timezone);
+
+    /*
+     * One date may cover several expenses; two may not.
+     *
+     * "kal groceries 300 aur petrol 1200" names a single day and means it for
+     * both — refusing to apply it there left the common multi-expense case
+     * dated today, which is the very bug this resolver exists to fix. But once
+     * the sentence names two different days, attributing each to the right
+     * clause needs real parsing, and applying one to all would be confidently
+     * wrong rather than usefully right. So the override stops there and the
+     * model keeps its answer.
+     */
     const spokenDate =
-      extraction.candidates.length === 1
-        ? resolveDate(rawInput, todayIn(context.forLlm.timezone))
+      countDateExpressions(rawInput) === 1
+        ? resolveDate(rawInput, today)
         : null;
+
+    /*
+     * The amount, but only when a scale word was spoken.
+     *
+     * Applied to a single candidate only: with several expenses in one
+     * sentence there is no way to tell which "5k" belongs to, and a bare
+     * number is left to the model in every case.
+     */
+    const spokenAmount =
+      extraction.candidates.length === 1 ? resolveAmount(rawInput) : null;
 
     for (const raw of extraction.candidates) {
       const candidate = sanitise(raw);
@@ -172,6 +199,18 @@ export class NluService {
         candidate.fieldConfidence.date = spokenDate.confidence;
       }
 
+      if (spokenAmount && spokenAmount.amountMinor !== candidate.amountMinor) {
+        this.logger.debug("Overrode the model's amount", {
+          profileId,
+          modelSaid: candidate.amountMinor,
+          resolved: spokenAmount.amountMinor,
+          from: spokenAmount.matched,
+        });
+
+        candidate.amountMinor = spokenAmount.amountMinor;
+        candidate.fieldConfidence.amount = spokenAmount.confidence;
+      }
+
       /*
        * Fuzzy rather than exact name matching.
        *
@@ -180,8 +219,22 @@ export class NluService {
        * rejected all of those and asked the user to pick a value the system
        * had already understood.
        */
-      const category =
-        matchCategory(categories, candidate.category)?.row ?? null;
+      let category = matchCategory(categories, candidate.category)?.row ?? null;
+
+      /*
+       * Fall back to what this profile usually does with this merchant.
+       *
+       * Only when the spoken category matched nothing — the user's explicit
+       * word always wins over an inference from history. This is what makes
+       * "blinkit 400" land in Groceries for someone who has always filed it
+       * there, without anyone having to add Blinkit to a synonym table.
+       */
+      if (!category && candidate.merchant) {
+        const learned = learnedCategory.get(candidate.merchant.toLowerCase());
+        category = learned
+          ? (categories.find((c) => c.id === learned) ?? null)
+          : null;
+      }
       const account = matchAccount(accounts, candidate.account)?.row ?? null;
 
       const confidence = overallConfidence(candidate);
@@ -280,15 +333,23 @@ export class NluService {
    * worth a second try, an invalid API key is not, and retrying it just
    * doubles the latency before the user sees the same error.
    */
-  private async callWithRetry(input: ParseInput, context: ExtractionContext) {
+  private async callWithRetry(
+    profileId: string,
+    input: ParseInput,
+    context: ExtractionContext,
+  ) {
+    // Through the resolver, so a profile with its own provider key uses it —
+    // and falls back to the platform if that key has stopped working.
+    const call = () => this.resolver.extract(profileId, input, context);
+
     try {
-      return await this.llm.extract(input, context);
+      return await call();
     } catch (error) {
       if (error instanceof LlmError && error.retryable) {
         this.logger.warn('Retrying extraction after a retryable failure', {
           reason: error.message,
         });
-        return await this.llm.extract(input, context);
+        return await call();
       }
       throw error;
     }
@@ -417,6 +478,61 @@ export class NluService {
   }
 
   /** categoryId → accountId → how often that pairing was used. */
+  /**
+   * The category this profile actually files each merchant under.
+   *
+   * The synonym table in matching.ts is a fixed guess at what people call
+   * things; this is what *this* user demonstrably does. If every Blinkit
+   * charge has been filed to Groceries, then Blinkit means Groceries here —
+   * whatever the table says, and whether or not the model offered a category
+   * at all.
+   *
+   * Built from confirmed transactions rather than from Correction rows: a
+   * correction records that a field changed but not the word that was spoken,
+   * so it cannot say what the user *meant*. The settled ledger can.
+   */
+  private async categoryByMerchant(
+    profileId: string,
+  ): Promise<Map<string, string>> {
+    const rows = await this.prisma.transaction.groupBy({
+      by: ['merchantId', 'categoryId'],
+      where: {
+        profileId,
+        deletedAt: null,
+        merchantId: { not: null },
+        categoryId: { not: null },
+      },
+      _count: { _all: true },
+    });
+
+    // Most-used category per merchant; ties go to whichever is seen first,
+    // which is stable enough for a suggestion the user still confirms.
+    const best = new Map<string, { categoryId: string; count: number }>();
+
+    for (const row of rows) {
+      if (!row.merchantId || !row.categoryId) continue;
+      const current = best.get(row.merchantId);
+      if (!current || row._count._all > current.count) {
+        best.set(row.merchantId, {
+          categoryId: row.categoryId,
+          count: row._count._all,
+        });
+      }
+    }
+
+    const merchants = await this.prisma.merchant.findMany({
+      where: { id: { in: [...best.keys()] } },
+      select: { id: true, normalizedName: true },
+    });
+
+    return new Map(
+      merchants.map((m) => [
+        m.normalizedName.toLowerCase(),
+        best.get(m.id)!.categoryId,
+      ]),
+    );
+  }
+
   private async accountAffinity(
     profileId: string,
   ): Promise<Map<string, Map<string, number>>> {

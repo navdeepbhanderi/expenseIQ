@@ -16,6 +16,7 @@ import { ReviewSkeleton } from "@/components/ui/skeletons";
 import { Eyebrow } from "@/components/ui/display";
 import { useToast } from "@/components/ui/toast";
 import { CandidateCard, HeardLine } from "@/components/capture/candidate-card";
+import { ReviewEditModal } from "@/components/review/review-edit-modal";
 import { formatMinor, undoSecondsLeft } from "@/lib/money";
 import { ApiError } from "@/lib/api/client";
 import { useNluAccuracy } from "@/lib/api/settings";
@@ -37,6 +38,7 @@ export default function ReviewPage() {
   const accuracy = useNluAccuracy(activeId);
   const confirm = useConfirm(activeId);
   const discard = useDiscard(activeId);
+  const [editing, setEditing] = useState<string | null>(null);
   const undo = useUndo(activeId);
   const { toast, undoToast } = useToast();
 
@@ -173,6 +175,16 @@ export default function ReviewPage() {
                 }
               />
 
+              {editing === item.reviewItemId && (
+                <ReviewEditModal
+                  open
+                  onOpenChange={(next) => !next && setEditing(null)}
+                  item={{ ...current, reviewItemId: item.reviewItemId }}
+                  categories={categories}
+                  accounts={accounts}
+                />
+              )}
+
               <div className="mt-4 flex flex-col gap-2 sm:flex-row">
                 <Button
                   size="mobile"
@@ -182,6 +194,17 @@ export default function ReviewPage() {
                   disabled={current.amountMinor === null}
                 >
                   Looks right
+                </Button>
+                {/* The amount, date, merchant and note are unreachable from
+                    the chips, so a misheard figure had no remedy but discard
+                    and say it again. */}
+                <Button
+                  size="mobile"
+                  variant="secondary"
+                  className="sm:h-10 sm:w-auto sm:rounded-[var(--radius-control)] sm:text-sm"
+                  onClick={() => setEditing(item.reviewItemId)}
+                >
+                  Fix details
                 </Button>
                 <Button
                   size="mobile"

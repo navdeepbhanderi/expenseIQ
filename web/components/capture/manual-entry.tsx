@@ -13,6 +13,7 @@ import { useAccounts } from "@/lib/api/accounts";
 import { useCategories } from "@/lib/api/hooks";
 import { useCreateTransaction } from "@/lib/api/transactions";
 import { ApiError } from "@/lib/api/client";
+import { MerchantInput } from "@/components/capture/merchant-input";
 import { toLocalISODate } from "@/lib/today";
 import { useRouter } from "next/navigation";
 
@@ -183,12 +184,7 @@ export function ManualEntry({
           }}
         />
 
-        <Input
-          label="Where"
-          placeholder="Swiggy, D-Mart, the chemist"
-          value={merchant}
-          onChange={(e) => setMerchant(e.target.value)}
-        />
+        <MerchantInput value={merchant} onChange={setMerchant} />
 
         <Input
           label="Note"
