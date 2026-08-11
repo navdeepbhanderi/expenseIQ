@@ -6,7 +6,9 @@ import {
 } from '@nestjs/common';
 import {
   AccountType,
+  Direction,
   Prisma,
+  TransactionSource,
   type Account,
   type ProfileRole,
 } from '@prisma/client';
@@ -30,6 +32,9 @@ import {
 } from './domain/amortization';
 import { loanTermsFrom } from './domain/loan-terms';
 import type { CreateAccountDto, UpdateAccountDto } from './dto/account.dto';
+import { PayAccountDto } from './dto/account.dto';
+import { randomUUID } from 'node:crypto';
+import { startOfDay } from '@/common/time/calendar';
 
 /** An account plus whatever derived view its type calls for. */
 export interface AccountDetail {
@@ -295,6 +300,107 @@ export class AccountsService {
         });
       }
     }
+  }
+  /**
+   * Records a payment towards a card or a loan.
+   *
+   * Written as a transfer pair inside one transaction so the ledger can never
+   * hold one half: a debit with no matching credit would silently overstate
+   * spending and understate the balance owed, and the two are only meaningful
+   * together.
+   *
+   * The account's own balance is moved as well as the entries being written.
+   * For a card, paying reduces the outstanding; for a loan it reduces the
+   * principal and advances the instalment count, which is what every
+   * amortisation figure on the account page is derived from.
+   */
+  async pay(
+    profileId: string,
+    accountId: string,
+    dto: PayAccountDto,
+  ): Promise<{ transferGroupId: string }> {
+    const target = await this.findById(profileId, accountId);
+    const source = await this.findById(profileId, dto.fromAccountId);
+
+    if (target.id === source.id) {
+      throw new BadRequestException('An account cannot pay itself');
+    }
+
+    if (
+      target.type !== AccountType.CREDIT_CARD &&
+      target.type !== AccountType.LOAN
+    ) {
+      throw new BadRequestException(
+        'Only a credit card or a loan has a balance to pay down',
+      );
+    }
+
+    const amount = BigInt(dto.amountMinor);
+    const when = dto.date ? new Date(dto.date) : startOfDay(new Date());
+    const transferGroupId = randomUUID();
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.transaction.createMany({
+        data: [
+          {
+            profileId,
+            accountId: source.id,
+            amountMinor: amount,
+            direction: Direction.DEBIT,
+            date: when,
+            note: `Payment to ${target.name}`,
+            source: TransactionSource.MANUAL,
+            isTransfer: true,
+            transferGroupId,
+          },
+          {
+            profileId,
+            accountId: target.id,
+            amountMinor: amount,
+            direction: Direction.CREDIT,
+            date: when,
+            note: `Paid from ${source.name}`,
+            source: TransactionSource.MANUAL,
+            isTransfer: true,
+            transferGroupId,
+          },
+        ],
+      });
+
+      // Money actually left the paying account.
+      await tx.account.update({
+        where: { id: source.id },
+        data: { balanceMinor: { decrement: amount } },
+      });
+
+      if (target.type === AccountType.CREDIT_CARD) {
+        // A card's balance is what is owed, so paying reduces it.
+        await tx.account.update({
+          where: { id: target.id },
+          data: { balanceMinor: { decrement: amount } },
+        });
+      } else {
+        /*
+         * A loan payment advances the instalment count.
+         *
+         * Only when the amount actually covers an EMI — a part payment is a
+         * prepayment against principal, and counting it as an instalment
+         * would make the remaining-tenure figure lie.
+         */
+        const coversAnEmi =
+          target.emiAmountMinor !== null && amount >= target.emiAmountMinor;
+
+        await tx.account.update({
+          where: { id: target.id },
+          data: {
+            balanceMinor: { decrement: amount },
+            ...(coversAnEmi ? { emisPaid: { increment: 1 } } : {}),
+          },
+        });
+      }
+    });
+
+    return { transferGroupId };
   }
 }
 

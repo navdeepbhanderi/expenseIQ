@@ -65,6 +65,8 @@ export class RecurringService {
           profileId,
           deletedAt: null,
           direction: Direction.DEBIT,
+          // Money moved between the user's own accounts is not spending.
+          isTransfer: false,
           date: { gte: since },
         },
         select: {

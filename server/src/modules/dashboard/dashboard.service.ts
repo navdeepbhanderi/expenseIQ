@@ -304,6 +304,9 @@ export class DashboardService {
         profileId,
         deletedAt: null,
         date: { gte: from, lt: to },
+        // The month's spend and income. A card payment moves money between
+        // the user's own accounts and is neither.
+        isTransfer: false,
       },
       _sum: { amountMinor: true },
     });
@@ -330,6 +333,8 @@ export class DashboardService {
         profileId,
         deletedAt: null,
         direction: Direction.DEBIT,
+        // Money moved between the user's own accounts is not spending.
+        isTransfer: false,
         date: { gte: from, lt: to },
       },
       _sum: { amountMinor: true },

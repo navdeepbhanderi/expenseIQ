@@ -85,6 +85,8 @@ export class ReportsService {
           profileId,
           deletedAt: null,
           direction: Direction.DEBIT,
+          // Money moved between the user's own accounts is not spending.
+          isTransfer: false,
           date: { gte: period.from, lt: period.to },
         },
         orderBy: { amountMinor: 'desc' },

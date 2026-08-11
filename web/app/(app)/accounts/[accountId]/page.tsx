@@ -12,9 +12,10 @@ import { EmptyState, Pill, Progress } from "@/components/ui/feedback";
 import { AccountDetailSkeleton } from "@/components/ui/skeletons";
 import { EditAccount } from "@/components/accounts/edit-account";
 import { ReminderSettings } from "@/components/accounts/reminder-settings";
+import { PayAccountModal } from "@/components/accounts/pay-account-modal";
 import { formatCompact, formatMinor } from "@/lib/money";
 import { cn } from "@/lib/cn";
-import type { CardPosition, LoanPosition } from "@/lib/api/types";
+import type { Account, CardPosition, LoanPosition } from "@/lib/api/types";
 
 /**
  * Account detail - design 2d.
@@ -73,12 +74,13 @@ export default function AccountDetailPage({
         <EditAccount account={account} />
       </div>
 
-      {card && <CardPanel card={card} />}
+      {card && <CardPanel card={card} account={account} />}
       {loan && (
         <LoanPanel
           loan={loan}
           profileId={activeId}
           accountId={accountId}
+          account={account}
         />
       )}
 
@@ -104,9 +106,25 @@ export default function AccountDetailPage({
 }
 
 /** Design 2d's card panel. */
-function CardPanel({ card }: { card: CardPosition }) {
+function CardPanel({
+  card,
+  account,
+}: {
+  card: CardPosition;
+  account: Account;
+}) {
+  const [paying, setPaying] = useState(false);
+
   return (
     <>
+      <PayAccountModal
+        open={paying}
+        onOpenChange={setPaying}
+        account={account}
+        outstandingMinor={card.outstanding.amountMinor}
+        minimumMinor={card.minimumDue.amountMinor}
+      />
+
       <section className="rounded-[var(--radius-card)] border border-line-strong bg-paper p-5">
         <div className="flex flex-wrap items-start justify-between gap-5">
           <div>
@@ -118,6 +136,14 @@ function CardPanel({ card }: { card: CardPosition }) {
               {formatMinor(card.available.amountMinor)} available of{" "}
               {formatMinor(card.creditLimit.amountMinor)}
             </p>
+
+            {/* The obvious missing verb. Everything else on this page
+                describes what is owed; nothing let you settle it. */}
+            {card.outstanding.amountMinor > 0 && (
+              <Button size="sm" className="mt-3" onClick={() => setPaying(true)}>
+                Clear this bill
+              </Button>
+            )}
           </div>
 
           <div className="text-right">
@@ -200,19 +226,30 @@ function CardPanel({ card }: { card: CardPosition }) {
 
 /** Design 2d's loan panel, plus the prepay simulator. */
 function LoanPanel({
+  account,
   loan,
   profileId,
   accountId,
 }: {
+  account: Account;
   loan: LoanPosition;
   profileId: string | null;
   accountId: string;
 }) {
   const simulate = usePrepaySimulation(profileId, accountId);
   const [amount, setAmount] = useState<number | null>(5_00_000_00);
+  const [paying, setPaying] = useState(false);
 
   return (
     <>
+      <PayAccountModal
+        open={paying}
+        onOpenChange={setPaying}
+        account={account}
+        outstandingMinor={loan.outstanding.amountMinor}
+        emiMinor={loan.emi.amountMinor}
+      />
+
       <section className="rounded-[var(--radius-card)] border border-line-strong bg-paper p-5">
         <div className="flex flex-wrap items-start justify-between gap-5">
           <div>
@@ -224,6 +261,12 @@ function LoanPanel({
               {loan.emisPaid} of {loan.tenureMonths} EMIs paid ·{" "}
               {Math.round(loan.principalClearedPercent)}% principal cleared
             </p>
+
+            {loan.outstanding.amountMinor > 0 && (
+              <Button size="sm" className="mt-3" onClick={() => setPaying(true)}>
+                Pay this EMI
+              </Button>
+            )}
           </div>
 
           <div className="text-right">

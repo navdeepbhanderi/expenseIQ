@@ -20,6 +20,7 @@ import type { ProfileAccess } from '@/common/types/express';
 import { AccountsService, type AccountDetail } from './accounts.service';
 import {
   CreateAccountDto,
+  PayAccountDto,
   PrepaySimulationDto,
   UpdateAccountDto,
 } from './dto/account.dto';
@@ -117,6 +118,24 @@ export class AccountsController {
     @Param('accountId', ParseUUIDPipe) accountId: string,
   ): Promise<{ closed: boolean }> {
     return this.accounts.remove(profileId, accountId);
+  }
+  @Post(':accountId/pay')
+  @RequireAction('transaction:create')
+  @ApiOperation({
+    summary: 'Pay a card bill or a loan EMI from another account',
+    description:
+      'Writes a transfer pair — money out of the paying account, in against ' +
+      'the card or loan — and moves both balances. Neither entry counts as ' +
+      'spending: the expense was recorded when the card was swiped, so ' +
+      'counting the payment too would double it and inflate every budget and ' +
+      'norm derived from the month.',
+  })
+  pay(
+    @Param('profileId', ParseUUIDPipe) profileId: string,
+    @Param('accountId', ParseUUIDPipe) accountId: string,
+    @Body() dto: PayAccountDto,
+  ): Promise<{ transferGroupId: string }> {
+    return this.accounts.pay(profileId, accountId, dto);
   }
 }
 

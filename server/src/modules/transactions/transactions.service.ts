@@ -364,7 +364,15 @@ export class TransactionsService {
   ): Promise<TransactionListResult['totals']> {
     const grouped = await this.prisma.transaction.groupBy({
       by: ['direction'],
-      where,
+      /*
+       * The header totals, not the rows.
+       *
+       * Transfers stay visible in the list — hiding a payment you made would
+       * be its own kind of wrong — but they are left out of "spent" and
+       * "received", which would otherwise both jump by the same amount every
+       * time a card bill was paid.
+       */
+      where: { ...where, isTransfer: false },
       _sum: { amountMinor: true },
     });
 

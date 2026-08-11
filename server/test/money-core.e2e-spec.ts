@@ -781,4 +781,97 @@ describe('Money core (e2e)', () => {
       expect(res.text).toContain('"Dinner, drinks and ""extras"""');
     });
   });
+
+  describe('paying a card', () => {
+    it('does not count the payment as spending', async () => {
+      const { token, profileId } = await createUser('aarav@example.com');
+
+      const savings = await harness.prisma.account.create({
+        data: {
+          profileId,
+          type: 'BANK',
+          name: 'SBI Savings',
+          balanceMinor: 50_000_00n,
+        },
+      });
+      const card = await harness.prisma.account.create({
+        data: {
+          profileId,
+          type: 'CREDIT_CARD',
+          name: 'HDFC Millennia',
+          balanceMinor: 5_200_00n,
+          creditLimitMinor: 2_00_000_00n,
+          statementDay: 15,
+          dueDay: 5,
+        },
+      });
+
+      await request(server)
+        .post(`/api/v1/profiles/${profileId}/accounts/${card.id}/pay`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ fromAccountId: savings.id, amountMinor: 5_200_00 })
+        .expect(201);
+
+      /*
+       * The whole point. The ₹5,200 was already recorded as spending when the
+       * card was swiped; if the payment counted too, the month's total, every
+       * budget and every norm would jump by the same amount each time a bill
+       * was paid.
+       */
+      const dashboard = await request(server)
+        .get(`/api/v1/profiles/${profileId}/dashboard`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      expect(dashboard.body.month.spent.amountMinor).toBe(0);
+
+      // But the money really moved, and the card really came down.
+      const [after, cardAfter] = await Promise.all([
+        harness.prisma.account.findUniqueOrThrow({ where: { id: savings.id } }),
+        harness.prisma.account.findUniqueOrThrow({ where: { id: card.id } }),
+      ]);
+      expect(after.balanceMinor).toBe(44_800_00n);
+      expect(cardAfter.balanceMinor).toBe(0n);
+    });
+
+    it('writes both halves or neither', async () => {
+      const { token, profileId } = await createUser('aarav@example.com');
+      const card = await harness.prisma.account.create({
+        data: {
+          profileId,
+          type: 'CREDIT_CARD',
+          name: 'Card',
+          balanceMinor: 1_000_00n,
+        },
+      });
+
+      // A debit with no matching credit would overstate spending and
+      // understate what is owed, so the pair is written in one transaction.
+      await request(server)
+        .post(`/api/v1/profiles/${profileId}/accounts/${card.id}/pay`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ fromAccountId: card.id, amountMinor: 100 })
+        .expect(400);
+
+      expect(
+        await harness.prisma.transaction.count({ where: { profileId } }),
+      ).toBe(0);
+    });
+
+    it('refuses to pay down something that is not owed', async () => {
+      const { token, profileId } = await createUser('aarav@example.com');
+      const a = await harness.prisma.account.create({
+        data: { profileId, type: 'BANK', name: 'A', balanceMinor: 100n },
+      });
+      const b = await harness.prisma.account.create({
+        data: { profileId, type: 'BANK', name: 'B', balanceMinor: 100n },
+      });
+
+      await request(server)
+        .post(`/api/v1/profiles/${profileId}/accounts/${b.id}/pay`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ fromAccountId: a.id, amountMinor: 50 })
+        .expect(400);
+    });
+  });
 });

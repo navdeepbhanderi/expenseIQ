@@ -8,6 +8,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  IsUUID,
   Length,
   Matches,
   Max,
@@ -247,4 +248,32 @@ export class PrepaySimulationDto {
   @IsInt()
   @Min(1)
   amountMinor!: number;
+}
+
+/**
+ * Paying a card bill or a loan EMI from another account.
+ *
+ * Two transactions rather than one, sharing a transferGroupId: money leaves
+ * the paying account and arrives at the card or loan. Both are flagged as
+ * transfers so neither reaches a spend total — the expense was already
+ * recorded when the card was swiped, and counting the payment too would
+ * double it.
+ */
+export class PayAccountDto {
+  @ApiProperty({ format: 'uuid', description: 'Where the money comes from.' })
+  @IsUUID()
+  fromAccountId!: string;
+
+  @ApiProperty({ example: 5_200_00, description: 'Paise.' })
+  @IsInt()
+  @Min(1)
+  amountMinor!: number;
+
+  @ApiPropertyOptional({
+    example: '2026-09-05',
+    description: 'Defaults to today.',
+  })
+  @IsOptional()
+  @IsDateString()
+  date?: string;
 }

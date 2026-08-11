@@ -55,6 +55,8 @@ export class BudgetsService {
           profileId,
           deletedAt: null,
           direction: Direction.DEBIT,
+          // Money moved between the user's own accounts is not spending.
+          isTransfer: false,
           date: { gte: start, lt: end },
         },
         _sum: { amountMinor: true },
@@ -167,7 +169,13 @@ export class BudgetsService {
     // claims to be reliable. Reliability has to reflect real evidence, not the
     // size of the array we happened to allocate.
     const earliest = await this.prisma.transaction.findFirst({
-      where: { profileId, deletedAt: null, direction: Direction.DEBIT },
+      where: {
+        profileId,
+        deletedAt: null,
+        direction: Direction.DEBIT,
+        // Money moved between the user's own accounts is not spending.
+        isTransfer: false,
+      },
       orderBy: { date: 'asc' },
       select: { date: true },
     });
@@ -189,6 +197,8 @@ export class BudgetsService {
           profileId,
           deletedAt: null,
           direction: Direction.DEBIT,
+          // Money moved between the user's own accounts is not spending.
+          isTransfer: false,
           date: { gte: windowStart, lt: currentStart },
           categoryId: { not: null },
         },
@@ -200,6 +210,8 @@ export class BudgetsService {
           profileId,
           deletedAt: null,
           direction: Direction.DEBIT,
+          // Money moved between the user's own accounts is not spending.
+          isTransfer: false,
           date: { gte: currentStart },
         },
         _sum: { amountMinor: true },

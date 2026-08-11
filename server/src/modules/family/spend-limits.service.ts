@@ -67,6 +67,8 @@ export class SpendLimitsService {
           profileId,
           deletedAt: null,
           direction: Direction.DEBIT,
+          // Money moved between the user's own accounts is not spending.
+          isTransfer: false,
           date: { gte: start, lt: end },
         },
         _sum: { amountMinor: true },

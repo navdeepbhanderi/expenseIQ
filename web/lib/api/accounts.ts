@@ -89,3 +89,36 @@ function invalidate(
   void client.invalidateQueries({ queryKey: ["profile", profileId] });
   void client.invalidateQueries({ queryKey: keys.profiles });
 }
+
+/**
+ * Pays a card bill or a loan EMI from another account.
+ *
+ * Writes a transfer pair server-side and moves both balances. Neither entry
+ * counts as spending — the expense was recorded when the card was swiped, so
+ * counting the payment too would double it and inflate every budget and norm
+ * derived from the month.
+ */
+export function usePayAccount(profileId: string | null) {
+  const client = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      accountId,
+      ...body
+    }: {
+      accountId: string;
+      fromAccountId: string;
+      amountMinor: number;
+      date?: string;
+    }) =>
+      api.post<{ transferGroupId: string }>(
+        `/profiles/${profileId}/accounts/${accountId}/pay`,
+        body,
+      ),
+    // A payment moves two balances, the month's totals and the due tiles at
+    // once; reconciling all of that by hand is how a cache starts lying.
+    onSuccess: () => {
+      void client.invalidateQueries({ queryKey: ["profile", profileId] });
+    },
+  });
+}

@@ -262,6 +262,8 @@ export class ProfilesService {
       where: {
         profileId: { in: profileIds },
         direction: 'DEBIT',
+        // Money moved between the user's own accounts is not spending.
+        isTransfer: false,
         deletedAt: null,
         date: { gte: start },
       },

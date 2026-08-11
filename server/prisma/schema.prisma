@@ -322,12 +322,21 @@ model Transaction {
   updatedAt       DateTime          @updatedAt
   deletedAt       DateTime?
 
-  profile       Profile        @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  account       Account?       @relation(fields: [accountId], references: [id], onDelete: SetNull)
-  category      Category?      @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  merchant      Merchant?      @relation(fields: [merchantId], references: [id], onDelete: SetNull)
-  nluRequest    NluRequest?    @relation(fields: [nluRequestId], references: [id], onDelete: SetNull)
-  recurringRule RecurringRule? @relation(fields: [recurringRuleId], references: [id], onDelete: SetNull)
+  profile         Profile        @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  account         Account?       @relation(fields: [accountId], references: [id], onDelete: SetNull)
+  category        Category?      @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  merchant        Merchant?      @relation(fields: [merchantId], references: [id], onDelete: SetNull)
+  nluRequest      NluRequest?    @relation(fields: [nluRequestId], references: [id], onDelete: SetNull)
+  recurringRule   RecurringRule? @relation(fields: [recurringRuleId], references: [id], onDelete: SetNull)
+  /// True for both halves of a movement between the user's own accounts.
+  ///
+  /// Paying a card bill is not spending: the expense was recorded when the
+  /// card was swiped. Counting the payment too would double it, and would
+  /// inflate the month's total, the budgets, the norms and the spend-limit
+  /// nudges every time a bill was paid. Every spend aggregate filters on this.
+  isTransfer      Boolean        @default(false)
+  /// Shared by the two halves, so they can be shown and undone as one thing.
+  transferGroupId String?
 
   @@index([profileId, date])
   @@index([profileId, categoryId])
