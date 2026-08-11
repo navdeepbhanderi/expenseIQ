@@ -11,7 +11,7 @@ import { FakeLlmAdapter } from './fake-llm.adapter';
  * The platform's provider.
  *
  * One provider, not a chain. ExpenseIQ ships with Groq because its free tier
- * — 14,400 requests a day at 30 a minute — is the only one of the three that a
+ * - 14,400 requests a day at 30 a minute - is the only one of the three that a
  * real household does not exhaust: OpenRouter allows 50 a day per account and
  * Gemini roughly 20 per model, at which point expense capture stops working
  * rather than merely slowing down.
@@ -19,7 +19,7 @@ import { FakeLlmAdapter } from './fake-llm.adapter';
  * Anyone who wants a different provider, a stronger model or their own quota
  * brings a key in Settings; that path supports Groq, OpenRouter and Gemini and
  * is per profile. Keeping a second platform provider wired in as well would be
- * dead configuration — nobody would set the keys, and the fallback branch
+ * dead configuration - nobody would set the keys, and the fallback branch
  * would never run and never be tested.
  *
  * `LLM_DRIVER=fake` selects the deterministic stand-in, which is what
@@ -52,7 +52,7 @@ import { FakeLlmAdapter } from './fake-llm.adapter';
 
         if (!llm?.groq.apiKey) {
           logger.warn(
-            'Using the deterministic fake LLM adapter — set GROQ_API_KEY for ' +
+            'Using the deterministic fake LLM adapter - set GROQ_API_KEY for ' +
               'real extraction, or add your own provider key in Settings',
           );
           return fake;

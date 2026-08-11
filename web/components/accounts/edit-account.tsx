@@ -38,7 +38,7 @@ export function EditAccount({ account }: { account: Account }) {
 
   async function save() {
     try {
-      await update.mutateAsync({ id: account.id, patch: toPayload(values) });
+      await update.mutateAsync({ id: account.id, patch: toPayload(values, "update") });
       toast({ title: "Account updated", tone: "success" });
       setOpen(false);
     } catch (caught) {

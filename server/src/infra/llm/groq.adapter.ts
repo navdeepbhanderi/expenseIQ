@@ -36,7 +36,7 @@ import type { ExtractionResult } from './llm.port';
 const ENDPOINT = 'https://api.groq.com/openai/v1/chat/completions';
 
 /**
- * openai/gpt-oss-20b — 1,000 requests/day on the free tier.
+ * openai/gpt-oss-20b - 1,000 requests/day on the free tier.
  *
  * NOT llama-3.1-8b-instant, which was the intended default for its
  * 14,400/day allowance. It rejects json_schema outright, and in json_object
@@ -68,8 +68,8 @@ export class GroqAdapter extends OpenAiCompatibleAdapter {
   /**
    * json_object, not json_schema.
    *
-   * llama-3.1-8b-instant rejects json_schema outright — every call, not
-   * occasionally — so asking for it would make the platform's own provider
+   * llama-3.1-8b-instant rejects json_schema outright - every call, not
+   * occasionally - so asking for it would make the platform's own provider
    * fail on every parse. Groq's supported-models list is short and none of the
    * entries on it come close to this model's 14,400/day allowance, which is
    * the whole reason it was chosen.

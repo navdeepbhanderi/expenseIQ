@@ -2,7 +2,7 @@
  * Deciding when to give up on a model and try the next one.
  *
  * Pure, and separate from the adapter, because the interesting behaviour here
- * is error classification — and classifying an error should be testable
+ * is error classification - and classifying an error should be testable
  * without a Gemini client, an API key, or a network.
  */
 
@@ -42,8 +42,8 @@ export function resolveChain(
  * 429 is the common case and the reason this exists: free-tier quota is
  * per-model, so the next rung has its own untouched budget. 404 covers a model
  * name this key cannot see. 400 covers a parameter the model refuses. 5xx is
- * capacity, which differs per model. Everything else — 401, 403, our own
- * malformed request — fails the same way on every rung, so walking the chain
+ * capacity, which differs per model. Everything else - 401, 403, our own
+ * malformed request - fails the same way on every rung, so walking the chain
  * would just multiply the latency of a guaranteed failure.
  */
 export function isWorthAnotherModel(error: unknown): boolean {
@@ -65,7 +65,7 @@ export function isWorthAnotherModel(error: unknown): boolean {
  *
  * Any 400 counts, not just one naming the parameter, because Google does not
  * name it. gemini-3.6-flash rejects thinkingConfig with the entirely generic
- * "Request contains an invalid argument." — matching on the word "thinking"
+ * "Request contains an invalid argument." - matching on the word "thinking"
  * looked precise and never once fired against the real API.
  *
  * So the test is deliberately broad: thinkingConfig is the only optional
@@ -91,7 +91,7 @@ export function statusOf(error: unknown): number | null {
 
   // The SDK often throws a plain Error whose message embeds the JSON error
   // body, so the status is only reachable as text. Matched only in
-  // status-shaped positions — a bare \d{3} would happily read the "300" out
+  // status-shaped positions - a bare \d{3} would happily read the "300" out
   // of "300 रुपये किराने पे" when the failing request is echoed back.
   const match =
     /"code"\s*:\s*([1-5]\d\d)|\bstatus[:=\s]\s*([1-5]\d\d)\b|^\s*\[?([1-5]\d\d)\b/i.exec(

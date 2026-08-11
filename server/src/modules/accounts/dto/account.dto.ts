@@ -211,6 +211,36 @@ export class UpdateAccountDto {
   @IsOptional()
   @IsBoolean()
   isFloatingRate?: boolean;
+  /*
+   * The loan terms, which were create-only.
+   *
+   * A principal or tenure typed wrong at setup had no remedy but deleting the
+   * account and rebuilding it, taking its transaction history with it. Every
+   * amortisation figure on the account page is derived from these three, so
+   * one wrong digit made the whole page wrong and unfixable.
+   *
+   * `type` is deliberately still absent: a credit card cannot become a loan,
+   * the two share almost no fields, and allowing the change would leave rows
+   * carrying terms that make no sense for what they now claim to be.
+   */
+  @ApiPropertyOptional({ description: 'Paise' })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  principalMinor?: number;
+
+  @ApiPropertyOptional({ example: 240 })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(600)
+  tenureMonths?: number;
+
+  @ApiPropertyOptional({ example: '2024-06-05' })
+  @IsOptional()
+  @IsDateString()
+  firstEmiDate?: string;
+
 }
 
 export class PrepaySimulationDto {

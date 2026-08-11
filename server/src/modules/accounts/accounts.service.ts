@@ -171,6 +171,13 @@ export class AccountsService {
     if (dto.isFloatingRate !== undefined) {
       data.isFloatingRate = dto.isFloatingRate;
     }
+    if (dto.principalMinor !== undefined) {
+      data.principalMinor = BigInt(dto.principalMinor);
+    }
+    if (dto.tenureMonths !== undefined) data.tenureMonths = dto.tenureMonths;
+    if (dto.firstEmiDate !== undefined) {
+      data.firstEmiDate = new Date(dto.firstEmiDate);
+    }
 
     return this.prisma.account.update({ where: { id: account.id }, data });
   }

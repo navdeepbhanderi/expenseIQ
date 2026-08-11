@@ -97,14 +97,27 @@ export function valuesFrom(account: Account): AccountFormValues {
   };
 }
 
-/** Turns form strings into the API's payload, omitting anything left blank. */
-export function toPayload(v: AccountFormValues): Record<string, unknown> {
+/**
+ * Turns form strings into the API's payload, omitting anything left blank.
+ *
+ * `mode` exists because the create and update DTOs are not the same shape and
+ * the API whitelists: sending `type` on an edit was rejected outright with
+ * "property type should not exist", so renaming an account failed with an
+ * error naming a field the user never touched.
+ *
+ * The type is create-only on purpose rather than by oversight - a credit card
+ * cannot become a loan, and the two share almost none of their fields.
+ */
+export function toPayload(
+  v: AccountFormValues,
+  mode: "create" | "update" = "create",
+): Record<string, unknown> {
   const num = (s: string) => (s.trim() === "" ? undefined : Number(s));
   const money = (s: string) =>
     s.trim() === "" ? undefined : (parseAmountToMinor(s) ?? undefined);
 
   const base: Record<string, unknown> = {
-    type: v.type,
+    ...(mode === "create" ? { type: v.type } : {}),
     name: v.name.trim(),
     issuer: v.issuer.trim() || undefined,
     last4: v.last4.trim() || undefined,

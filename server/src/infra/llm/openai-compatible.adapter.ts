@@ -20,15 +20,15 @@ import { isWorthAnotherModel } from './model-fallback';
 /**
  * The shared base for every OpenAI chat-completions provider.
  *
- * Groq, OpenRouter and Gemini all speak this dialect — Google publishes a
- * compatible endpoint alongside its native SDK — so one implementation covers
+ * Groq, OpenRouter and Gemini all speak this dialect - Google publishes a
+ * compatible endpoint alongside its native SDK - so one implementation covers
  * the platform's provider and every key a user might bring.
  *
  * Everything load-bearing lives here: the model chain walk, the retry rules,
  * the JSON repair, and the timeout that stays armed across the body read.
  * That last one is not a detail. A provider answers with headers immediately
  * and then stalls mid-body while an upstream model queues, so a timer cleared
- * when fetch() resolves guards nothing — measured, a 12s deadline that cleared
+ * when fetch() resolves guards nothing - measured, a 12s deadline that cleared
  * too early produced 128-150 second parses.
  *
  * Subclasses supply four things and nothing else: the endpoint, a label, the
@@ -80,14 +80,14 @@ export abstract class OpenAiCompatibleAdapter implements LlmPort {
    * How the response is constrained to JSON.
    *
    * `json_schema` is the strong form: the provider guarantees the shape, and
-   * the parse cannot come back malformed. Not every model implements it —
+   * the parse cannot come back malformed. Not every model implements it -
    * llama-3.1-8b-instant answers "This model does not support response format
    * `json_schema`" on every single call, which is a hard failure rather than
    * a degraded one.
    *
    * `json_object` is the fallback: valid JSON is guaranteed, the shape is not.
    * That is survivable here because the prompt states the schema and the
-   * response is validated and repaired afterwards anyway — a model returning
+   * response is validated and repaired afterwards anyway - a model returning
    * the wrong shape was always a case this had to handle.
    */
   protected responseFormat(): Record<string, unknown> {

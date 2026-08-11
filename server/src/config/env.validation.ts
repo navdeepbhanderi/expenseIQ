@@ -77,7 +77,7 @@ export const envSchema = z.object({
   GROQ_TIMEOUT_MS: z.coerce.number().int().min(1000).default(20_000),
 
   // Comma-separated chains, same convention as the Gemini ones. Left empty,
-  // the adapter's measured defaults apply — see groq.adapter.ts.
+  // the adapter's measured defaults apply - see groq.adapter.ts.
   // Receipts. Must be a model that does BOTH vision and structured output,
   // which on the free tier is a much shorter list than either alone.
   /**
