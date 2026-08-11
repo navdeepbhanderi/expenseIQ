@@ -31,6 +31,8 @@ import {
   uncertainFields,
 } from './domain/confidence';
 import { suggestAccounts } from './domain/suggestions';
+import { resolveDate, todayIn } from './domain/dates';
+import { matchAccount, matchCategory } from './domain/matching';
 
 export interface ParsedCandidate {
   reviewItemId: string;
@@ -133,10 +135,54 @@ export class NluService {
 
     const candidates: ParsedCandidate[] = [];
 
+    /*
+     * The date the user actually said, worked out here rather than trusted
+     * from the model.
+     *
+     * Every model in the free fallback chain is small, and they fail at date
+     * arithmetic in one consistent direction: they answer today. That is the
+     * one wrong answer a user cannot spot, because an unstated date also
+     * shows as today. Where the utterance contains a date expression we can
+     * resolve, it wins over whatever came back.
+     *
+     * Single-candidate only. With several expenses in one sentence the date
+     * words cannot be attributed to a particular clause without parsing the
+     * sentence properly, and applying one date to all of them would be
+     * confidently wrong rather than usefully right.
+     */
+    const spokenDate =
+      extraction.candidates.length === 1
+        ? resolveDate(rawInput, todayIn(context.forLlm.timezone))
+        : null;
+
     for (const raw of extraction.candidates) {
       const candidate = sanitise(raw);
-      const category = matchByName(categories, candidate.category);
-      const account = matchByName(accounts, candidate.account);
+
+      if (spokenDate && spokenDate.date !== candidate.date) {
+        this.logger.debug("Overrode the model's date", {
+          profileId,
+          modelSaid: candidate.date,
+          resolved: spokenDate.date,
+          from: spokenDate.matched,
+        });
+
+        candidate.date = spokenDate.date;
+        // The field's own confidence becomes the resolver's, so an ambiguous
+        // "kal" still surfaces as worth a glance rather than as settled.
+        candidate.fieldConfidence.date = spokenDate.confidence;
+      }
+
+      /*
+       * Fuzzy rather than exact name matching.
+       *
+       * The model answers with what was said — "HDFC" for "HDFC Millennia",
+       * "grocery" for "Groceries", "kirana" for either. Exact equality
+       * rejected all of those and asked the user to pick a value the system
+       * had already understood.
+       */
+      const category =
+        matchCategory(categories, candidate.category)?.row ?? null;
+      const account = matchAccount(accounts, candidate.account)?.row ?? null;
 
       const confidence = overallConfidence(candidate);
       const band = bandFor(confidence);
@@ -540,11 +586,3 @@ function nonEmpty(value: unknown): string | null {
  * always echo the exact casing. A name that matches nothing becomes null
  * rather than a guess — the review queue prompts for it instead.
  */
-function matchByName<T extends { id: string; name: string }>(
-  rows: T[],
-  name: string | null,
-): T | null {
-  if (!name) return null;
-  const wanted = name.trim().toLowerCase();
-  return rows.find((row) => row.name.toLowerCase() === wanted) ?? null;
-}

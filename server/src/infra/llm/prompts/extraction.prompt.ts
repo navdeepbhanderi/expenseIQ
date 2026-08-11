@@ -1,4 +1,5 @@
 import type { ExtractionContext } from '../llm.port';
+import { todayIn } from '@/modules/nlu/domain/dates';
 
 /**
  * One call does language detection, internal translation and extraction.
@@ -9,13 +10,40 @@ import type { ExtractionContext } from '../llm.port';
  * the cost for a flow the design budgets at about four seconds end to end.
  */
 export function buildExtractionPrompt(context: ExtractionContext): string {
-  const today = context.today.toISOString().slice(0, 10);
+  /*
+   * The user's today, not the server's.
+   *
+   * toISOString() is UTC, so for an IST user between midnight and 05:30 this
+   * stated yesterday's date — and every relative date the model produced was
+   * then a day out. Someone logging a late dinner got the wrong day, silently.
+   */
+  const today = todayIn(context.timezone, context.today);
+
+  // Named so the model can anchor "last <weekday>" without counting back.
+  const weekday = new Intl.DateTimeFormat('en-US', {
+    timeZone: context.timezone,
+    weekday: 'long',
+  }).format(context.today);
 
   return `You extract expense records from how people actually talk about money in India.
 
-TODAY IS ${today} (timezone ${context.timezone}). Resolve every relative date
-against it: "today", "aaj", "આજે" → ${today}. "yesterday", "kal", "ગઈકાલે" →
-the day before. "last Tuesday" → the most recent Tuesday before today.
+TODAY IS ${today}, a ${weekday} (timezone ${context.timezone}).
+
+DATES — get these right, they are checked.
+Resolve every relative expression against today:
+- "today", "aaj", "abhi", "आज", "આજે" → ${today}
+- "yesterday", "kal", "ગઈકાલે" → the day BEFORE today
+- "day before yesterday", "parso", "परसों" → two days before
+- "3 days ago", "3 din pehle", "3 દિવસ પહેલા" → count back that many days
+- "last Tuesday" → the most recent Tuesday STRICTLY before today
+- "on the 5th", "5 tarikh", "5 तारीख", "૫ તારીખે" → the 5th of THIS month; if
+  that day has not arrived yet, the 5th of LAST month
+- "5/8" is 5 August. India writes the day first. Never read it as 8 May.
+
+Hindi and Gujarati "kal" and "parso" mean either direction depending on tense.
+This is an expense log, so assume the PAST unless the sentence clearly points
+forward. A date you were not given is today — but a date you WERE given is
+never today.
 
 INPUT LANGUAGE
 The input may be English, Hindi, Gujarati, any other Indian language, or — most

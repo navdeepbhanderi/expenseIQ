@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { normalizeMerchant } from '@/modules/merchants/domain/normalize';
+import { resolveDate, todayIn } from '@/modules/nlu/domain/dates';
 import type {
   ExtractionContext,
   ExtractionResult,
@@ -105,7 +106,7 @@ export class FakeLlmAdapter implements LlmPort {
     const amountMinor = parseAmount(clause);
     const category = matchFromList(clause, context.categories);
     const account = matchFromList(clause, context.accounts);
-    const statedDate = parseDate(clause, context.today);
+    const statedDate = parseDate(clause, context.today, context.timezone);
     const isCredit = /\b(salary|received|refund|credited|mila|aaya)\b/i.test(
       clause,
     );
@@ -127,7 +128,7 @@ export class FakeLlmAdapter implements LlmPort {
       direction: isCredit ? ('CREDIT' as const) : ('DEBIT' as const),
       category,
       merchant: null,
-      date: statedDate ?? context.today.toISOString().slice(0, 10),
+      date: statedDate ?? todayIn(context.timezone, context.today),
       account,
       note: null,
       confidence: amountMinor === null ? 0.3 : category ? 0.92 : 0.65,
@@ -184,18 +185,16 @@ function matchFromList(text: string, options: string[]): string | null {
   return null;
 }
 
-function parseDate(text: string, today: Date): string | null {
-  const lower = text.toLowerCase();
-  const day = 86_400_000;
-
-  if (/\b(today|aaj|आज|આજે)\b/.test(lower)) {
-    return today.toISOString().slice(0, 10);
-  }
-  if (/\b(yesterday|kal|कल|ગઈકાલે)\b/.test(lower)) {
-    return new Date(today.getTime() - day).toISOString().slice(0, 10);
-  }
-
-  return null;
+/**
+ * Defers to the real resolver rather than keeping a second, weaker copy.
+ *
+ * The fake adapter exists so tests never call a live model — but it should
+ * still behave like the production path does. Its own two-case regex handled
+ * "yesterday" and nothing else, so every test written against it passed while
+ * the real pipeline mishandled "on the 5th" and "3 din pehle".
+ */
+function parseDate(text: string, today: Date, timezone: string): string | null {
+  return resolveDate(text, todayIn(timezone, today))?.date ?? null;
 }
 
 function detectLanguage(text: string): string {
