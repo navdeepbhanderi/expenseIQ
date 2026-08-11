@@ -362,9 +362,16 @@ export function AccountForm({
         </>
       )}
 
+      {/*
+        ExpenseIQ never moves money — it holds no bank credentials, which is
+        one of the promises on the landing page. The old wording, "Paid
+        automatically on the due date", read as though this app would pay it.
+        This flag only changes how a due is described: as something already
+        handled rather than as a task waiting for you.
+      */}
       <Toggle
         label="Auto-debit"
-        description="Paid automatically on the due date"
+        description="Your bank pays this itself — we only track it"
         checked={values.autoDebit}
         onCheckedChange={(next) => set("autoDebit", next)}
       />

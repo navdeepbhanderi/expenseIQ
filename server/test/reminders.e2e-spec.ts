@@ -495,4 +495,72 @@ describe('Reminders (e2e)', () => {
       expect(read.body[0].offsetDays).toBe(5);
     });
   });
+
+  describe('auto-debited accounts', () => {
+    it('says it will be taken, not that it is owed', async () => {
+      const { token, profileId } = await setup();
+      const account = await cardDueInDays(profileId, 3);
+
+      await harness.prisma.account.update({
+        where: { id: account.id },
+        data: { autoDebit: true },
+      });
+
+      await request(server)
+        .put(`/api/v1/profiles/${profileId}/accounts/${account.id}/reminders`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ offsetDays: 3, enabled: true })
+        .expect(200);
+
+      await request(server)
+        .post(`/api/v1/profiles/${profileId}/reminders/scan`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(201);
+
+      const notification = await harness.prisma.notification.findFirstOrThrow({
+        where: { profileId },
+        orderBy: { createdAt: 'desc' },
+      });
+
+      /*
+       * The reminder still fires — the balance has to be there, and a failed
+       * standing instruction costs a fee. What changes is that it stops
+       * asking the user to go and pay something their bank pays for them,
+       * which is the kind of nudge that teaches people to ignore nudges.
+       */
+      expect(notification.body).toContain('taken automatically');
+      expect(notification.body).not.toContain('due on');
+    });
+
+    it('keeps its urgency when the debit has not gone through', async () => {
+      const { token, profileId } = await setup();
+      const account = await cardDueInDays(profileId, -4);
+
+      await harness.prisma.account.update({
+        where: { id: account.id },
+        data: { autoDebit: true },
+      });
+
+      await request(server)
+        .put(`/api/v1/profiles/${profileId}/accounts/${account.id}/reminders`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ offsetDays: 0, enabled: true })
+        .expect(200);
+
+      await request(server)
+        .post(`/api/v1/profiles/${profileId}/reminders/scan`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(201);
+
+      const notification = await harness.prisma.notification.findFirstOrThrow({
+        where: { profileId },
+        orderBy: { createdAt: 'desc' },
+      });
+
+      // An auto-debit that is overdue means the instruction failed, which is
+      // worse news than a bill someone has simply not got to yet.
+      expect(notification.body).toContain('has not been');
+      expect(notification.severity).toBe('ERROR');
+    });
+  });
 });

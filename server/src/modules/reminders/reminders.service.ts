@@ -234,10 +234,29 @@ export class RemindersService {
           ? `${account.name} is due today`
           : `${account.name} due in ${daysUntilDue} days`;
 
+    const on = input.dueDate.toISOString().slice(0, 10);
+
+    /*
+     * An auto-debited account is not a to-do.
+     *
+     * The reminder still fires — you need the balance to be there, and a
+     * failed standing instruction costs a fee — but asking someone to go and
+     * pay something their bank pays for them is the kind of nudge that
+     * teaches people to ignore nudges. Design 6h puts it as: an auto-debit
+     * tells you, it does not ask you.
+     *
+     * Overdue is the exception and deliberately keeps its urgency. An
+     * auto-debit that is overdue means the instruction did not go through,
+     * which is worse news than a bill you simply have not paid yet.
+     */
     const body =
       kind === 'overdue'
-        ? `₹${rupees} was due on ${input.dueDate.toISOString().slice(0, 10)}.`
-        : `₹${rupees} due on ${input.dueDate.toISOString().slice(0, 10)}.`;
+        ? account.autoDebit
+          ? `₹${rupees} should have been taken automatically on ${on} and has not been. Check the account.`
+          : `₹${rupees} was due on ${on}.`
+        : account.autoDebit
+          ? `₹${rupees} will be taken automatically on ${on}. Make sure the balance is there.`
+          : `₹${rupees} due on ${on}.`;
 
     const channels = input.reminder.channels;
 
@@ -271,7 +290,11 @@ export class RemindersService {
         await this.mailer.send({
           to,
           subject: title,
-          text: `${body}\n\nOpen ExpenseIQ to review and mark it paid.`,
+          // "Mark it paid" is wrong for a standing instruction — nobody is
+          // going to pay it by hand, and the entry appears on its own.
+          text: account.autoDebit
+            ? `${body}\n\nNothing to do — it will appear in ExpenseIQ once it goes through.`
+            : `${body}\n\nOpen ExpenseIQ to review and mark it paid.`,
         });
       }
     }

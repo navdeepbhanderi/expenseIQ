@@ -240,7 +240,6 @@ export class UpdateAccountDto {
   @IsOptional()
   @IsDateString()
   firstEmiDate?: string;
-
 }
 
 export class PrepaySimulationDto {
