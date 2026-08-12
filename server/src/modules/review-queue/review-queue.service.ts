@@ -19,6 +19,7 @@ import {
 } from '@/modules/nlu/domain/confidence';
 
 import type { EditReviewItemDto } from './dto/review-queue.dto';
+import { applyBalanceEffect } from '@/modules/transactions/domain/balance-effect';
 
 /** Design 2b and 3e both promise a 10-second window to take it back. */
 export const UNDO_WINDOW_MS = 10_000;
@@ -236,6 +237,18 @@ export class ReviewQueueService {
         },
       });
 
+      /*
+       * The confirmed entry moves the account balance, exactly as a typed one
+       * does.
+       *
+       * This path writes its own row rather than calling the transactions
+       * service, so it did not inherit the balance effect: an expense
+       * confirmed from the review queue — which is how nearly every expense
+       * in this product arrives — appeared in the ledger while the account it
+       * was spent from never changed.
+       */
+      await applyBalanceEffect(tx, created, 1);
+
       return created;
     });
 
@@ -330,6 +343,10 @@ export class ReviewQueueService {
         where: { id: transactionId },
         data: { deletedAt: new Date() },
       });
+
+      // Undoing gives the money back, or the balance keeps an effect whose
+      // cause is no longer in the ledger.
+      await applyBalanceEffect(tx, transaction, -1);
 
       const item = await tx.reviewQueueItem.findFirst({
         where: {

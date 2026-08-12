@@ -47,3 +47,55 @@ export function balanceDelta(
 
   return increases ? magnitude : -magnitude;
 }
+
+/**
+ * Moves an account's balance by one transaction's effect, inside a
+ * caller-supplied database transaction.
+ *
+ * Shared because two code paths write transactions: the transactions service,
+ * and the review queue's confirm — which is how nearly every expense in this
+ * product actually arrives. The confirm path wrote its own row and never
+ * inherited the balance effect, so a confirmed expense appeared in the ledger
+ * while the account it was spent from never changed.
+ *
+ * `sign` is 1 to apply and -1 to reverse, so undo and delete cannot disagree
+ * with create about the direction.
+ */
+export async function applyBalanceEffect(
+  tx: {
+    account: {
+      findUnique: (args: {
+        where: { id: string };
+        select: { id: true; type: true };
+      }) => Promise<{ id: string; type: AccountType } | null>;
+      update: (args: {
+        where: { id: string };
+        data: { balanceMinor: { increment: bigint } };
+      }) => Promise<unknown>;
+    };
+  },
+  row: { accountId: string | null; amountMinor: bigint; direction: Direction },
+  sign: 1 | -1,
+): Promise<void> {
+  // No account is a legitimate state — it is one of the fields the parser may
+  // leave for the user to fill in later.
+  if (!row.accountId) return;
+
+  const account = await tx.account.findUnique({
+    where: { id: row.accountId },
+    select: { id: true, type: true },
+  });
+
+  if (!account) return;
+
+  await tx.account.update({
+    where: { id: account.id },
+    data: {
+      balanceMinor: {
+        increment:
+          balanceDelta(account.type, row.direction, row.amountMinor) *
+          BigInt(sign),
+      },
+    },
+  });
+}

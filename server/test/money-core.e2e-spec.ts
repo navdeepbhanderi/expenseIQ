@@ -931,31 +931,38 @@ describe('Money core (e2e)', () => {
         .expect(201);
 
       expect(
-        (await harness.prisma.account.findUniqueOrThrow({
-          where: { id: bank.id },
-        })).balanceMinor,
+        (
+          await harness.prisma.account.findUniqueOrThrow({
+            where: { id: bank.id },
+          })
+        ).balanceMinor,
       ).toBe(24_000_00n);
 
       // Deleting has to give the money back, or the balance keeps an effect
       // whose cause is gone from the ledger.
       await request(server)
-        .delete(
-          `/api/v1/profiles/${profileId}/transactions/${created.body.id}`,
-        )
+        .delete(`/api/v1/profiles/${profileId}/transactions/${created.body.id}`)
         .set('Authorization', `Bearer ${token}`)
         .expect(204);
 
       expect(
-        (await harness.prisma.account.findUniqueOrThrow({
-          where: { id: bank.id },
-        })).balanceMinor,
+        (
+          await harness.prisma.account.findUniqueOrThrow({
+            where: { id: bank.id },
+          })
+        ).balanceMinor,
       ).toBe(24_405_00n);
     });
 
     it('an edit reverses the old effect before applying the new one', async () => {
       const { token, profileId } = await createUser('aarav@example.com');
       const card = await harness.prisma.account.create({
-        data: { profileId, type: 'CREDIT_CARD', name: 'Card', balanceMinor: 0n },
+        data: {
+          profileId,
+          type: 'CREDIT_CARD',
+          name: 'Card',
+          balanceMinor: 0n,
+        },
       });
 
       const created = await request(server)
@@ -965,18 +972,18 @@ describe('Money core (e2e)', () => {
         .expect(201);
 
       await request(server)
-        .patch(
-          `/api/v1/profiles/${profileId}/transactions/${created.body.id}`,
-        )
+        .patch(`/api/v1/profiles/${profileId}/transactions/${created.body.id}`)
         .set('Authorization', `Bearer ${token}`)
         .send({ amountMinor: 3_000_00 })
         .expect(200);
 
       // Not 8,000 — the original effect is undone, not added to.
       expect(
-        (await harness.prisma.account.findUniqueOrThrow({
-          where: { id: card.id },
-        })).balanceMinor,
+        (
+          await harness.prisma.account.findUniqueOrThrow({
+            where: { id: card.id },
+          })
+        ).balanceMinor,
       ).toBe(3_000_00n);
     });
   });

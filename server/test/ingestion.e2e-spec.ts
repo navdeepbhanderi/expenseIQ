@@ -709,4 +709,72 @@ describe('Ingestion (e2e)', () => {
         .expect(404);
     });
   });
+
+  describe('confirming moves the account balance', () => {
+    it('is the path nearly every expense actually takes', async () => {
+      const { token, profileId } = await setup();
+
+      const bank = await harness.prisma.account.create({
+        data: {
+          profileId,
+          type: 'BANK',
+          name: 'BOB',
+          balanceMinor: 28_000_00n,
+        },
+      });
+
+      const parsed = await request(server)
+        .post(`/api/v1/profiles/${profileId}/nlu/parse`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ text: '300 rupees on groceries' })
+        .expect(201);
+
+      const itemId = parsed.body.candidates[0].reviewItemId as string;
+
+      // Confirm takes no body; the account is chosen by editing the entry
+      // first, which is also what records it as a correction.
+      await request(server)
+        .patch(`/api/v1/profiles/${profileId}/review-queue/${itemId}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ accountId: bank.id })
+        .expect(200);
+
+      const confirmed = await request(server)
+        .post(`/api/v1/profiles/${profileId}/review-queue/${itemId}/confirm`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(201);
+
+      /*
+       * The confirm path writes its own transaction row rather than calling
+       * the transactions service, so it did not inherit the balance effect —
+       * a confirmed expense appeared in the ledger while the account it came
+       * from never moved.
+       */
+      expect(
+        (
+          await harness.prisma.account.findUniqueOrThrow({
+            where: { id: bank.id },
+          })
+        ).balanceMinor,
+      ).toBe(27_700_00n);
+
+      // And undo has to give it back.
+      const token2 = confirmed.body.undo?.token as string | undefined;
+      if (token2) {
+        await request(server)
+          .post(`/api/v1/profiles/${profileId}/review-queue/undo`)
+          .set('Authorization', `Bearer ${token}`)
+          .send({ token: token2 })
+          .expect(204);
+
+        expect(
+          (
+            await harness.prisma.account.findUniqueOrThrow({
+              where: { id: bank.id },
+            })
+          ).balanceMinor,
+        ).toBe(28_000_00n);
+      }
+    });
+  });
 });

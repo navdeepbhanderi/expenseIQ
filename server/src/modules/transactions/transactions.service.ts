@@ -24,7 +24,7 @@ import {
   TRANSACTION_RELATIONS,
   type TransactionWithRelations,
 } from './transaction-view';
-import { balanceDelta } from './domain/balance-effect';
+import { applyBalanceEffect } from './domain/balance-effect';
 
 /** One entry in the filter sidebar - design 6c's "Groceries 18". */
 export interface Facet {
@@ -169,46 +169,8 @@ export class TransactionsService {
         include: TRANSACTION_RELATIONS,
       });
 
-      await this.applyToBalance(tx, created, 1);
+      await applyBalanceEffect(tx, created, 1);
       return created;
-    });
-  }
-
-  /**
-   * Moves the account balance by one transaction's effect.
-   *
-   * `sign` is 1 to apply and -1 to reverse, which is what lets a delete undo
-   * a create and an edit reverse-then-reapply without a second code path that
-   * could disagree about the direction.
-   *
-   * A transaction with no account has nowhere to land — that is a legitimate
-   * state here, since the account is one of the fields the parser is allowed
-   * to leave for the user to fill in later.
-   */
-  private async applyToBalance(
-    tx: Prisma.TransactionClient,
-    row: {
-      accountId: string | null;
-      amountMinor: bigint;
-      direction: Direction;
-    },
-    sign: 1 | -1,
-  ): Promise<void> {
-    if (!row.accountId) return;
-
-    const account = await tx.account.findUnique({
-      where: { id: row.accountId },
-      select: { id: true, type: true },
-    });
-
-    if (!account) return;
-
-    const delta =
-      balanceDelta(account.type, row.direction, row.amountMinor) * BigInt(sign);
-
-    await tx.account.update({
-      where: { id: account.id },
-      data: { balanceMinor: { increment: delta } },
     });
   }
 
@@ -253,7 +215,7 @@ export class TransactionsService {
      * disagree with itself.
      */
     return this.prisma.$transaction(async (tx) => {
-      await this.applyToBalance(tx, existing, -1);
+      await applyBalanceEffect(tx, existing, -1);
 
       const updated = await tx.transaction.update({
         where: { id: transactionId },
@@ -261,7 +223,7 @@ export class TransactionsService {
         include: TRANSACTION_RELATIONS,
       });
 
-      await this.applyToBalance(tx, updated, 1);
+      await applyBalanceEffect(tx, updated, 1);
       return updated;
     });
   }
@@ -285,7 +247,7 @@ export class TransactionsService {
 
       // Deleting has to give the money back, or the balance keeps an effect
       // whose cause is no longer in the ledger.
-      await this.applyToBalance(tx, existing, -1);
+      await applyBalanceEffect(tx, existing, -1);
     });
   }
 
@@ -313,7 +275,7 @@ export class TransactionsService {
         data: { deletedAt: new Date() },
       });
 
-      for (const row of rows) await this.applyToBalance(tx, row, -1);
+      for (const row of rows) await applyBalanceEffect(tx, row, -1);
 
       return { deleted: result.count };
     });
@@ -338,7 +300,7 @@ export class TransactionsService {
       });
 
       // Putting it back puts its effect back.
-      await this.applyToBalance(tx, restored, 1);
+      await applyBalanceEffect(tx, restored, 1);
       return restored;
     });
   }

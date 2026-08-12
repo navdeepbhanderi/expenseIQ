@@ -5,6 +5,7 @@ import { useProfile } from "@/components/providers/profile-provider";
 import { useCategories, useDashboard } from "@/lib/api/hooks";
 import {
   useConfirm,
+  useEditReviewItem,
   useDiscard,
   useReviewQueue,
   useUndo,
@@ -39,6 +40,7 @@ export default function ReviewPage() {
   const confirm = useConfirm(activeId);
   const discard = useDiscard(activeId);
   const [editing, setEditing] = useState<string | null>(null);
+  const edit = useEditReviewItem(activeId);
   const undo = useUndo(activeId);
   const { toast, undoToast } = useToast();
 
@@ -70,12 +72,33 @@ export default function ReviewPage() {
     const current = merged(item);
 
     try {
+      /*
+       * Save the chip edits before confirming.
+       *
+       * `POST /confirm` takes no body — the server reads the item's own
+       * parsed fields — so passing the edits to it did nothing at all: every
+       * category or account changed by tapping a chip was silently discarded
+       * and the entry went into the ledger as first parsed.
+       *
+       * PATCH is also what records the change as a Correction, which is what
+       * the accuracy figure and the category learning are built on.
+       */
+      const pending = edits[item.reviewItemId];
+      if (pending) {
+        // Only the fields actually chosen. A chip cleared back to nothing is
+        // not expressible here — the edit endpoint takes a value or omits it.
+        const patch = {
+          ...(pending.categoryId ? { categoryId: pending.categoryId } : {}),
+          ...(pending.accountId ? { accountId: pending.accountId } : {}),
+        };
+
+        if (Object.keys(patch).length > 0) {
+          await edit.mutateAsync({ itemId: item.reviewItemId, patch });
+        }
+      }
+
       const result = await confirm.mutateAsync({
         itemId: item.reviewItemId,
-        patch: {
-          categoryId: current.categoryId,
-          accountId: current.accountId,
-        },
       });
 
       const label = categories.find((c) => c.id === current.categoryId)?.name;

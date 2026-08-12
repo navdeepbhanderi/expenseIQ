@@ -8,6 +8,7 @@ import { addMonths, startOfMonth } from '@/modules/dashboard/dashboard.service';
 
 import type { SetAllowanceDto } from './dto/family.dto';
 import { monthKey as monthKeyIn } from '@/common/time/calendar';
+import { applyBalanceEffect } from '@/modules/transactions/domain/balance-effect';
 
 export interface AllowanceStatus {
   allowance: Allowance | null;
@@ -151,7 +152,10 @@ export class AllowancesService {
     });
 
     await this.prisma.$transaction(async (tx) => {
-      await tx.transaction.create({
+      // No account is attached today, so this lands nowhere — but routing it
+      // through the same helper means attaching one later cannot silently
+      // skip the balance the way the review queue's confirm did.
+      const credited = await tx.transaction.create({
         data: {
           profileId,
           amountMinor: allowance.amountMinor,
@@ -162,6 +166,8 @@ export class AllowancesService {
           source: TransactionSource.RECURRING,
         },
       });
+
+      await applyBalanceEffect(tx, credited, 1);
 
       await tx.allowance.update({
         where: { profileId },

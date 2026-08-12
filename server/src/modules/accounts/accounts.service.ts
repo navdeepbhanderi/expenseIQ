@@ -35,6 +35,7 @@ import type { CreateAccountDto, UpdateAccountDto } from './dto/account.dto';
 import { PayAccountDto } from './dto/account.dto';
 import { randomUUID } from 'node:crypto';
 import { startOfDay } from '@/common/time/calendar';
+import { applyBalanceEffect } from '@/modules/transactions/domain/balance-effect';
 
 /** An account plus whatever derived view its type calls for. */
 export interface AccountDetail {
@@ -367,19 +368,35 @@ export class AccountsService {
         ],
       });
 
-      // Money actually left the paying account.
-      await tx.account.update({
-        where: { id: source.id },
-        data: { balanceMinor: { decrement: amount } },
-      });
+      /*
+       * Both balances move through the same rule every other write uses.
+       *
+       * This used to decrement each account by hand. It happened to agree
+       * with balanceDelta, but a second copy of the sign rule is exactly how
+       * a liability starts being credited instead of debited after someone
+       * edits one of them.
+       */
+      await applyBalanceEffect(
+        tx,
+        {
+          accountId: source.id,
+          amountMinor: amount,
+          direction: Direction.DEBIT,
+        },
+        1,
+      );
 
-      if (target.type === AccountType.CREDIT_CARD) {
-        // A card's balance is what is owed, so paying reduces it.
-        await tx.account.update({
-          where: { id: target.id },
-          data: { balanceMinor: { decrement: amount } },
-        });
-      } else {
+      await applyBalanceEffect(
+        tx,
+        {
+          accountId: target.id,
+          amountMinor: amount,
+          direction: Direction.CREDIT,
+        },
+        1,
+      );
+
+      if (target.type === AccountType.LOAN) {
         /*
          * A loan payment advances the instalment count.
          *
@@ -390,13 +407,12 @@ export class AccountsService {
         const coversAnEmi =
           target.emiAmountMinor !== null && amount >= target.emiAmountMinor;
 
-        await tx.account.update({
-          where: { id: target.id },
-          data: {
-            balanceMinor: { decrement: amount },
-            ...(coversAnEmi ? { emisPaid: { increment: 1 } } : {}),
-          },
-        });
+        if (coversAnEmi) {
+          await tx.account.update({
+            where: { id: target.id },
+            data: { emisPaid: { increment: 1 } },
+          });
+        }
       }
     });
 
