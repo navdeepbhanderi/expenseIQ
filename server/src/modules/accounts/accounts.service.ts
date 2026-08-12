@@ -8,6 +8,7 @@ import {
   AccountType,
   Direction,
   Prisma,
+  StatementStatus,
   TransactionSource,
   type Account,
   type ProfileRole,
@@ -38,10 +39,26 @@ import { startOfDay } from '@/common/time/calendar';
 import { applyBalanceEffect } from '@/modules/transactions/domain/balance-effect';
 
 /** An account plus whatever derived view its type calls for. */
+/** The bill, and what has been spent since it was cut. */
+export interface StatementView {
+  billed: {
+    statementDate: Date;
+    dueDate: Date;
+    amount: Money;
+    minimumDue: Money;
+    paid: Money;
+    /** Amount less what has been paid against it. */
+    dueNow: Money;
+    isOverdue: boolean;
+  } | null;
+  /** Spent since the last statement — next cycle's problem, not this one's. */
+  unbilled: Money;
+}
+
 export interface AccountDetail {
   account: Account;
   /** Present for CREDIT_CARD. Design 2d's card panel. */
-  card?: CardPosition & { cycle: BillingCycle };
+  card?: CardPosition & { cycle: BillingCycle; statement: StatementView };
   /** Present for LOAN. Design 2d's loan panel. */
   loan?: LoanSummary;
 }
@@ -136,7 +153,7 @@ export class AccountsService {
     const account = await this.findById(profileId, accountId);
 
     if (account.type === AccountType.CREDIT_CARD) {
-      return { account, card: this.cardView(account) };
+      return { account, card: await this.cardView(account) };
     }
 
     if (account.type === AccountType.LOAN) {
@@ -236,7 +253,9 @@ export class AccountsService {
     );
   }
 
-  private cardView(account: Account): CardPosition & { cycle: BillingCycle } {
+  private async cardView(
+    account: Account,
+  ): Promise<CardPosition & { cycle: BillingCycle; statement: StatementView }> {
     if (account.statementDay === null || account.dueDay === null) {
       throw new BadRequestException(
         'This card has no statement or due day configured',
@@ -252,12 +271,58 @@ export class AccountsService {
       minDuePercent: account.minDuePercent ?? 5,
     });
 
+    /*
+     * What is actually owed *now*, as opposed to what has been spent.
+     *
+     * The open statement is the bill: fixed when it was cut, due on its own
+     * date. Anything spent since belongs to the next cycle and is not owed
+     * yet — the distinction the product could not express before, which made
+     * "clear this bill" offer to pay for the coffee bought that morning.
+     */
+    const open = await this.prisma.cardStatement.findFirst({
+      where: {
+        accountId: account.id,
+        status: { in: [StatementStatus.OPEN, StatementStatus.OVERDUE] },
+      },
+      orderBy: { statementDate: 'asc' },
+    });
+
+    const cycle = computeBillingCycle({
+      statementDay: account.statementDay,
+      dueDay: account.dueDay,
+    });
+
+    const dueNow = open ? open.amountMinor - open.paidMinor : 0n;
+
     return {
       ...position,
-      cycle: computeBillingCycle({
-        statementDay: account.statementDay,
-        dueDay: account.dueDay,
-      }),
+      cycle,
+      statement: {
+        // Null when nothing has been billed yet — a new card, or one settled
+        // in full. The UI shows unbilled spend instead of a demand.
+        billed: open
+          ? {
+              statementDate: open.statementDate,
+              dueDate: open.dueDate,
+              amount: Money.fromBigInt(open.amountMinor),
+              minimumDue: Money.fromBigInt(open.minimumDueMinor),
+              paid: Money.fromBigInt(open.paidMinor),
+              dueNow: Money.fromBigInt(dueNow),
+              isOverdue: open.status === StatementStatus.OVERDUE,
+            }
+          : null,
+        /*
+         * Spent since the last statement, which is not due yet.
+         *
+         * Derived rather than stored: it is a running figure by definition,
+         * and it stops being interesting the moment it is billed.
+         */
+        unbilled: Money.fromBigInt(
+          BigInt(position.outstanding.minor) - dueNow > 0n
+            ? BigInt(position.outstanding.minor) - dueNow
+            : 0n,
+        ),
+      },
     };
   }
 
@@ -395,6 +460,44 @@ export class AccountsService {
         },
         1,
       );
+
+      if (target.type === AccountType.CREDIT_CARD) {
+        /*
+         * Settle the oldest open bill first.
+         *
+         * Which statement a payment lands against is not cosmetic: the oldest
+         * is the one that is overdue or about to be, and paying it is what
+         * stops the interest. Applying to the newest would leave the one that
+         * matters unpaid while the balance looked healthier.
+         *
+         * Overflow beyond the bill is left alone rather than applied forward
+         * — it has already reduced the outstanding, and pre-paying a
+         * statement that has not been cut yet would freeze a figure the next
+         * cycle is still adding to.
+         */
+        const open = await tx.cardStatement.findFirst({
+          where: {
+            accountId: target.id,
+            status: {
+              in: [StatementStatus.OPEN, StatementStatus.OVERDUE],
+            },
+          },
+          orderBy: { statementDate: 'asc' },
+        });
+
+        if (open) {
+          const owed = open.amountMinor - open.paidMinor;
+          const applied = amount > owed ? owed : amount;
+
+          await tx.cardStatement.update({
+            where: { id: open.id },
+            data: {
+              paidMinor: { increment: applied },
+              ...(applied >= owed ? { status: StatementStatus.PAID } : {}),
+            },
+          });
+        }
+      }
 
       if (target.type === AccountType.LOAN) {
         /*

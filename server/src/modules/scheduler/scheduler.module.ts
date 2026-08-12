@@ -3,6 +3,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 
 import { RecurringModule } from '@/modules/recurring/recurring.module';
 import { RemindersModule } from '@/modules/reminders/reminders.module';
+import { AccountsModule } from '@/modules/accounts/accounts.module';
 import { SchedulerService } from './scheduler.service';
 
 /**
@@ -12,7 +13,12 @@ import { SchedulerService } from './scheduler.service';
  * @Cron hidden inside whichever service happened to need it first.
  */
 @Module({
-  imports: [ScheduleModule.forRoot(), RecurringModule, RemindersModule],
+  imports: [
+    ScheduleModule.forRoot(),
+    RecurringModule,
+    RemindersModule,
+    AccountsModule,
+  ],
   providers: [SchedulerService],
 })
 export class SchedulerModule {}

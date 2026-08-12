@@ -284,6 +284,7 @@ model Account {
   reminders        Reminder[]
   recurringRules   RecurringRule[]
   merchantDefaults Merchant[]
+  statements       CardStatement[]
 
   @@index([profileId])
   @@map("accounts")
@@ -779,4 +780,50 @@ model LlmCredential {
   profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
   @@map("llm_credentials")
+}
+
+/// What a card actually billed, frozen at the moment it billed it.
+///
+/// A card has two numbers that mean different things, and the product used to
+/// have only one. `Account.balanceMinor` is the *current* outstanding — it
+/// moves with every purchase. A statement is what was billed on the statement
+/// date and is owed by the due date; a purchase made the day after does not
+/// belong to it and is not due for another cycle.
+///
+/// Conflating them meant "clear this bill" paid for the coffee bought that
+/// morning, and "overdue" meant a date had passed rather than that money was
+/// unpaid. Snapshotting is the point: once generated, the amount and minimum
+/// never move, so a reminder quoting them cannot drift after it is sent.
+model CardStatement {
+  id              String          @id @default(uuid())
+  accountId       String
+  /// The day the statement was generated. Unique per account.
+  statementDate   DateTime        @db.Date
+  dueDate         DateTime        @db.Date
+  /// Billed in this cycle plus anything unpaid carried forward.
+  amountMinor     BigInt
+  /// Snapshot, not recomputed — the issuer's minimum is fixed when billed.
+  minimumDueMinor BigInt
+  /// Accumulates across partial payments.
+  paidMinor       BigInt          @default(0)
+  status          StatementStatus @default(OPEN)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  /// One statement per account per cycle. This is what makes the nightly
+  /// generator safe to run twice.
+  @@unique([accountId, statementDate])
+  @@index([accountId, status])
+  @@map("card_statements")
+}
+
+enum StatementStatus {
+  /// Billed, not yet settled.
+  OPEN
+  /// Fully paid.
+  PAID
+  /// Past its due date with a balance remaining.
+  OVERDUE
 }

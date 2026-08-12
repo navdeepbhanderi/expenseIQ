@@ -987,4 +987,214 @@ describe('Money core (e2e)', () => {
       ).toBe(3_000_00n);
     });
   });
+
+  describe('statements — what is billed versus what is spent', () => {
+    const StatementGenerator = () =>
+      harness.app.get<
+        import('@/modules/accounts/statement-generator.service').StatementGeneratorService
+      >(
+        require('@/modules/accounts/statement-generator.service')
+          .StatementGeneratorService,
+        { strict: false },
+      );
+
+    async function cardWithCycle(profileId: string) {
+      return harness.prisma.account.create({
+        data: {
+          profileId,
+          type: 'CREDIT_CARD',
+          name: 'Flipkart Axis',
+          balanceMinor: 0n,
+          creditLimitMinor: 28_000_00n,
+          statementDay: 15,
+          dueDay: 5,
+          minDuePercent: 5,
+        },
+      });
+    }
+
+    const spend = (
+      profileId: string,
+      accountId: string,
+      iso: string,
+      rupees: number,
+    ) =>
+      harness.prisma.transaction.create({
+        data: {
+          profileId,
+          accountId,
+          amountMinor: BigInt(rupees * 100),
+          direction: 'DEBIT',
+          date: new Date(`${iso}T00:00:00.000Z`),
+          source: 'MANUAL',
+        },
+      });
+
+    it('bills the cycle that ended and leaves later spending alone', async () => {
+      const { profileId } = await createUser('aarav@example.com');
+      const card = await cardWithCycle(profileId);
+
+      // Inside the cycle that the 15 Aug statement covers.
+      await spend(profileId, card.id, '2026-08-10', 5_000);
+      // After it — belongs to the 15 Sep statement, not this one.
+      await spend(profileId, card.id, '2026-08-20', 1_200);
+
+      await StatementGenerator().run(
+        profileId,
+        new Date('2026-08-25T00:00:00.000Z'),
+      );
+
+      const statement = await harness.prisma.cardStatement.findFirstOrThrow({
+        where: { accountId: card.id },
+      });
+
+      /*
+       * The whole point of the phase. ₹5,000 was billed on 15 Aug and is due
+       * 5 Sep; the ₹1,200 spent on the 20th is next month's problem. The
+       * product previously had one number and could not tell them apart, so
+       * "clear this bill" offered to pay for both.
+       */
+      expect(statement.amountMinor).toBe(5_000_00n);
+      expect(statement.dueDate.toISOString().slice(0, 10)).toBe('2026-09-05');
+      expect(statement.minimumDueMinor).toBe(250_00n);
+      expect(statement.status).toBe('OPEN');
+    });
+
+    it('is safe to run twice', async () => {
+      const { profileId } = await createUser('aarav@example.com');
+      const card = await cardWithCycle(profileId);
+      await spend(profileId, card.id, '2026-08-10', 5_000);
+
+      const asOf = new Date('2026-08-25T00:00:00.000Z');
+      await StatementGenerator().run(profileId, asOf);
+      await StatementGenerator().run(profileId, asOf);
+
+      // A nightly job that double-billed would be worse than one that never ran.
+      expect(
+        await harness.prisma.cardStatement.count({
+          where: { accountId: card.id },
+        }),
+      ).toBe(1);
+    });
+
+    it('carries an unpaid bill into the next one', async () => {
+      const { profileId } = await createUser('aarav@example.com');
+      const card = await cardWithCycle(profileId);
+
+      await spend(profileId, card.id, '2026-08-10', 5_000);
+      await StatementGenerator().run(
+        profileId,
+        new Date('2026-08-16T00:00:00.000Z'),
+      );
+
+      await spend(profileId, card.id, '2026-09-02', 2_000);
+      await StatementGenerator().run(
+        profileId,
+        new Date('2026-09-16T00:00:00.000Z'),
+      );
+
+      const latest = await harness.prisma.cardStatement.findFirstOrThrow({
+        where: { accountId: card.id },
+        orderBy: { statementDate: 'desc' },
+      });
+
+      // A bill you did not clear does not vanish when the next is cut.
+      expect(latest.amountMinor).toBe(7_000_00n);
+    });
+
+    it('marks an unpaid bill overdue only once its date has passed', async () => {
+      const { profileId } = await createUser('aarav@example.com');
+      const card = await cardWithCycle(profileId);
+      await spend(profileId, card.id, '2026-08-10', 5_000);
+
+      await StatementGenerator().run(
+        profileId,
+        new Date('2026-08-16T00:00:00.000Z'),
+      );
+      expect(
+        (
+          await harness.prisma.cardStatement.findFirstOrThrow({
+            where: { accountId: card.id },
+          })
+        ).status,
+      ).toBe('OPEN');
+
+      // Overdue means money is unpaid past the date, not that a date passed.
+      await StatementGenerator().run(
+        profileId,
+        new Date('2026-09-06T00:00:00.000Z'),
+      );
+      expect(
+        (
+          await harness.prisma.cardStatement.findFirstOrThrow({
+            where: { accountId: card.id },
+          })
+        ).status,
+      ).toBe('OVERDUE');
+    });
+
+    it('a payment settles the bill, not just the balance', async () => {
+      const { token, profileId } = await createUser('aarav@example.com');
+      const card = await cardWithCycle(profileId);
+      const bank = await harness.prisma.account.create({
+        data: {
+          profileId,
+          type: 'BANK',
+          name: 'BOB',
+          balanceMinor: 50_000_00n,
+        },
+      });
+
+      await spend(profileId, card.id, '2026-08-10', 5_000);
+      await StatementGenerator().run(
+        profileId,
+        new Date('2026-08-16T00:00:00.000Z'),
+      );
+
+      await request(server)
+        .post(`/api/v1/profiles/${profileId}/accounts/${card.id}/pay`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ fromAccountId: bank.id, amountMinor: 5_000_00 })
+        .expect(201);
+
+      const statement = await harness.prisma.cardStatement.findFirstOrThrow({
+        where: { accountId: card.id },
+      });
+      expect(statement.paidMinor).toBe(5_000_00n);
+      expect(statement.status).toBe('PAID');
+    });
+
+    it('records a part payment without closing the bill', async () => {
+      const { token, profileId } = await createUser('aarav@example.com');
+      const card = await cardWithCycle(profileId);
+      const bank = await harness.prisma.account.create({
+        data: {
+          profileId,
+          type: 'BANK',
+          name: 'BOB',
+          balanceMinor: 50_000_00n,
+        },
+      });
+
+      await spend(profileId, card.id, '2026-08-10', 5_000);
+      await StatementGenerator().run(
+        profileId,
+        new Date('2026-08-16T00:00:00.000Z'),
+      );
+
+      // Paying the minimum is not paying the bill — that difference is free
+      // credit versus interest, so it must stay visible.
+      await request(server)
+        .post(`/api/v1/profiles/${profileId}/accounts/${card.id}/pay`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ fromAccountId: bank.id, amountMinor: 250_00 })
+        .expect(201);
+
+      const statement = await harness.prisma.cardStatement.findFirstOrThrow({
+        where: { accountId: card.id },
+      });
+      expect(statement.paidMinor).toBe(250_00n);
+      expect(statement.status).toBe('OPEN');
+    });
+  });
 });

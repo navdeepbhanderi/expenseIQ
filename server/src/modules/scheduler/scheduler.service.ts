@@ -7,6 +7,7 @@ import { AppLogger } from '@/common/logger/app-logger.service';
 import type { AppConfig } from '@/config/configuration';
 import { RecurrenceGeneratorService } from '@/modules/recurring/recurrence-generator.service';
 import { RemindersService } from '@/modules/reminders/reminders.service';
+import { StatementGeneratorService } from '@/modules/accounts/statement-generator.service';
 
 /**
  * The daily jobs.
@@ -28,6 +29,7 @@ export class SchedulerService {
     private readonly prisma: PrismaService,
     private readonly generator: RecurrenceGeneratorService,
     private readonly reminders: RemindersService,
+    private readonly statements: StatementGeneratorService,
     private readonly config: ConfigService,
     private readonly logger: AppLogger,
   ) {
@@ -54,6 +56,7 @@ export class SchedulerService {
 
     let generated = 0;
     let reminded = 0;
+    let statements = 0;
     let failed = 0;
 
     for (const { id } of profiles) {
@@ -75,6 +78,24 @@ export class SchedulerService {
         });
       }
 
+      /*
+       * Statements before reminders, deliberately.
+       *
+       * A reminder quotes the open statement, so the bill has to exist before
+       * anything tries to tell the user about it — otherwise a card whose
+       * statement day is today would be reminded about last month's.
+       */
+      try {
+        const run = await this.statements.run(id);
+        statements += run.generated;
+      } catch (error) {
+        failed += 1;
+        this.logger.error('Statement generation failed', undefined, {
+          profileId: id,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+
       try {
         const run = await this.reminders.runScan(id);
         reminded += run.fired;
@@ -90,6 +111,7 @@ export class SchedulerService {
     this.logger.log('Daily run complete', {
       profiles: profiles.length,
       generated,
+      statements,
       reminded,
       failed,
     });
