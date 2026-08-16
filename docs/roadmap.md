@@ -1,5 +1,27 @@
 # ExpenseIQ — roadmap
 
+## Where this stands
+
+Updated 16 August 2026. Branch `feat/parsing-accuracy-and-schedule-limits`.
+
+**Shipped since this file was written**, none of it originally planned — each
+one found by using the product rather than reading it:
+
+- Balances now follow the ledger. `transactions.service` never touched
+  `balanceMinor`, so every balance was the number typed at account creation.
+  Two ₹5,000 purchases left a card reading ₹0 outstanding. One sign rule now,
+  in `transactions/domain/balance-effect.ts`, applied by every path that
+  writes a transaction — including the review queue's confirm, which writes
+  its own row and is how nearly every expense actually arrives.
+- Transfers. Paying a card is a linked pair excluded from nine spend
+  aggregates; without that, clearing a ₹5,200 bill added ₹5,200 to the month
+  and fired a spend-limit nudge, every month, for doing the right thing.
+- Phase A's backend — see below.
+- The dev database was reset (it had drifted enough to block `migrate dev`),
+  which also stopped the flaky `Family (e2e)` reproducing.
+
+**Verified:** 377 server unit · 240 e2e · 80 web · lint and build clean.
+
 Written after a QA pass that found the same shape of bug repeatedly: a model
 that knows something the product never acts on. The card knew its statement
 day but had no statement; the ledger knew every transaction but never moved a
@@ -13,52 +35,57 @@ on a later one. Where a phase is a prerequisite for others it says so.
 
 ## Phase A — Credit cards that behave like credit cards
 
-**The problem.** The product has a billing *cycle* — two dates recomputed from
-`statementDay` and `dueDay` — and one number, `balanceMinor`. A real card has
-two numbers that mean different things:
+**Backend: done** (`e880740`). **UI: not started.** This is the only phase
+partially delivered, and the remaining piece is small and self-contained.
 
-| | What it is | Behaviour |
-|---|---|---|
-| Statement balance | ₹5,000 billed on 15 Aug | Frozen at statement time, due 5 Sep |
-| Current outstanding | Everything unpaid, incl. today's coffee | Moves constantly, not yet due |
+### What shipped
 
-Conflating them means "Clear this bill" pays the purchase made this morning,
-which is not due for seven weeks. It also means the app cannot say the one
-sentence a cardholder actually wants: *"₹5,000 due by 5 Sep; the ₹1,200 since
-is next month's."*
+`CardStatement` snapshots the bill — amount, minimum and due date, frozen when
+cut. Snapshotting rather than deriving on read is the point: a statement is a
+historical fact, so recomputing it from current transactions would make last
+month's bill change whenever an old entry was edited, and would let a reminder
+quote a figure that had already moved by the time the email landed.
 
-**The missing noun is a statement.**
+The nightly scheduler generates them, *before* the reminder scan so a card
+whose statement day is today is not reminded about last month's, and ages an
+unpaid statement past its due date to `OVERDUE` — so overdue finally means
+money is owed rather than that a date went by. Unpaid balances carry forward.
+Payments settle the oldest open statement first, because that is the one
+overdue or about to be, and paying it is what stops the interest.
+
+Idempotent on `(accountId, statementDate)`; a nightly job that double-billed
+would be worse than one that never ran.
+
+### What remains — the card panel
+
+`GET /profiles/:id/accounts/:accountId` already returns everything needed:
 
 ```
-CardStatement
-  accountId · statementDate · dueDate
-  amountMinor       -- snapshot: cycle spend + unpaid carry-over
-  minimumDueMinor   -- snapshot, not recomputed later
-  paidMinor         -- payments applied against this statement
-  status            -- OPEN | PAID | OVERDUE
+card.statement.billed   -- null when nothing is owed
+  { statementDate, dueDate, amount, minimumDue, paid, dueNow, isOverdue }
+card.statement.unbilled -- spent since the last statement; next cycle's
 ```
 
-**Work**
+The panel currently reads `card.outstanding` and `card.cycle` and cannot tell
+the two apart. It needs to:
 
-1. Model + migration.
-2. A generator in the nightly scheduler: on the statement day, snapshot the
-   cycle's spend plus any unpaid carry-over, compute the minimum, open it.
-3. Payments apply against the oldest open statement rather than the running
-   balance. Partial payments accumulate in `paidMinor`.
-4. Card panel reworked around the distinction — *due now* from the open
-   statement, *unbilled so far* as information rather than a demand.
-5. Overdue becomes "an unpaid statement past its due date", not "a date has
-   passed". (The display half of this is already fixed; the meaning is not.)
-6. Reminders quote the statement amount, which cannot drift after the email
-   is sent — today they quote a live balance that can.
+1. Lead with `billed.dueNow` and `billed.dueDate` when a bill is open —
+   *"₹5,000 due by 5 Sept"*.
+2. Show `unbilled` as information, not a demand — *"₹1,200 spent since, bills
+   15 Sept"*. This is the sentence the product could not say before.
+3. Show `paid` when a part payment has been made; paying the minimum and
+   paying in full are the difference between free credit and 42% interest, so
+   they must not look the same.
+4. Default the pay modal's amount to `dueNow`, not `outstanding` — today it
+   offers to pay for the coffee bought that morning.
+5. Use red only for `billed.isOverdue`. The current date-based check is
+   already gated on owing something, but that is a patch over the real rule.
+6. When `billed` is null: no demand at all, just the cycle and what has been
+   spent so far.
 
-**Why first.** Every other card feature — interest, minimum-due warnings,
-reconciliation — needs a statement to hang off. It is also the only phase here
-that fixes something actively misleading.
-
-**Loans.** The equivalent already half-exists: `emisPaid` and the amortisation
-schedule. Bring it to the same standard — a due EMI is a statement in all but
-name.
+**Loans.** The equivalent half-exists — `emisPaid` and the amortisation
+schedule. Bringing them to the same standard is the rest of this phase; a due
+EMI is a statement in all but name.
 
 ---
 
@@ -160,22 +187,37 @@ remains:
 ## Phase G — Housekeeping
 
 1. **Intermittent e2e failure** in `Family (e2e)` — savings goals and family
-   dashboard, passing 4/4 in isolation, so cross-suite state leakage. A
-   non-deterministic test is worse than a failing one; it trains you to re-run.
+   dashboard. Has not reproduced across several full runs since the test
+   database was reset, which is the likely explanation: accumulated state, the
+   same drift that had blocked `migrate dev`. Recorded as *not reproducing*
+   rather than fixed, because no root cause was found. If it returns, the
+   suspicion is cross-suite leakage rather than anything in those tests —
+   both pass 4/4 in isolation.
 2. **Rotate the exposed credentials** — Google client secret, Resend,
    OpenRouter and Groq keys have all passed through a chat transcript.
-3. **Visual QA.** Almost all of the UI review above is code-level. Layout,
-   contrast, focus order and touch targets have not been checked on a real
-   device, and several Phase C/D items would probably reorder after twenty
-   minutes of using it on a phone.
+3. **Visual QA.** Almost all of the UI review above is code-level. Four or
+   five screens have been looked at in a browser; layout, contrast, focus
+   order and touch targets have not been checked on a real device, and several
+   Phase C/D items would probably reorder after twenty minutes of using it on
+   a phone.
+
+4. **A backfill for balances, if any pre-reset data survives elsewhere.** Rows
+   written before balances followed the ledger left account balances that do
+   not reconcile with their transactions. The dev database was wiped rather
+   than backfilled — a backfill would have had to guess which historical
+   balances were already correct. Any other environment carrying old data
+   needs `balanceMinor` recomputed from its ledger before its numbers mean
+   anything.
 
 ---
 
 ## Suggested order
 
-**A → C → B → D → E → F**, with G threaded through.
+**A (finish the UI) → C → B → D → E → F**, with G threaded through.
 
-A first because it is the only phase fixing something actively wrong. C next
+Finishing A first because its data is live and unread, which is the exact
+pattern this whole document exists to close: a model that knows something the
+product never acts on. C next
 because it is cheap and it is the difference between "the app is broken" and
 "something failed, try again". B before D because it removes double-counting
 from real numbers, where D is friction rather than incorrectness.
