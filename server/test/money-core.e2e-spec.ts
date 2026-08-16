@@ -2,6 +2,7 @@ import request from 'supertest';
 import type { Server } from 'node:http';
 import { ProfileRole } from '@prisma/client';
 import { createHarness, type Harness } from './app-harness';
+import { StatementGeneratorService } from '@/modules/accounts/statement-generator.service';
 
 /**
  * Phase 2 acceptance: accounts, categories, merchants and transactions.
@@ -990,13 +991,7 @@ describe('Money core (e2e)', () => {
 
   describe('statements — what is billed versus what is spent', () => {
     const StatementGenerator = () =>
-      harness.app.get<
-        import('@/modules/accounts/statement-generator.service').StatementGeneratorService
-      >(
-        require('@/modules/accounts/statement-generator.service')
-          .StatementGeneratorService,
-        { strict: false },
-      );
+      harness.app.get(StatementGeneratorService, { strict: false });
 
     async function cardWithCycle(profileId: string) {
       return harness.prisma.account.create({
